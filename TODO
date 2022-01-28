@@ -1,0 +1,14 @@
+- posting amounts
+- posting accounts
+    - account validation
+- virtual postings
+- transaction status
+- transaction code
+- transaction description
+    - payee
+    - note
+- comments
+    - single line
+    - multi line
+    - transaction comment
+- tags
