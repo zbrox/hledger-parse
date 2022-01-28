@@ -14,6 +14,7 @@ jobs:
         with:
             toolchain: stable
             components: clippy
+      - uses: Swatinem/rust-cache@v1
       - name: Run all tests
         uses: actions-rs/cargo@v1
         with:
