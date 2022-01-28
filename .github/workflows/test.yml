@@ -18,18 +18,3 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-  check:
-    name: Clippy
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout latest
-        uses: actions/checkout@master
-      - name: Install stable toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-            toolchain: stable
-            components: clippy
-      - name: Run clippy
-        uses: actions-rs/cargo@v1
-        with:
-          command: clippy
