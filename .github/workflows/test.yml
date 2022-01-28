@@ -19,7 +19,7 @@ jobs:
         with:
           command: test
   check:
-    name: Check
+    name: Clippy
     runs-on: ubuntu-latest
     steps:
       - name: Checkout latest
