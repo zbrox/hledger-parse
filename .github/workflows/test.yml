@@ -11,6 +11,9 @@ jobs:
         uses: actions/checkout@master
       - name: Install stable toolchain
         uses: actions-rs/toolchain@v1
+        with:
+            toolchain: stable
+            components: clippy
       - name: Run all tests
         uses: actions-rs/cargo@v1
         with:
@@ -23,7 +26,10 @@ jobs:
         uses: actions/checkout@master
       - name: Install stable toolchain
         uses: actions-rs/toolchain@v1
-      - name: Run check
+        with:
+            toolchain: stable
+            components: clippy
+      - name: Run clippy
         uses: actions-rs/cargo@v1
         with:
-          command: check
+          command: clippy
