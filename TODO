@@ -2,9 +2,6 @@
 - posting accounts
     - account validation
 - virtual postings
-- transaction description
-    - payee
-    - note
 - comments
     - single line
     - multi line
