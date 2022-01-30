@@ -1,19 +1,14 @@
-use nom::{IResult, combinator::opt, branch::alt, character::complete::char};
+use nom::{branch::alt, character::complete::char, combinator::opt, sequence::terminated, IResult};
 
 use crate::types::Status;
 
 fn parse_status(input: &str) -> IResult<&str, Status> {
-    let (tail, status) = opt(
-        alt((
-            char('!'),
-            char('*'),
-        ))
-    )(input)?;
+    let (tail, status) = opt(terminated(alt((char('!'), char('*'))), char(' ')))(input)?;
 
     let status = match status {
         Some('!') => Status::Pending,
         Some('*') => Status::Cleared,
-        _ => Status::Unmarked
+        _ => Status::Unmarked,
     };
 
     Ok((tail, status))
@@ -25,12 +20,12 @@ mod tests {
 
     #[test]
     fn test_status_cleared() {
-        assert_eq!(parse_status("*"), Ok(("", Status::Cleared)));
+        assert_eq!(parse_status("* "), Ok(("", Status::Cleared)));
     }
 
     #[test]
     fn test_status_pending() {
-        assert_eq!(parse_status("!"), Ok(("", Status::Pending)));
+        assert_eq!(parse_status("! "), Ok(("", Status::Pending)));
     }
 
     #[test]
