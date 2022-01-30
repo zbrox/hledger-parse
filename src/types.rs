@@ -4,5 +4,11 @@ use std::cmp::PartialEq;
 pub enum Status {
     Unmarked,
     Pending,
-    Cleared
+    Cleared,
+}
+
+#[derive(PartialEq, Debug)]
+pub struct Description {
+    pub payee: Option<String>,
+    pub note: Option<String>,
 }
