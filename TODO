@@ -4,4 +4,6 @@
     - single line
     - multi line
     - transaction comment
-- tags
+- better error reporting
+    - custom errors for some structs
+- unicode support
