@@ -33,6 +33,13 @@ pub struct Amount {
     pub value: i32,
 }
 
+#[derive(PartialEq, Debug)]
+pub struct Posting {
+    pub status: Status,
+    pub account_name: String,
+    pub amount: Option<Amount>,
+}
+
 #[cfg(test)]
 mod tests {
     use crate::types::AmountSign;
