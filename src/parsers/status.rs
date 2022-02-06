@@ -2,7 +2,7 @@ use nom::{branch::alt, character::complete::char, combinator::opt, sequence::ter
 
 use crate::types::Status;
 
-fn parse_status(input: &str) -> IResult<&str, Status> {
+pub fn parse_status(input: &str) -> IResult<&str, Status> {
     let (tail, status) = opt(terminated(alt((char('!'), char('*'))), char(' ')))(input)?;
 
     let status = match status {

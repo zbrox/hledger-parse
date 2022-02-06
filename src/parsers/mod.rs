@@ -5,3 +5,4 @@ pub mod status;
 pub mod code;
 pub mod descriptions;
 pub mod amount;
+pub mod postings;
