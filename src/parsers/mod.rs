@@ -6,3 +6,4 @@ pub mod code;
 pub mod descriptions;
 pub mod amount;
 pub mod postings;
+pub mod tags;

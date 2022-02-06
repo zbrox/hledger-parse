@@ -40,6 +40,12 @@ pub struct Posting {
     pub amount: Option<Amount>,
 }
 
+#[derive(PartialEq, Debug)]
+pub struct Tag {
+    pub name: String,
+    pub value: Option<String>,
+}
+
 #[cfg(test)]
 mod tests {
     use crate::types::AmountSign;
