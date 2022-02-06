@@ -1,6 +1,4 @@
-- posting amounts
-- posting accounts
-    - account validation
+- account validation
 - virtual postings
 - comments
     - single line
