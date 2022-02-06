@@ -1,0 +1,22 @@
+{
+    "version": "0.1.0",
+    "configurations": [
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in 'hledger-parse'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run"
+                ],
+                "filter": {
+                    "name": "hledger-parse",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}
