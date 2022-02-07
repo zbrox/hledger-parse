@@ -9,7 +9,7 @@ use nom::{
 
 use crate::types::{Amount, AmountSign};
 
-use super::utils::{in_quotes, is_char_digit};
+use super::utils::{in_quotes, is_char_digit, is_char_minus};
 
 fn parse_sign(input: &str) -> IResult<&str, AmountSign> {
     let (tail, char) = opt(char('-'))(input)?;
@@ -23,9 +23,13 @@ fn parse_sign(input: &str) -> IResult<&str, AmountSign> {
 fn parse_amount_prefix_currency(input: &str) -> IResult<&str, Amount> {
     let (tail, sign) = terminated(parse_sign, space0)(input)?;
     let (tail, currency) = terminated(
-        alt((in_quotes, terminated(take_till(is_char_digit), space0))),
+        alt((in_quotes, terminated(take_till(|c| is_char_digit(c) || is_char_minus(c)), space0))),
         space0,
     )(tail)?;
+    let (tail, sign) = match sign {
+        AmountSign::Minus => (tail, sign),
+        AmountSign::Plus => terminated(parse_sign, space0)(tail)?,
+    };
 
     let (tail, value) = i32(tail)?;
 
@@ -240,6 +244,30 @@ mod tests {
                 "",
                 Amount {
                     currency: "EUR".into(),
+                    value: -100
+                }
+            ))
+        );
+    }
+
+    #[test]
+    fn test_parse_amount_negative_currency_prefixed() {
+        assert_eq!(
+            parse_amount("-$100"),
+            Ok((
+                "",
+                Amount {
+                    currency: "$".into(),
+                    value: -100
+                }
+            ))
+        );
+        assert_eq!(
+            parse_amount("$-100"),
+            Ok((
+                "",
+                Amount {
+                    currency: "$".into(),
                     value: -100
                 }
             ))
