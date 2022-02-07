@@ -1,26 +1,27 @@
 use nom::{
     branch::alt,
     bytes::complete::{is_not, tag, take_until},
-    character::complete::{not_line_ending, space0},
+    character::complete::space0,
     combinator::opt,
-    sequence::{delimited, separated_pair},
+    sequence::{delimited, separated_pair, terminated},
     IResult,
 };
 
 use crate::types::Description;
 
-fn parse_only_note(input: &str) -> IResult<&str, Option<&str>> {
-    opt(alt((not_line_ending, is_not(";"))))(input)
+fn parse_only_note(input: &str) -> IResult<&str, &str> {
+    terminated(is_not(";"), space0)(input)
 }
 
 fn parse_payee_and_note(input: &str) -> IResult<&str, (Option<&str>, Option<&str>)> {
     separated_pair(
         opt(alt((take_until(" |"), take_until("|")))),
         delimited(space0, tag("|"), space0),
-        parse_only_note,
+        opt(parse_only_note),
     )(input)
 }
 
+// TODO: this is fugly
 pub fn parse_description(input: &str) -> IResult<&str, Description> {
     match parse_payee_and_note(input) {
         Ok((t, (p, n))) => Ok((
@@ -30,12 +31,16 @@ pub fn parse_description(input: &str) -> IResult<&str, Description> {
                 note: n.map(str::trim).map(str::to_string),
             },
         )),
-        Err(_) => match parse_only_note(input) {
+        Err(_) => match opt(parse_only_note)(input) {
             Ok((t, n)) => Ok((
                 t,
                 Description {
                     payee: None,
-                    note: n.map(str::trim).map(str::to_string),
+                    note: match n.map(str::trim) {
+                        Some("") => None,
+                        Some(n) => Some(n.into()),
+                        None => None,
+                    },
                 },
             )),
             Err(e) => Err(nom::Err::Error(nom::error::Error::new(
@@ -76,6 +81,30 @@ mod tests {
                 }
             ))
         )
+    }
+
+    #[test]
+    fn test_parse_empty_description() {
+        assert_eq!(
+            parse_description(" "),
+            Ok((
+                "",
+                Description {
+                    payee: None,
+                    note: None
+                }
+            ))
+        );
+        assert_eq!(
+            parse_description(""),
+            Ok((
+                "",
+                Description {
+                    payee: None,
+                    note: None
+                }
+            ))
+        );
     }
 
     #[test]
