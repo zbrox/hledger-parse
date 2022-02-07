@@ -82,7 +82,7 @@ fn parse_separator_date(
     }
 }
 
-fn parse_date(input: &str) -> IResult<&str, (NaiveDate, Option<NaiveDate>)> {
+pub fn parse_date(input: &str) -> IResult<&str, (NaiveDate, Option<NaiveDate>)> {
     alt((
         parse_separator_date('-'),
         parse_separator_date('/'),

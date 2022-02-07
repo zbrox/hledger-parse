@@ -21,7 +21,7 @@ fn parse_payee_and_note(input: &str) -> IResult<&str, (Option<&str>, Option<&str
     )(input)
 }
 
-fn parse_description(input: &str) -> IResult<&str, Description> {
+pub fn parse_description(input: &str) -> IResult<&str, Description> {
     match parse_payee_and_note(input) {
         Ok((t, (p, n))) => Ok((
             t,

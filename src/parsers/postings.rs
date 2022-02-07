@@ -11,7 +11,7 @@ use crate::types::Posting;
 
 use super::{amount::parse_amount, status::parse_status};
 
-fn parse_posting(input: &str) -> IResult<&str, Posting> {
+pub fn parse_posting(input: &str) -> IResult<&str, Posting> {
     let (tail, (status, account_name, amount)) = tuple((
         delimited(space1, parse_status, space0),
         alt((
