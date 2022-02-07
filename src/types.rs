@@ -1,5 +1,7 @@
 use std::cmp::PartialEq;
 
+use chrono::NaiveDate;
+
 #[derive(PartialEq, Debug)]
 pub enum Status {
     Unmarked,
@@ -44,6 +46,16 @@ pub struct Posting {
 pub struct Tag {
     pub name: String,
     pub value: Option<String>,
+}
+
+#[derive(PartialEq, Debug)]
+pub struct Transaction {
+    pub primary_date: NaiveDate,
+    pub secondary_date: Option<NaiveDate>,
+    pub status: Status,
+    pub code: Option<String>,
+    pub description: Description,
+    pub postings: Vec<Posting>,
 }
 
 #[cfg(test)]
