@@ -26,8 +26,8 @@ fn parse_description(input: &str) -> IResult<&str, Description> {
         Ok((t, (p, n))) => Ok((
             t,
             Description {
-                payee: p.map(str::to_string),
-                note: n.map(str::to_string),
+                payee: p.map(str::trim).map(str::to_string),
+                note: n.map(str::trim).map(str::to_string),
             },
         )),
         Err(_) => match parse_only_note(input) {
@@ -35,7 +35,7 @@ fn parse_description(input: &str) -> IResult<&str, Description> {
                 t,
                 Description {
                     payee: None,
-                    note: n.map(str::to_string),
+                    note: n.map(str::trim).map(str::to_string),
                 },
             )),
             Err(e) => Err(nom::Err::Error(nom::error::Error::new(
