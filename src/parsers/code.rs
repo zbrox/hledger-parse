@@ -5,7 +5,7 @@ use nom::{
     IResult,
 };
 
-fn parse_code(input: &str) -> IResult<&str, &str> {
+pub fn parse_code(input: &str) -> IResult<&str, &str> {
     delimited(
         pair(char('('), space0),
         take_until1(")"),
