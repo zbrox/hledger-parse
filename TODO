@@ -7,3 +7,5 @@
 - better error reporting
     - custom errors for some structs
 - unicode support
+- transactions
+- transaction validation
