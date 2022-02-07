@@ -13,6 +13,10 @@ pub fn is_char_digit(char: char) -> bool {
     is_digit(char as u8)
 }
 
+pub fn is_char_minus(char: char) -> bool {
+    char == '-'
+}
+
 pub fn is_char_space(char: char) -> bool {
     is_space(char as u8)
 }
