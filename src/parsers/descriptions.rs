@@ -1,16 +1,16 @@
 use nom::{
     branch::alt,
-    bytes::complete::{is_not, tag, take_until},
+    bytes::complete::{tag, take_until},
     character::complete::space0,
-    combinator::opt,
-    sequence::{delimited, separated_pair, terminated},
+    combinator::{opt, rest},
+    sequence::{delimited, separated_pair},
     IResult,
 };
 
 use crate::types::Description;
 
 fn parse_only_note(input: &str) -> IResult<&str, &str> {
-    terminated(is_not(";"), space0)(input)
+    rest(input)
 }
 
 fn parse_payee_and_note(input: &str) -> IResult<&str, (Option<&str>, Option<&str>)> {
