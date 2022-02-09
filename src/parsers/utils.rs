@@ -21,6 +21,10 @@ pub fn is_char_space(char: char) -> bool {
     is_space(char as u8)
 }
 
+pub fn is_char_alphanumeric(char: char) -> bool {
+    char.is_alphanumeric()
+}
+
 pub fn in_quotes(input: &str) -> IResult<&str, &str> {
     delimited(
         terminated(char('"'), space0),
