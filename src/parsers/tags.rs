@@ -26,6 +26,11 @@ mod tests {
     use crate::{parsers::tags::parse_tag, types::Tag};
 
     #[test]
+    fn test_parse_tag_with_space() {
+        assert_eq!(parse_tag("not a tag:"), Err(nom::Err::Error(nom::error::Error { input: "not a tag:", code: nom::error::ErrorKind::Tag })))
+    }
+
+    #[test]
     fn test_parse_tag_no_value() {
         assert_eq!(
             parse_tag("cash:"),
