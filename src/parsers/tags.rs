@@ -39,6 +39,7 @@ mod tests {
         )
     }
 
+    #[test]
     fn test_parse_tag_with_value() {
         assert_eq!(
             parse_tag("cash:atm"),
