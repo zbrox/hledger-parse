@@ -1,5 +1,5 @@
 use nom::{
-    bytes::complete::{tag, take_until},
+    bytes::complete::{tag, take_while},
     character::complete::alphanumeric1,
     combinator::opt,
     sequence::terminated,
@@ -8,8 +8,10 @@ use nom::{
 
 use crate::types::Tag;
 
+use super::utils::is_char_alphanumeric;
+
 pub fn parse_tag(input: &str) -> IResult<&str, Tag> {
-    let (tail, name) = terminated(take_until(":"), tag(":"))(input)?;
+    let (tail, name) = terminated(take_while(|c| is_char_alphanumeric(c) || c == '-'), tag(":"))(input)?;
     let (tail, value) = opt(alphanumeric1)(tail)?;
 
     Ok((
@@ -27,7 +29,7 @@ mod tests {
 
     #[test]
     fn test_parse_tag_with_space() {
-        assert_eq!(parse_tag("not a tag:"), Err(nom::Err::Error(nom::error::Error { input: "not a tag:", code: nom::error::ErrorKind::Tag })))
+        assert_eq!(parse_tag("not a tag:"), Err(nom::Err::Error(nom::error::Error { input: " a tag:", code: nom::error::ErrorKind::Tag })))
     }
 
     #[test]
