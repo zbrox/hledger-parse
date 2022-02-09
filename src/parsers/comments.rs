@@ -1,28 +1,39 @@
 use nom::{
-    branch::alt, bytes::complete::take_till, character::complete::char,
-    character::complete::space0, sequence::preceded, IResult,
+    branch::alt, character::complete::char, character::complete::space0, combinator::rest,
+    sequence::preceded, IResult,
 };
 
-use super::utils::is_char_newline;
-
-pub fn parse_comment(input: &str) -> IResult<&str, &str> {
+pub fn parse_line_comment(input: &str) -> IResult<&str, &str> {
     preceded(
         alt((char('#'), char(';'), char('*'))),
-        preceded(space0, take_till(is_char_newline)),
+        preceded(space0, rest),
     )(input)
+}
+
+pub fn parse_transaction_comment(input: &str) -> IResult<&str, &str> {
+    preceded(char(';'), preceded(space0, rest))(input)
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::parsers::comments::parse_comment;
+    use crate::parsers::comments::{parse_line_comment, parse_transaction_comment};
 
     #[test]
-    fn test_parse_comment() {
-        assert_eq!(parse_comment("; comment\n"), Ok(("\n", "comment")));
-        assert_eq!(parse_comment("; comment"), Ok(("", "comment")));
-        assert_eq!(parse_comment("* comment\n"), Ok(("\n", "comment")));
-        assert_eq!(parse_comment("* comment"), Ok(("", "comment")));
-        assert_eq!(parse_comment("# comment\n"), Ok(("\n", "comment")));
-        assert_eq!(parse_comment("# comment"), Ok(("", "comment")));
+    fn test_parse_line_comment() {
+        assert_eq!(parse_line_comment("; comment"), Ok(("", "comment")));
+        assert_eq!(parse_line_comment("* comment"), Ok(("", "comment")));
+        assert_eq!(parse_line_comment("# comment"), Ok(("", "comment")));
+    }
+
+    #[test]
+    fn test_parse_transaction_comment() {
+        assert_eq!(parse_transaction_comment("; comment"), Ok(("", "comment")));
+        assert_eq!(
+            parse_transaction_comment("# comment"),
+            Err(nom::Err::Error(nom::error::Error {
+                input: "# comment",
+                code: nom::error::ErrorKind::Char
+            }))
+        );
     }
 }
