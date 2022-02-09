@@ -1,7 +1,7 @@
 use nom::{
     branch::alt,
     bytes::complete::{tag, take_until},
-    character::complete::{newline, not_line_ending, space0, space1},
+    character::complete::{line_ending, not_line_ending, space0, space1},
     combinator::opt,
     sequence::{delimited, terminated, tuple},
     IResult,
@@ -16,9 +16,9 @@ pub fn parse_posting(input: &str) -> IResult<&str, Posting> {
         delimited(space1, parse_status, space0),
         alt((
             terminated(take_until("  "), terminated(tag("  "), space0)),
-            terminated(not_line_ending, newline),
+            terminated(not_line_ending, line_ending),
         )),
-        opt(terminated(parse_amount, newline)),
+        opt(terminated(parse_amount, line_ending)),
     ))(input)?;
 
     Ok((
