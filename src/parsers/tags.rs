@@ -72,4 +72,18 @@ mod tests {
             ))
         )
     }
+
+    #[test]
+    fn test_parse_tag_unicode_no_value() {
+        assert_eq!(
+            parse_tag("кеш:"),
+            Ok((
+                "",
+                Tag {
+                    name: "кеш".into(),
+                    value: None,
+                }
+            ))
+        )
+    }
 }
