@@ -57,6 +57,7 @@ pub struct Transaction {
     pub description: Description,
     pub comment: Option<String>,
     pub postings: Vec<Posting>,
+    pub tags: Vec<Tag>,
 }
 
 #[cfg(test)]
