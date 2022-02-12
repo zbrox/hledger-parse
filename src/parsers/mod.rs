@@ -7,3 +7,4 @@ pub mod descriptions;
 pub mod amount;
 pub mod postings;
 pub mod tags;
+pub mod transactions;
