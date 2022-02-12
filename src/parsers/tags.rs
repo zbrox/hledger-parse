@@ -1,6 +1,5 @@
 use nom::{
     bytes::complete::{tag, take_while},
-    combinator::rest,
     sequence::terminated,
     IResult,
 };
@@ -14,7 +13,7 @@ pub fn parse_tag(input: &str) -> IResult<&str, Tag> {
         take_while(|c| is_char_alphanumeric(c) || c == '-'),
         tag(":"),
     )(input)?;
-    let (tail, value) = rest(tail)?;
+    let (tail, value) = take_while(|c| c != ',')(tail)?;
     let value = value.trim();
     let value = match value.len() {
         0 => None,
