@@ -32,3 +32,37 @@ pub fn in_quotes(input: &str) -> IResult<&str, &str> {
         preceded(space0, char('"')),
     )(input)
 }
+
+pub fn split_on_space_before_char(input: &str, char: char) -> (&str, &str) {
+    let char_pos = input.find(char);
+    let space_pos = match char_pos {
+        Some(pos) => input[..pos].rfind(' '),
+        None => return (input, ""),
+    };
+
+    match space_pos {
+        Some(pos) => (input[..pos].into(), input[pos + 1..].into()),
+        None => (input, ""),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::parsers::utils::split_on_space_before_char;
+
+    #[test]
+    fn test_split_on_space_before_char() {
+        assert_eq!(
+            split_on_space_before_char("before before source:salary", ':'),
+            ("before before", "source:salary")
+        );
+        assert_eq!(
+            split_on_space_before_char("преди преди източник:заплата", ':'),
+            ("преди преди", "източник:заплата")
+        );
+        assert_eq!(
+            split_on_space_before_char("", ':'),
+            ("", "")
+        );
+    }
+}
