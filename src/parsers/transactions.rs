@@ -50,7 +50,6 @@ pub fn parse_transaction(input: &str) -> IResult<&str, Transaction> {
             code: code.map(str::to_string),
             status,
             description,
-            comment: comment.map(str::to_string),
             tags,
             postings,
         },
@@ -85,7 +84,6 @@ mod tests {
                         note: Some("income".into()),
                         payee: None,
                     },
-                    comment: None,
                     tags: vec![],
                     status: Status::Unmarked,
                     postings: vec![
@@ -130,7 +128,6 @@ mod tests {
                         note: Some("income".into()),
                         payee: None,
                     },
-                    comment: None,
                     tags: vec![],
                     status: Status::Unmarked,
                     postings: vec![
@@ -175,7 +172,6 @@ mod tests {
                         note: Some("income".into()),
                         payee: None,
                     },
-                    comment: None,
                     tags: vec![],
                     status: Status::Cleared,
                     postings: vec![
@@ -220,52 +216,6 @@ mod tests {
                         note: None,
                         payee: None,
                     },
-                    comment: None,
-                    tags: vec![],
-                    status: Status::Unmarked,
-                    postings: vec![
-                        Posting {
-                            account_name: "assets:bank:checking".into(),
-                            status: Status::Unmarked,
-                            amount: Some(Amount {
-                                currency: "$".into(),
-                                value: 1
-                            }),
-                        },
-                        Posting {
-                            account_name: "income:salary".into(),
-                            status: Status::Unmarked,
-                            amount: Some(Amount {
-                                currency: "$".into(),
-                                value: -1
-                            }),
-                        },
-                    ],
-                }
-            ))
-        )
-    }
-
-    #[test]
-    fn test_transaction_with_comment() {
-        assert_eq!(
-            parse_transaction(
-                r#"2008/01/01 ; some comment
-    assets:bank:checking   $1
-    income:salary         $-1
-"#
-            ),
-            Ok((
-                "",
-                Transaction {
-                    primary_date: NaiveDate::from_ymd(2008, 1, 1),
-                    secondary_date: None,
-                    code: None,
-                    description: Description {
-                        note: None,
-                        payee: None,
-                    },
-                    comment: Some("some comment".into()),
                     tags: vec![],
                     status: Status::Unmarked,
                     postings: vec![
@@ -310,7 +260,6 @@ mod tests {
                         note: None,
                         payee: None,
                     },
-                    comment: Some("some comment".into()),
                     tags: vec![
                         Tag {
                             name: "tag1".into(),

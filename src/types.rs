@@ -55,7 +55,6 @@ pub struct Transaction {
     pub status: Status,
     pub code: Option<String>,
     pub description: Description,
-    pub comment: Option<String>,
     pub postings: Vec<Posting>,
     pub tags: Vec<Tag>,
 }
