@@ -6,8 +6,7 @@
     - transaction comment
 - better error reporting
     - custom errors for some structs
-- unicode support
-- transactions
+- unicode support (test what works now)
 - transaction validation
 - include statements
 - more test cases
