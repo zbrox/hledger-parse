@@ -59,6 +59,11 @@ pub struct Transaction {
     pub tags: Vec<Tag>,
 }
 
+#[derive(PartialEq, Debug)]
+pub struct Journal {
+    pub transactions: Vec<Transaction>,
+}
+
 #[cfg(test)]
 mod tests {
     use crate::types::AmountSign;
