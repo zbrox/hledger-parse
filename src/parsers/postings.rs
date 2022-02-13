@@ -1,9 +1,9 @@
 use nom::{
     branch::alt,
-    bytes::complete::{tag, take_until},
+    bytes::complete::take_until,
     character::complete::{not_line_ending, space0, space1},
-    combinator::opt,
-    sequence::{delimited, terminated, tuple},
+    combinator::{opt, peek},
+    sequence::{delimited, preceded, terminated, tuple},
     IResult,
 };
 
@@ -15,7 +15,7 @@ pub fn parse_posting(input: &str) -> IResult<&str, Posting> {
     let (tail, (status, account_name, amount)) = tuple((
         delimited(space1, parse_status, space0),
         alt((
-            terminated(take_until("  "), terminated(tag("  "), space0)),
+            terminated(take_until("  "), peek(preceded(space1, parse_amount))),
             not_line_ending,
         )),
         opt(parse_amount),
