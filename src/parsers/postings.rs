@@ -1,7 +1,7 @@
 use nom::{
     branch::alt,
     bytes::complete::{tag, take_until},
-    character::complete::{line_ending, not_line_ending, space0, space1},
+    character::complete::{not_line_ending, space0, space1},
     combinator::opt,
     sequence::{delimited, terminated, tuple},
     IResult,
@@ -16,9 +16,9 @@ pub fn parse_posting(input: &str) -> IResult<&str, Posting> {
         delimited(space1, parse_status, space0),
         alt((
             terminated(take_until("  "), terminated(tag("  "), space0)),
-            terminated(not_line_ending, line_ending),
+            not_line_ending,
         )),
-        opt(terminated(parse_amount, line_ending)),
+        opt(parse_amount),
     ))(input)?;
 
     Ok((
@@ -43,7 +43,7 @@ mod tests {
     #[test]
     fn test_parse_simple_posting() {
         assert_eq!(
-            parse_posting(" assets:cash  $100\n"),
+            parse_posting(" assets:cash  $100"),
             Ok((
                 "",
                 Posting {
@@ -61,7 +61,7 @@ mod tests {
     #[test]
     fn test_parse_posting_with_status() {
         assert_eq!(
-            parse_posting(" ! assets:cash  $100\n"),
+            parse_posting(" ! assets:cash  $100"),
             Ok((
                 "",
                 Posting {
@@ -79,7 +79,7 @@ mod tests {
     #[test]
     fn test_parse_posting_without_amount() {
         assert_eq!(
-            parse_posting(" assets:cash\n"),
+            parse_posting(" assets:cash"),
             Ok((
                 "",
                 Posting {
@@ -94,9 +94,9 @@ mod tests {
     #[test]
     fn test_parse_posting_no_starting_space() {
         assert_eq!(
-            parse_posting("assets:cash\n"),
+            parse_posting("assets:cash"),
             Err(nom::Err::Error(nom::error::Error {
-                input: "assets:cash\n",
+                input: "assets:cash",
                 code: ErrorKind::Space
             }))
         )

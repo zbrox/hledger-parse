@@ -40,7 +40,7 @@ pub fn parse_transaction(input: &str) -> IResult<&str, Transaction> {
     let (_, comment_and_tags) = opt(parse_transaction_comment)(comment_and_tags_input)?;
 
     let (_, (comment, tags)) = parse_comments_tags(comment_and_tags.unwrap_or(""))?;
-    let (tail, postings) = many0(parse_posting)(tail)?;
+    let (tail, postings) = many0(terminated(parse_posting, line_ending))(tail)?;
 
     Ok((
         tail,
