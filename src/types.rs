@@ -2,14 +2,14 @@ use std::cmp::PartialEq;
 
 use chrono::NaiveDate;
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub enum Status {
     Unmarked,
     Pending,
     Cleared,
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub struct Description {
     pub payee: Option<String>,
     pub note: Option<String>,
@@ -29,26 +29,26 @@ impl AmountSign {
     }
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub struct Amount {
     pub currency: String,
     pub value: i32,
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub struct Posting {
     pub status: Status,
     pub account_name: String,
     pub amount: Option<Amount>,
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub struct Tag {
     pub name: String,
     pub value: Option<String>,
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub struct Transaction {
     pub primary_date: NaiveDate,
     pub secondary_date: Option<NaiveDate>,
