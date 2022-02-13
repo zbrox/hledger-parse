@@ -2,7 +2,7 @@ use nom::{
     branch::alt,
     character::complete::char,
     character::complete::{line_ending, not_line_ending, space0},
-    combinator::{opt, rest},
+    combinator::{opt, rest, eof},
     multi::many0,
     sequence::{preceded, terminated},
     IResult,
@@ -11,7 +11,7 @@ use nom::{
 pub fn parse_line_comment(input: &str) -> IResult<&str, &str> {
     preceded(
         alt((char('#'), char(';'), char('*'))),
-        preceded(space0, not_line_ending),
+        preceded(space0, alt((not_line_ending, eof))),
     )(input)
 }
 
@@ -58,5 +58,11 @@ mod tests {
             parse_line_comments(input),
             Ok(("", vec!["comment1", "comment2", "", "comment3"]))
         );
+    }
+
+    #[test]
+    fn test_parse_line_comment_empty() {
+        assert_eq!(parse_line_comment(";"), Ok(("", "")));
+        assert_eq!(parse_line_comment(";\n"), Ok(("\n", "")));
     }
 }
