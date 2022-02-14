@@ -8,3 +8,4 @@ pub mod amount;
 pub mod postings;
 pub mod tags;
 pub mod transactions;
+pub mod journal;
