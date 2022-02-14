@@ -43,7 +43,7 @@ pub fn parse_description(input: &str) -> IResult<&str, Description> {
                     },
                 },
             )),
-            Err(e) => Err(nom::Err::Error(nom::error::Error::new(
+            Err(_) => Err(nom::Err::Error(nom::error::Error::new(
                 input,
                 nom::error::ErrorKind::Tag,
             ))),
