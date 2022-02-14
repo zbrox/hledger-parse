@@ -116,7 +116,7 @@ mod tests {
             parse_transaction(
                 r#"2008/01/01 income
     assets:bank:checking   $1
-    income:salary         $-1
+    income:salary
 
 2008/01/01"#
             ),
@@ -144,10 +144,7 @@ mod tests {
                         Posting {
                             account_name: "income:salary".into(),
                             status: Status::Unmarked,
-                            amount: Some(Amount {
-                                currency: "$".into(),
-                                value: -1
-                            }),
+                            amount: None,
                         },
                     ],
                 }

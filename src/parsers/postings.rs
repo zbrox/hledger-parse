@@ -2,8 +2,8 @@ use nom::{
     branch::alt,
     bytes::complete::take_until,
     character::complete::{not_line_ending, space0, space1},
-    combinator::{opt, peek},
-    sequence::{delimited, preceded, terminated, tuple},
+    combinator::{opt, peek, success},
+    sequence::{delimited, pair, preceded, terminated},
     IResult,
 };
 
@@ -12,14 +12,16 @@ use crate::types::Posting;
 use super::{amount::parse_amount, status::parse_status};
 
 pub fn parse_posting(input: &str) -> IResult<&str, Posting> {
-    let (tail, (status, account_name, amount)) = tuple((
+    let (tail, (status, (account_name, amount))) = pair(
         delimited(space1, parse_status, space0),
         alt((
-            terminated(take_until("  "), peek(preceded(space1, parse_amount))),
-            not_line_ending,
+            pair(
+                terminated(take_until("  "), peek(preceded(space1, parse_amount))),
+                opt(parse_amount),
+            ),
+            pair(not_line_ending, success(None)),
         )),
-        opt(parse_amount),
-    ))(input)?;
+    )(input)?;
 
     Ok((
         tail,
