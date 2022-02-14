@@ -111,6 +111,51 @@ mod tests {
     }
 
     #[test]
+    fn test_transaction_ending_after_postings() {
+        assert_eq!(
+            parse_transaction(
+                r#"2008/01/01 income
+    assets:bank:checking   $1
+    income:salary         $-1
+
+2008/01/01"#
+            ),
+            Ok((
+                "\n2008/01/01",
+                Transaction {
+                    primary_date: NaiveDate::from_ymd(2008, 1, 1),
+                    secondary_date: None,
+                    code: None,
+                    description: Description {
+                        note: Some("income".into()),
+                        payee: None,
+                    },
+                    tags: vec![],
+                    status: Status::Unmarked,
+                    postings: vec![
+                        Posting {
+                            account_name: "assets:bank:checking".into(),
+                            status: Status::Unmarked,
+                            amount: Some(Amount {
+                                currency: "$".into(),
+                                value: 1
+                            }),
+                        },
+                        Posting {
+                            account_name: "income:salary".into(),
+                            status: Status::Unmarked,
+                            amount: Some(Amount {
+                                currency: "$".into(),
+                                value: -1
+                            }),
+                        },
+                    ],
+                }
+            ))
+        )
+    }
+
+    #[test]
     fn test_simple_transaction_with_empty_amount_posting() {
         assert_eq!(
             parse_transaction(
