@@ -1,7 +1,8 @@
 use nom::{
+    branch::alt,
     bytes::complete::tag,
     character::complete::{line_ending, not_line_ending, space0},
-    combinator::{opt, eof},
+    combinator::opt,
     multi::{many1, separated_list0},
     sequence::terminated,
     IResult,
@@ -40,7 +41,7 @@ pub fn parse_transaction(input: &str) -> IResult<&str, Transaction> {
     let (_, comment_and_tags) = opt(parse_transaction_comment)(comment_and_tags_input)?;
 
     let (_, (_comment, tags)) = parse_comments_tags(comment_and_tags.unwrap_or(""))?;
-    let (tail, postings) = many1(terminated(parse_posting, line_ending))(tail)?;
+    let (tail, postings) = many1(terminated(parse_posting, alt((tag("\r\n"), tag("\n")))))(tail)?;
 
     Ok((
         tail,
