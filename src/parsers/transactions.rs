@@ -123,7 +123,7 @@ mod tests {
   income:gifts"#
             ),
             Ok((
-                "\n2008/01/01 gift\n  assets:bank:checking  $1\n  income:gifts",
+                "\n2008/06/01 gift\n  assets:bank:checking  $1\n  income:gifts",
                 Transaction {
                     primary_date: NaiveDate::from_ymd(2008, 1, 1),
                     secondary_date: None,
