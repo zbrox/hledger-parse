@@ -1,7 +1,7 @@
 use nom::{
     branch::alt,
     character::complete::{line_ending, space0},
-    combinator::{eof, map, value},
+    combinator::{all_consuming, eof, map, value},
     multi::many_till,
     sequence::terminated,
     IResult,
@@ -29,17 +29,17 @@ fn parse_empty_line(input: &str) -> IResult<&str, Value> {
 }
 
 pub fn parse_journal(input: &str) -> IResult<&str, Journal> {
-    let (tail, (values, _)) = many_till(
+    let (_, (values, _)) = all_consuming(many_till(
         alt((
             map(parse_transaction, Value::Transaction),
             parse_comment_value,
             parse_empty_line,
         )),
         eof,
-    )(input)?;
+    ))(input)?;
 
     Ok((
-        tail,
+        "",
         Journal {
             transactions: values
                 .into_iter()
