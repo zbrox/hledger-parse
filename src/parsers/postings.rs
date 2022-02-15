@@ -66,6 +66,21 @@ mod tests {
     }
 
     #[test]
+    fn test_correct_termination_parse_posting() {
+        assert_eq!(
+            parse_posting(" assets:cash\n2008/06/01 gift\n  assets:bank:checking  $1"),
+            Ok((
+                "\n2008/06/01 gift\n  assets:bank:checking  $1",
+                Posting {
+                    status: crate::types::Status::Unmarked,
+                    account_name: "assets:cash".into(),
+                    amount: None
+                }
+            ))
+        )
+    }
+
+    #[test]
     fn test_parse_posting_with_status() {
         assert_eq!(
             parse_posting(" ! assets:cash  $100"),
