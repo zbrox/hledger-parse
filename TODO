@@ -1,9 +1,8 @@
 - account validation
 - virtual postings
 - comments
-    - single line
     - multi line
-    - transaction comment
+    - posting
 - better error reporting
     - custom errors for some structs
 - unicode support (test what works now)
