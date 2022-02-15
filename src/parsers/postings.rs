@@ -2,7 +2,7 @@ use nom::{
     branch::alt,
     bytes::complete::{is_not, take_until},
     character::complete::{space0, space1},
-    combinator::{opt, peek, success},
+    combinator::{opt, peek, success, verify},
     sequence::{delimited, pair, preceded, terminated},
     IResult,
 };
@@ -13,7 +13,10 @@ use super::{amount::parse_amount, status::parse_status};
 
 fn parse_posting_with_amount(input: &str) -> IResult<&str, (&str, Option<Amount>)> {
     pair(
-        terminated(take_until("  "), peek(preceded(space1, parse_amount))),
+        verify(
+            terminated(take_until("  "), peek(preceded(space1, parse_amount))),
+            |s: &str| !s.contains("\n"),
+        ),
         opt(parse_amount),
     )(input)
 }
