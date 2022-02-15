@@ -1,26 +1,31 @@
 use nom::{
     branch::alt,
-    bytes::complete::take_until,
-    character::complete::{not_line_ending, space0, space1},
+    bytes::complete::{is_not, take_until},
+    character::complete::{space0, space1},
     combinator::{opt, peek, success},
     sequence::{delimited, pair, preceded, terminated},
     IResult,
 };
 
-use crate::types::Posting;
+use crate::types::{Amount, Posting};
 
 use super::{amount::parse_amount, status::parse_status};
+
+fn parse_posting_with_amount(input: &str) -> IResult<&str, (&str, Option<Amount>)> {
+    pair(
+        terminated(take_until("  "), peek(preceded(space1, parse_amount))),
+        opt(parse_amount),
+    )(input)
+}
+
+fn parse_posting_without_amount(input: &str) -> IResult<&str, (&str, Option<Amount>)> {
+    pair(is_not("\n"), success(None))(input)
+}
 
 pub fn parse_posting(input: &str) -> IResult<&str, Posting> {
     let (tail, (status, (account_name, amount))) = pair(
         delimited(space1, parse_status, space0),
-        alt((
-            pair(
-                terminated(take_until("  "), peek(preceded(space1, parse_amount))),
-                opt(parse_amount),
-            ),
-            pair(not_line_ending, success(None)),
-        )),
+        alt((parse_posting_with_amount, parse_posting_without_amount)),
     )(input)?;
 
     Ok((
