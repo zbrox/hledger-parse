@@ -15,7 +15,7 @@ fn parse_posting_with_amount(input: &str) -> IResult<&str, (&str, Option<Amount>
     pair(
         verify(
             terminated(take_until("  "), peek(preceded(space1, parse_amount))),
-            |s: &str| !s.contains("\n"),
+            |s: &str| !s.contains('\n'),
         ),
         opt(parse_amount),
     )(input)

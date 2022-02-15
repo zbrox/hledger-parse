@@ -1,9 +1,9 @@
 use nom::{
     branch::alt,
     character::complete::{line_ending, space0},
-    combinator::{all_consuming, eof, map, value},
-    multi::{many1, many_till},
-    sequence::{preceded, terminated},
+    combinator::{eof, map, value},
+    multi::many_till,
+    sequence::terminated,
     IResult,
 };
 
