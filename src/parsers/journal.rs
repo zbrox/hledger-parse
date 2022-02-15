@@ -55,7 +55,12 @@ pub fn parse_journal(input: &str) -> IResult<&str, Journal> {
 
 #[cfg(test)]
 mod tests {
-    use crate::parsers::journal::{parse_comment_value, parse_empty_line, Value};
+    use chrono::NaiveDate;
+
+    use crate::{
+        parsers::journal::{parse_comment_value, parse_empty_line, Value},
+        types::{Amount, Description, Journal, Posting, Status, Transaction},
+    };
 
     use super::parse_journal;
 
@@ -132,14 +137,153 @@ mod tests {
 
 ;final comment
         "#;
-        let res = parse_journal(input);
-        println!("{res:?}");
-        let res = res.unwrap();
-        println!("Transaction count: {}", &res.1.transactions.len());
-        println!(
-            "Transaction 0 postings count: {}",
-            res.1.transactions[0].postings.len()
+        assert_eq!(
+            parse_journal(input),
+            Ok((
+                "",
+                Journal {
+                    transactions: vec![
+                        Transaction {
+                            primary_date: NaiveDate::from_ymd(2008, 1, 1),
+                            secondary_date: None,
+                            code: None,
+                            status: Status::Unmarked,
+                            description: Description {
+                                note: Some("income".into()),
+                                payee: None,
+                            },
+                            postings: vec![
+                                Posting {
+                                    account_name: "assets:bank:checking".into(),
+                                    amount: Some(Amount {
+                                        currency: "$".into(),
+                                        value: 1,
+                                    }),
+                                    status: Status::Unmarked,
+                                },
+                                Posting {
+                                    account_name: "income:salary".into(),
+                                    amount: None,
+                                    status: Status::Unmarked,
+                                },
+                            ],
+                            tags: vec![],
+                        },
+                        Transaction {
+                            primary_date: NaiveDate::from_ymd(2008, 6, 1),
+                            secondary_date: None,
+                            code: None,
+                            status: Status::Unmarked,
+                            description: Description {
+                                note: Some("gift".into()),
+                                payee: None,
+                            },
+                            postings: vec![
+                                Posting {
+                                    account_name: "assets:bank:checking".into(),
+                                    amount: Some(Amount {
+                                        currency: "$".into(),
+                                        value: 1,
+                                    }),
+                                    status: Status::Unmarked,
+                                },
+                                Posting {
+                                    account_name: "income:gifts".into(),
+                                    amount: None,
+                                    status: Status::Unmarked,
+                                },
+                            ],
+                            tags: vec![],
+                        },
+                        Transaction {
+                            primary_date: NaiveDate::from_ymd(2008, 6, 2),
+                            secondary_date: None,
+                            code: None,
+                            status: Status::Unmarked,
+                            description: Description {
+                                note: Some("save".into()),
+                                payee: None,
+                            },
+                            postings: vec![
+                                Posting {
+                                    account_name: "assets:bank:saving".into(),
+                                    amount: Some(Amount {
+                                        currency: "$".into(),
+                                        value: 1,
+                                    }),
+                                    status: Status::Unmarked,
+                                },
+                                Posting {
+                                    account_name: "assets:bank:checking".into(),
+                                    amount: None,
+                                    status: Status::Unmarked,
+                                },
+                            ],
+                            tags: vec![],
+                        },
+                        Transaction {
+                            primary_date: NaiveDate::from_ymd(2008, 6, 3),
+                            secondary_date: None,
+                            code: None,
+                            status: Status::Cleared,
+                            description: Description {
+                                note: Some("eat & shop".into()),
+                                payee: None,
+                            },
+                            postings: vec![
+                                Posting {
+                                    account_name: "expenses:food".into(),
+                                    amount: Some(Amount {
+                                        currency: "$".into(),
+                                        value: 1,
+                                    }),
+                                    status: Status::Unmarked,
+                                },
+                                Posting {
+                                    account_name: "expenses:supplies".into(),
+                                    amount: Some(Amount {
+                                        currency: "$".into(),
+                                        value: 1,
+                                    }),
+                                    status: Status::Unmarked,
+                                },
+                                Posting {
+                                    account_name: "assets:cash".into(),
+                                    amount: None,
+                                    status: Status::Unmarked,
+                                },
+                            ],
+                            tags: vec![],
+                        },
+                        Transaction {
+                            primary_date: NaiveDate::from_ymd(2008, 12, 31),
+                            secondary_date: None,
+                            code: None,
+                            status: Status::Cleared,
+                            description: Description {
+                                note: Some("pay off".into()),
+                                payee: None,
+                            },
+                            postings: vec![
+                                Posting {
+                                    account_name: "liabilities:debts".into(),
+                                    amount: Some(Amount {
+                                        currency: "$".into(),
+                                        value: 1,
+                                    }),
+                                    status: Status::Unmarked,
+                                },
+                                Posting {
+                                    account_name: "assets:bank:checking".into(),
+                                    amount: None,
+                                    status: Status::Unmarked,
+                                },
+                            ],
+                            tags: vec![],
+                        },
+                    ]
+                }
+            ))
         );
-        assert!(parse_journal(input).is_ok());
     }
 }
