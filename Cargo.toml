@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 chrono = "0.4.19"
 nom = "7.1.0"
+thiserror = "1.0.30"
