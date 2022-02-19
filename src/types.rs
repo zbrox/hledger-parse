@@ -1,6 +1,7 @@
-use std::{cmp::PartialEq, error::Error, fmt::Display, path::PathBuf};
+use std::{cmp::PartialEq, path::PathBuf};
 
 use chrono::NaiveDate;
+use thiserror::Error;
 
 use crate::parsers::journal::parse_journal;
 
@@ -68,9 +69,11 @@ pub struct Journal {
 
 pub type ParserResult<T> = std::result::Result<T, ParserError>;
 
-#[derive(Debug)]
+#[derive(Error, Debug)]
 pub enum ParserError {
-    IO(std::io::Error),
+    #[error("IO error: {0}")]
+    IO(#[from] std::io::Error),
+    #[error("Parse error: {0}")]
     Parse(nom::error::Error<String>),
 }
 
@@ -82,34 +85,6 @@ impl TryFrom<PathBuf> for Journal {
         let journal = parse_journal(&journal_contents)?;
 
         Ok(journal)
-    }
-}
-
-impl Error for ParserError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        match *self {
-            ParserError::IO(ref e) => Some(e),
-            ParserError::Parse(ref e) => e.source(),
-        }
-    }
-
-    fn cause(&self) -> Option<&dyn Error> {
-        self.source()
-    }
-}
-
-impl Display for ParserError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match *self {
-            ParserError::IO(..) => write!(f, "Problem reading the journal file"),
-            ParserError::Parse(..) => write!(f, "Parsing error"),
-        }
-    }
-}
-
-impl From<std::io::Error> for ParserError {
-    fn from(err: std::io::Error) -> Self {
-        ParserError::IO(err)
     }
 }
 
