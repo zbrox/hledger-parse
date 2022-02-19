@@ -2,7 +2,7 @@ use std::{cmp::PartialEq, error::Error, fmt::Display, path::PathBuf};
 
 use chrono::NaiveDate;
 
-use crate::journal::parse_journal;
+use crate::parsers::journal::parse_journal;
 
 #[derive(PartialEq, Debug, Clone)]
 pub enum Status {
