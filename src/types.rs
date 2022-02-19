@@ -1,6 +1,8 @@
-use std::cmp::PartialEq;
+use std::{cmp::PartialEq, error::Error, fmt::Display, path::PathBuf};
 
 use chrono::NaiveDate;
+
+use crate::journal::parse_journal;
 
 #[derive(PartialEq, Debug, Clone)]
 pub enum Status {
@@ -62,6 +64,59 @@ pub struct Transaction {
 #[derive(PartialEq, Debug)]
 pub struct Journal {
     pub transactions: Vec<Transaction>,
+}
+
+pub type ParserResult<T> = std::result::Result<T, ParserError>;
+
+#[derive(Debug)]
+pub enum ParserError {
+    IO(std::io::Error),
+    Parse(nom::error::Error<String>),
+}
+
+impl TryFrom<PathBuf> for Journal {
+    type Error = ParserError;
+
+    fn try_from(journal_path: PathBuf) -> ParserResult<Self> {
+        let journal_contents = std::fs::read_to_string(journal_path)?;
+        let journal = parse_journal(&journal_contents)?;
+
+        Ok(journal)
+    }
+}
+
+impl Error for ParserError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        match *self {
+            ParserError::IO(ref e) => Some(e),
+            ParserError::Parse(ref e) => e.source(),
+        }
+    }
+
+    fn cause(&self) -> Option<&dyn Error> {
+        self.source()
+    }
+}
+
+impl Display for ParserError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match *self {
+            ParserError::IO(..) => write!(f, "Problem reading the journal file"),
+            ParserError::Parse(..) => write!(f, "Parsing error"),
+        }
+    }
+}
+
+impl From<std::io::Error> for ParserError {
+    fn from(err: std::io::Error) -> Self {
+        ParserError::IO(err)
+    }
+}
+
+impl From<nom::error::Error<&str>> for ParserError {
+    fn from(err: nom::error::Error<&str>) -> Self {
+        ParserError::Parse(nom::error::Error::new(err.input.to_string(), err.code))
+    }
 }
 
 #[cfg(test)]
