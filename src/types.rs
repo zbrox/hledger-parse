@@ -1,4 +1,4 @@
-use std::{cmp::PartialEq, path::PathBuf};
+use std::{cmp::PartialEq, fmt::Display, path::PathBuf};
 
 use chrono::NaiveDate;
 use thiserror::Error;
@@ -16,6 +16,29 @@ pub enum Status {
 pub struct Description {
     pub payee: Option<String>,
     pub note: Option<String>,
+}
+
+impl Display for Description {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Description {
+                payee: Some(p),
+                note: Some(n),
+            } => write!(f, "{} | {}", p, n),
+            Description {
+                payee: None,
+                note: Some(n),
+            } => write!(f, "{}", n),
+            Description {
+                payee: Some(p),
+                note: None,
+            } => write!(f, "{} |", p),
+            Description {
+                payee: None,
+                note: None,
+            } => write!(f, ""),
+        }
+    }
 }
 
 pub enum AmountSign {
@@ -60,6 +83,15 @@ pub struct Transaction {
     pub description: Description,
     pub postings: Vec<Posting>,
     pub tags: Vec<Tag>,
+}
+
+impl Display for Transaction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match &self.secondary_date {
+            Some(sec_date) => write!(f, "{}={} {}", self.primary_date, sec_date, self.description),
+            None => write!(f, "{} {}", self.primary_date, self.description),
+        }
+    }
 }
 
 #[derive(PartialEq, Debug)]
