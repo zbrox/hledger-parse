@@ -75,6 +75,8 @@ pub enum ParserError {
     IO(#[from] std::io::Error),
     #[error("Parse error: {0}")]
     Parse(nom::error::Error<String>),
+    #[error("Validation error: {0}")]
+    Validation(String),
 }
 
 impl TryFrom<PathBuf> for Journal {
