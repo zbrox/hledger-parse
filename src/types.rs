@@ -1,6 +1,7 @@
 use std::{cmp::PartialEq, fmt::Display, path::PathBuf};
 
 use chrono::NaiveDate;
+use nom::error::ErrorKind;
 use thiserror::Error;
 
 use crate::parsers::journal::parse_journal;
@@ -99,32 +100,36 @@ pub struct Journal {
     pub transactions: Vec<Transaction>,
 }
 
-pub type ParserResult<T> = std::result::Result<T, ParserError>;
+pub type ParserIResult<I, O> = std::result::Result<(I, O), ParserError<I>>;
 
 #[derive(Error, Debug)]
-pub enum ParserError {
+pub enum ParserError<I> {
     #[error("IO error: {0}")]
     IO(#[from] std::io::Error),
     #[error("Parse error: {0}")]
-    Parse(nom::error::Error<String>),
+    Parse(I, ErrorKind),
     #[error("Validation error: {0}")]
     Validation(String),
 }
 
 impl TryFrom<PathBuf> for Journal {
-    type Error = ParserError;
+    type Error = ParserError<String>;
 
-    fn try_from(journal_path: PathBuf) -> ParserResult<Self> {
+    fn try_from(journal_path: PathBuf) -> Result<Self, ParserError<String>> {
         let journal_contents = std::fs::read_to_string(journal_path)?;
-        let journal = parse_journal(&journal_contents)?;
+        let journal = parse_journal(&journal_contents).map_err(|e| match e {
+            ParserError::Parse(i, ek) => ParserError::Parse(i.to_string(), ek),
+            ParserError::Validation(desc) => ParserError::Validation(desc),
+            ParserError::IO(e) => ParserError::IO(e),
+        })?;
 
         Ok(journal)
     }
 }
 
-impl From<nom::error::Error<&str>> for ParserError {
-    fn from(err: nom::error::Error<&str>) -> Self {
-        ParserError::Parse(nom::error::Error::new(err.input.to_string(), err.code))
+impl<'a> From<nom::error::Error<&'a str>> for ParserError<&'a str> {
+    fn from(err: nom::error::Error<&'a str>) -> Self {
+        ParserError::Parse(err.input, err.code)
     }
 }
 

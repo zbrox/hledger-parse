@@ -7,7 +7,7 @@ use nom::{
     Finish, IResult,
 };
 
-use crate::types::{Journal, ParserResult, Transaction};
+use crate::types::{Journal, ParserError, Transaction};
 
 use super::{comments::parse_line_comment, transactions::parse_transaction};
 
@@ -28,7 +28,7 @@ fn parse_empty_line(input: &str) -> IResult<&str, Value> {
     value(Value::Ignore, terminated(space0, alt((line_ending, eof))))(input)
 }
 
-pub fn parse_journal(input: &str) -> ParserResult<Journal> {
+pub fn parse_journal(input: &str) -> Result<Journal, ParserError<&str>> {
     let (_, (values, _)) = all_consuming(many_till(
         alt((
             map(parse_transaction, Value::Transaction),
