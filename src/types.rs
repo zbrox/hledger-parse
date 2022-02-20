@@ -95,6 +95,45 @@ impl Display for Transaction {
     }
 }
 
+impl<'a> Transaction {
+    pub fn validate(&self) -> Result<(), ParserError<&str>> {
+        self.validate_postings()?;
+        Ok(())
+    }
+
+    fn validate_postings(&self) -> Result<(), ParserError<&str>> {
+        let none_amounts = self.postings.iter().filter(|p| p.amount.is_none()).count();
+
+        if none_amounts > 1_usize {
+            return Err(ParserError::Validation(format!(
+                "Transaction {} cannot have more than 1 posting with missing amounts",
+                self
+            )));
+        }
+
+        if none_amounts == 1_usize {
+            return Ok(());
+        }
+
+        let postings_sum = self
+            .postings
+            .iter()
+            .map(|p| &p.amount)
+            .flatten()
+            .map(|a| a.value) // TODO: different currencies, conversion rates
+            .sum::<i32>();
+
+        if postings_sum != 0 {
+            return Err(ParserError::Validation(format!(
+                "Transaction {} postings' sum does not equal 0",
+                self
+            )));
+        }
+
+        Ok(())
+    }
+}
+
 #[derive(PartialEq, Debug)]
 pub struct Journal {
     pub transactions: Vec<Transaction>,
@@ -135,11 +174,82 @@ impl<'a> From<nom::error::Error<&'a str>> for ParserError<&'a str> {
 
 #[cfg(test)]
 mod tests {
+    use chrono::NaiveDate;
+
     use crate::types::AmountSign;
+
+    use super::{Amount, Description, Posting, Status, Transaction};
 
     #[test]
     fn test_amount_sign_multiplier() {
         assert_eq!(AmountSign::Plus.multiplier(), 1);
         assert_eq!(AmountSign::Minus.multiplier(), -1);
+    }
+
+    #[test]
+    fn test_transaction_validate_none_amount_postings() {
+        let transaction = Transaction {
+            primary_date: NaiveDate::from_ymd(2008, 1, 1),
+            secondary_date: None,
+            status: Status::Unmarked,
+            code: None,
+            description: Description {
+                note: Some("income".into()),
+                payee: None,
+            },
+            postings: vec![
+                Posting {
+                    account_name: "assets:bank:checking".into(),
+                    amount: Some(Amount {
+                        currency: "$".into(),
+                        value: 1,
+                    }),
+                    status: Status::Unmarked,
+                },
+                Posting {
+                    account_name: "income:salary".into(),
+                    amount: None,
+                    status: Status::Unmarked,
+                },
+            ],
+            tags: vec![],
+        };
+
+        assert!(transaction.validate().is_ok());
+    }
+
+    #[test]
+    fn test_transaction_validate_not_zero_sum_postings() {
+        let transaction = Transaction {
+            primary_date: NaiveDate::from_ymd(2008, 1, 1),
+            secondary_date: None,
+            status: Status::Unmarked,
+            code: None,
+            description: Description {
+                note: Some("income".into()),
+                payee: None,
+            },
+            postings: vec![
+                Posting {
+                    account_name: "assets:bank:checking".into(),
+                    amount: Some(Amount {
+                        currency: "$".into(),
+                        value: 1,
+                    }),
+                    status: Status::Unmarked,
+                },
+                Posting {
+                    account_name: "income:salary".into(),
+                    amount: Some(Amount {
+                        currency: "$".into(),
+                        value: 0,
+                    }),
+                    status: Status::Unmarked,
+                },
+            ],
+            tags: vec![],
+        };
+
+        assert!(transaction.validate().is_err());
     }
 }
