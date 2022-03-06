@@ -57,7 +57,7 @@ pub fn parse_transaction(input: &str) -> HLParserIResult<&str, Transaction> {
         postings,
     };
 
-    // transaction.validate().map_err(|e| nom::Err::Error(e))?;
+    transaction.validate().map_err(nom::Err::Error)?;
 
     Ok((tail, transaction))
 }

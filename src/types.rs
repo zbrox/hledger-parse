@@ -96,12 +96,12 @@ impl Display for Transaction {
 }
 
 impl<'a> Transaction {
-    pub fn validate(&self) -> Result<(), HLParserError<&str>> {
+    pub fn validate<I>(&self) -> Result<(), HLParserError<I>> {
         self.validate_postings()?;
         Ok(())
     }
 
-    fn validate_postings(&self) -> Result<(), HLParserError<&str>> {
+    fn validate_postings<I>(&self) -> Result<(), HLParserError<I>> {
         let none_amounts = self.postings.iter().filter(|p| p.amount.is_none()).count();
 
         if none_amounts > 1_usize {
@@ -232,7 +232,7 @@ mod tests {
             tags: vec![],
         };
 
-        assert!(transaction.validate().is_ok());
+        assert!(transaction.validate::<&str>().is_ok());
     }
 
     #[test]
@@ -267,6 +267,6 @@ mod tests {
             tags: vec![],
         };
 
-        assert!(transaction.validate().is_err());
+        assert!(transaction.validate::<&str>().is_err());
     }
 }
