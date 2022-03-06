@@ -1,7 +1,7 @@
 use std::{cmp::PartialEq, fmt::Display, path::PathBuf};
 
 use chrono::NaiveDate;
-use nom::error::ErrorKind;
+use nom::error::{ErrorKind, ParseError};
 use thiserror::Error;
 
 use crate::parsers::journal::parse_journal;
@@ -96,16 +96,16 @@ impl Display for Transaction {
 }
 
 impl<'a> Transaction {
-    pub fn validate(&self) -> Result<(), ParserError<&str>> {
+    pub fn validate(&self) -> Result<(), HLParserError<&str>> {
         self.validate_postings()?;
         Ok(())
     }
 
-    fn validate_postings(&self) -> Result<(), ParserError<&str>> {
+    fn validate_postings(&self) -> Result<(), HLParserError<&str>> {
         let none_amounts = self.postings.iter().filter(|p| p.amount.is_none()).count();
 
         if none_amounts > 1_usize {
-            return Err(ParserError::Validation(format!(
+            return Err(HLParserError::Validation(format!(
                 "Transaction {} cannot have more than 1 posting with missing amounts",
                 self
             )));
@@ -124,7 +124,7 @@ impl<'a> Transaction {
             .sum::<i32>();
 
         if postings_sum != 0 {
-            return Err(ParserError::Validation(format!(
+            return Err(HLParserError::Validation(format!(
                 "Transaction {} postings' sum does not equal 0",
                 self
             )));
@@ -139,10 +139,10 @@ pub struct Journal {
     pub transactions: Vec<Transaction>,
 }
 
-pub type ParserIResult<I, O> = std::result::Result<(I, O), ParserError<I>>;
+pub type HLParserIResult<I, O> = nom::IResult<I, O, HLParserError<I>>;
 
 #[derive(Error, Debug)]
-pub enum ParserError<I> {
+pub enum HLParserError<I> {
     #[error("IO error: {0}")]
     IO(#[from] std::io::Error),
     #[error("Parse error: {0}")]
@@ -152,23 +152,33 @@ pub enum ParserError<I> {
 }
 
 impl TryFrom<PathBuf> for Journal {
-    type Error = ParserError<String>;
+    type Error = HLParserError<String>;
 
-    fn try_from(journal_path: PathBuf) -> Result<Self, ParserError<String>> {
+    fn try_from(journal_path: PathBuf) -> Result<Self, HLParserError<String>> {
         let journal_contents = std::fs::read_to_string(journal_path)?;
         let journal = parse_journal(&journal_contents).map_err(|e| match e {
-            ParserError::Parse(i, ek) => ParserError::Parse(i.to_string(), ek),
-            ParserError::Validation(desc) => ParserError::Validation(desc),
-            ParserError::IO(e) => ParserError::IO(e),
+            HLParserError::Parse(i, ek) => HLParserError::Parse(i.to_string(), ek),
+            HLParserError::Validation(desc) => HLParserError::Validation(desc),
+            HLParserError::IO(e) => HLParserError::IO(e),
         })?;
 
         Ok(journal)
     }
 }
 
-impl<'a> From<nom::error::Error<&'a str>> for ParserError<&'a str> {
+impl<'a> From<nom::error::Error<&'a str>> for HLParserError<&'a str> {
     fn from(err: nom::error::Error<&'a str>) -> Self {
-        ParserError::Parse(err.input, err.code)
+        HLParserError::Parse(err.input, err.code)
+    }
+}
+
+impl<I> ParseError<I> for HLParserError<I> {
+    fn from_error_kind(input: I, kind: ErrorKind) -> Self {
+        HLParserError::Parse(input, kind)
+    }
+
+    fn append(_: I, _: ErrorKind, other: Self) -> Self {
+        other
     }
 }
 
