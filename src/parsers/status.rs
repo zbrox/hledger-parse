@@ -1,8 +1,8 @@
-use nom::{branch::alt, character::complete::char, combinator::opt, sequence::terminated, IResult};
+use nom::{branch::alt, character::complete::char, combinator::opt, sequence::terminated};
 
-use crate::types::Status;
+use crate::types::{Status, HLParserIResult};
 
-pub fn parse_status(input: &str) -> IResult<&str, Status> {
+pub fn parse_status(input: &str) -> HLParserIResult<&str, Status> {
     let (tail, status) = opt(terminated(alt((char('!'), char('*'))), char(' ')))(input)?;
 
     let status = match status {
@@ -20,17 +20,17 @@ mod tests {
 
     #[test]
     fn test_status_cleared() {
-        assert_eq!(parse_status("* "), Ok(("", Status::Cleared)));
+        assert_eq!(parse_status("* ").unwrap(), ("", Status::Cleared));
     }
 
     #[test]
     fn test_status_pending() {
-        assert_eq!(parse_status("! "), Ok(("", Status::Pending)));
+        assert_eq!(parse_status("! ").unwrap(), ("", Status::Pending));
     }
 
     #[test]
     fn test_status_unmarked() {
-        assert_eq!(parse_status(""), Ok(("", Status::Unmarked)));
-        assert_eq!(parse_status(" "), Ok((" ", Status::Unmarked)));
+        assert_eq!(parse_status("").unwrap(), ("", Status::Unmarked));
+        assert_eq!(parse_status(" ").unwrap(), (" ", Status::Unmarked));
     }
 }

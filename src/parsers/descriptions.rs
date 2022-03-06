@@ -4,16 +4,15 @@ use nom::{
     character::complete::space0,
     combinator::{opt, rest},
     sequence::{delimited, separated_pair},
-    IResult,
 };
 
-use crate::types::Description;
+use crate::types::{Description, HLParserIResult, HLParserError};
 
-fn parse_only_note(input: &str) -> IResult<&str, &str> {
+fn parse_only_note(input: &str) -> HLParserIResult<&str, &str> {
     rest(input)
 }
 
-fn parse_payee_and_note(input: &str) -> IResult<&str, (Option<&str>, Option<&str>)> {
+fn parse_payee_and_note(input: &str) -> HLParserIResult<&str, (Option<&str>, Option<&str>)> {
     separated_pair(
         opt(alt((take_until(" |"), take_until("|")))),
         delimited(space0, tag("|"), space0),
@@ -22,7 +21,7 @@ fn parse_payee_and_note(input: &str) -> IResult<&str, (Option<&str>, Option<&str
 }
 
 // TODO: this is fugly
-pub fn parse_description(input: &str) -> IResult<&str, Description> {
+pub fn parse_description(input: &str) -> HLParserIResult<&str, Description> {
     match parse_payee_and_note(input) {
         Ok((t, (p, n))) => Ok((
             t,
@@ -43,7 +42,7 @@ pub fn parse_description(input: &str) -> IResult<&str, Description> {
                     },
                 },
             )),
-            Err(_) => Err(nom::Err::Error(nom::error::Error::new(
+            Err(_) => Err(nom::Err::Error(HLParserError::Parse(
                 input,
                 nom::error::ErrorKind::Tag,
             ))),
@@ -58,86 +57,86 @@ mod tests {
     #[test]
     fn test_parse_description() {
         assert_eq!(
-            parse_description("some description"),
-            Ok((
+            parse_description("some description").unwrap(),
+            (
                 "",
                 Description {
                     payee: None,
                     note: Some("some description".into()),
                 }
-            ))
+            )
         )
     }
 
     #[test]
     fn test_parse_payee_and_note() {
         assert_eq!(
-            parse_description("Acme | some description"),
-            Ok((
+            parse_description("Acme | some description").unwrap(),
+            (
                 "",
                 Description {
                     payee: Some("Acme".into()),
                     note: Some("some description".into()),
                 }
-            ))
+            )
         )
     }
 
     #[test]
     fn test_parse_empty_description() {
         assert_eq!(
-            parse_description(" "),
-            Ok((
+            parse_description(" ").unwrap(),
+            (
                 "",
                 Description {
                     payee: None,
                     note: None
                 }
-            ))
+            )
         );
         assert_eq!(
-            parse_description(""),
-            Ok((
+            parse_description("").unwrap(),
+            (
                 "",
                 Description {
                     payee: None,
                     note: None
                 }
-            ))
+            )
         );
     }
 
     #[test]
     fn test_parse_payee_and_note_different_spacing() {
         assert_eq!(
-            parse_description("Acme| some description"),
-            Ok((
+            parse_description("Acme| some description").unwrap(),
+            (
                 "",
                 Description {
                     payee: Some("Acme".into()),
                     note: Some("some description".into()),
                 }
-            ))
+            )
         );
         assert_eq!(
-            parse_description("Acme |some description"),
-            Ok((
+            parse_description("Acme |some description").unwrap(),
+            (
                 "",
                 Description {
                     payee: Some("Acme".into()),
                     note: Some("some description".into()),
                 }
-            ))
+            )
         );
         assert_eq!(
-            parse_description("Acme|some description"),
-            Ok((
+            parse_description("Acme|some description").unwrap(),
+            (
                 "",
                 Description {
                     payee: Some("Acme".into()),
                     note: Some("some description".into()),
                 }
-            ))
+            )
         );
     }
 }

@@ -4,10 +4,10 @@ use nom::{
     combinator::{all_consuming, eof, map, value},
     multi::many_till,
     sequence::terminated,
-    Finish, IResult,
+    Finish,
 };
 
-use crate::types::{Journal, HLParserError, Transaction};
+use crate::types::{Journal, HLParserError, Transaction, HLParserIResult};
 
 use super::{comments::parse_line_comment, transactions::parse_transaction};
 
@@ -17,14 +17,14 @@ enum Value {
     Transaction(Transaction),
 }
 
-fn parse_comment_value(input: &str) -> IResult<&str, Value> {
+fn parse_comment_value(input: &str) -> HLParserIResult<&str, Value> {
     value(
         Value::Ignore,
         terminated(parse_line_comment, alt((line_ending, eof))),
     )(input)
 }
 
-fn parse_empty_line(input: &str) -> IResult<&str, Value> {
+fn parse_empty_line(input: &str) -> HLParserIResult<&str, Value> {
     value(Value::Ignore, terminated(space0, alt((line_ending, eof))))(input)
 }
 
@@ -65,17 +65,17 @@ mod tests {
     #[test]
     fn test_parse_comment_value() {
         assert_eq!(
-            parse_comment_value("; A sample journal file\n"),
-            Ok(("", Value::Ignore))
+            parse_comment_value("; A sample journal file\n").unwrap(),
+            ("", Value::Ignore)
         );
-        assert_eq!(parse_comment_value(";\n"), Ok(("", Value::Ignore)));
-        assert_eq!(parse_comment_value(";"), Ok(("", Value::Ignore)));
+        assert_eq!(parse_comment_value(";\n").unwrap(), ("", Value::Ignore));
+        assert_eq!(parse_comment_value(";").unwrap(), ("", Value::Ignore));
     }
 
     #[test]
     fn test_parse_empty_line() {
-        assert_eq!(parse_empty_line("\n"), Ok(("", Value::Ignore)));
-        assert_eq!(parse_empty_line("   \n"), Ok(("", Value::Ignore)));
+        assert_eq!(parse_empty_line("\n").unwrap(), ("", Value::Ignore));
+        assert_eq!(parse_empty_line("   \n").unwrap(), ("", Value::Ignore));
     }
 
     #[test]

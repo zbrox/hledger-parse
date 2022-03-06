@@ -4,46 +4,47 @@ use nom::{
     character::complete::{not_line_ending, space0},
     combinator::{rest, eof},
     sequence::{preceded},
-    IResult,
 };
 
-pub fn parse_line_comment(input: &str) -> IResult<&str, &str> {
+use crate::types::HLParserIResult;
+
+pub fn parse_line_comment(input: &str) -> HLParserIResult<&str, &str> {
     preceded(
         alt((char('#'), char(';'), char('*'))),
         preceded(space0, alt((not_line_ending, eof))),
     )(input)
 }
 
-pub fn parse_transaction_comment(input: &str) -> IResult<&str, &str> {
+pub fn parse_transaction_comment(input: &str) -> HLParserIResult<&str, &str> {
     preceded(char(';'), preceded(space0, rest))(input)
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::parsers::comments::{parse_line_comment, parse_transaction_comment};
+    use crate::{parsers::comments::{parse_line_comment, parse_transaction_comment}, types::HLParserError};
 
     #[test]
     fn test_parse_line_comment() {
-        assert_eq!(parse_line_comment("; comment"), Ok(("", "comment")));
-        assert_eq!(parse_line_comment("* comment"), Ok(("", "comment")));
-        assert_eq!(parse_line_comment("# comment"), Ok(("", "comment")));
+        assert_eq!(parse_line_comment("; comment").unwrap(), ("", "comment"));
+        assert_eq!(parse_line_comment("* comment").unwrap(), ("", "comment"));
+        assert_eq!(parse_line_comment("# comment").unwrap(), ("", "comment"));
     }
 
     #[test]
     fn test_parse_transaction_comment() {
-        assert_eq!(parse_transaction_comment("; comment"), Ok(("", "comment")));
+        assert_eq!(parse_transaction_comment("; comment").unwrap(), ("", "comment"));
         assert_eq!(
-            parse_transaction_comment("# comment"),
-            Err(nom::Err::Error(nom::error::Error {
-                input: "# comment",
-                code: nom::error::ErrorKind::Char
-            }))
+            parse_transaction_comment("# comment").unwrap_err().to_string(),
+            nom::Err::Error(HLParserError::Parse(
+                "# comment",
+                nom::error::ErrorKind::Char
+            )).to_string()
         );
     }
 
     #[test]
     fn test_parse_line_comment_empty() {
-        assert_eq!(parse_line_comment(";"), Ok(("", "")));
-        assert_eq!(parse_line_comment(";\n"), Ok(("\n", "")));
+        assert_eq!(parse_line_comment(";").unwrap(), ("", ""));
+        assert_eq!(parse_line_comment(";\n").unwrap(), ("\n", ""));
     }
 }
