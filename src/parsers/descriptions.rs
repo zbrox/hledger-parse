@@ -6,7 +6,7 @@ use nom::{
     sequence::{delimited, separated_pair},
 };
 
-use crate::types::{Description, HLParserIResult, HLParserError};
+use crate::types::{Description, HLParserError, HLParserIResult};
 
 fn parse_only_note(input: &str) -> HLParserIResult<&str, &str> {
     rest(input)

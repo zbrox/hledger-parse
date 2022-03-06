@@ -6,7 +6,7 @@ use nom::{
     sequence::{delimited, pair, preceded, terminated},
 };
 
-use crate::types::{Amount, Posting, HLParserIResult};
+use crate::types::{Amount, HLParserIResult, Posting};
 
 use super::{amount::parse_amount, status::parse_status};
 
@@ -46,7 +46,7 @@ mod tests {
 
     use crate::{
         parsers::postings::parse_posting,
-        types::{Amount, Posting, HLParserError},
+        types::{Amount, HLParserError, Posting},
     };
 
     #[test]
@@ -119,10 +119,7 @@ mod tests {
     fn test_parse_posting_no_starting_space() {
         assert_eq!(
             parse_posting("assets:cash").unwrap_err().to_string(),
-            nom::Err::Error(HLParserError::Parse(
-                    "assets:cash",
-                    ErrorKind::Space
-            )).to_string()
+            nom::Err::Error(HLParserError::Parse("assets:cash", ErrorKind::Space)).to_string()
         )
     }
 }

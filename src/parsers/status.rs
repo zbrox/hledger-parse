@@ -1,6 +1,6 @@
 use nom::{branch::alt, character::complete::char, combinator::opt, sequence::terminated};
 
-use crate::types::{Status, HLParserIResult};
+use crate::types::{HLParserIResult, Status};
 
 pub fn parse_status(input: &str) -> HLParserIResult<&str, Status> {
     let (tail, status) = opt(terminated(alt((char('!'), char('*'))), char(' ')))(input)?;

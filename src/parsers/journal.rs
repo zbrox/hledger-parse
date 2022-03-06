@@ -7,7 +7,7 @@ use nom::{
     Finish,
 };
 
-use crate::types::{Journal, HLParserError, Transaction, HLParserIResult};
+use crate::types::{HLParserError, HLParserIResult, Journal, Transaction};
 
 use super::{comments::parse_line_comment, transactions::parse_transaction};
 

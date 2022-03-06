@@ -3,7 +3,7 @@ use nom::{
     sequence::terminated,
 };
 
-use crate::types::{Tag, HLParserIResult};
+use crate::types::{HLParserIResult, Tag};
 
 use super::utils::is_char_alphanumeric;
 
@@ -30,19 +30,18 @@ pub fn parse_tag(input: &str) -> HLParserIResult<&str, Tag> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{parsers::tags::parse_tag, types::{Tag, HLParserError}};
+    use crate::{
+        parsers::tags::parse_tag,
+        types::{HLParserError, Tag},
+    };
 
     #[test]
     fn test_parse_tag_with_space() {
         let err = parse_tag("not a tag:").unwrap_err().to_string();
-        let expected_err = nom::Err::Error(HLParserError::Parse(
-            " a tag:",
-            nom::error::ErrorKind::Tag
-        )).to_string();
-        assert_eq!(
-            err,
-            expected_err,
-        )
+        let expected_err =
+            nom::Err::Error(HLParserError::Parse(" a tag:", nom::error::ErrorKind::Tag))
+                .to_string();
+        assert_eq!(err, expected_err,)
     }
 
     #[test]

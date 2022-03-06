@@ -7,7 +7,7 @@ use nom::{
     sequence::terminated,
 };
 
-use crate::types::{Tag, Transaction, HLParserIResult};
+use crate::types::{HLParserIResult, Tag, Transaction};
 
 use super::{
     code::parse_code, comments::parse_transaction_comment, dates::parse_date,
@@ -21,13 +21,15 @@ fn parse_comments_tags(input: &str) -> HLParserIResult<&str, (Option<&str>, Vec<
         0 => None,
         _ => Some(comment_input.trim()),
     };
-    let (tail, tags) = separated_list0(terminated(tag(","), space0), parse_tag)(tags_input).map_err(nom::Err::convert)?;
+    let (tail, tags) = separated_list0(terminated(tag(","), space0), parse_tag)(tags_input)
+        .map_err(nom::Err::convert)?;
 
     Ok((tail, (comment, tags)))
 }
 
 pub fn parse_transaction(input: &str) -> HLParserIResult<&str, Transaction> {
-    let (tail, (primary_date, secondary_date)) = terminated(parse_date, space0)(input).map_err(nom::Err::convert)?;
+    let (tail, (primary_date, secondary_date)) =
+        terminated(parse_date, space0)(input).map_err(nom::Err::convert)?;
     let (tail, status) = parse_status(tail).map_err(nom::Err::convert)?;
     let (tail, code) = opt(parse_code)(tail).map_err(nom::Err::convert)?;
     let (tail, rest_of_line) = terminated(opt(not_line_ending), line_ending)(tail)?;
@@ -37,10 +39,13 @@ pub fn parse_transaction(input: &str) -> HLParserIResult<&str, Transaction> {
     let (description_input, comment_and_tags_input) =
         rest_of_line.split_at(rest_of_line.find(';').unwrap_or(rest_of_line.len()));
     let (_, description) = parse_description(description_input).map_err(nom::Err::convert)?;
-    let (_, comment_and_tags) = opt(parse_transaction_comment)(comment_and_tags_input).map_err(nom::Err::convert)?;
+    let (_, comment_and_tags) =
+        opt(parse_transaction_comment)(comment_and_tags_input).map_err(nom::Err::convert)?;
 
-    let (_, (_comment, tags)) = parse_comments_tags(comment_and_tags.unwrap_or("")).map_err(nom::Err::convert)?;
-    let (tail, postings) = many0(terminated(parse_posting, alt((tag("\r\n"), tag("\n")))))(tail).map_err(nom::Err::convert)?;
+    let (_, (_comment, tags)) =
+        parse_comments_tags(comment_and_tags.unwrap_or("")).map_err(nom::Err::convert)?;
+    let (tail, postings) = many0(terminated(parse_posting, alt((tag("\r\n"), tag("\n")))))(tail)
+        .map_err(nom::Err::convert)?;
 
     let transaction = Transaction {
         primary_date,
@@ -54,10 +59,7 @@ pub fn parse_transaction(input: &str) -> HLParserIResult<&str, Transaction> {
 
     // transaction.validate().map_err(|e| nom::Err::Error(e))?;
 
-    Ok((
-        tail,
-        transaction,
-    ))
+    Ok((tail, transaction))
 }
 
 #[cfg(test)]
@@ -77,7 +79,8 @@ mod tests {
     assets:bank:checking   $1
     income:salary         $-1
 "#
-            ).unwrap(),
+            )
+            .unwrap(),
             (
                 "",
                 Transaction {
@@ -124,7 +127,8 @@ mod tests {
 2008/06/01 gift
   assets:bank:checking  $1
   income:gifts"#
-            ).unwrap(),
+            )
+            .unwrap(),
             (
                 "\n2008/06/01 gift\n  assets:bank:checking  $1\n  income:gifts",
                 Transaction {
@@ -165,7 +169,8 @@ mod tests {
     assets:bank:checking   $1
     income:salary
 "#
-            ).unwrap(),
+            )
+            .unwrap(),
             (
                 "",
                 Transaction {
@@ -206,7 +211,8 @@ mod tests {
     assets:bank:checking   $1
     income:salary         $-1
 "#
-            ).unwrap(),
+            )
+            .unwrap(),
             (
                 "",
                 Transaction {
@@ -250,7 +256,8 @@ mod tests {
     assets:bank:checking   $1
     income:salary         $-1
 "#
-            ).unwrap(),
+            )
+            .unwrap(),
             (
                 "",
                 Transaction {
@@ -294,7 +301,8 @@ mod tests {
     assets:bank:checking   $1
     income:salary         $-1
 "#
-            ).unwrap(),
+            )
+            .unwrap(),
             (
                 "",
                 Transaction {
@@ -338,7 +346,8 @@ mod tests {
     assets:bank:checking   $1
     income:salary         $-1
 "#
-            ).unwrap(),
+            )
+            .unwrap(),
             (
                 "",
                 Transaction {

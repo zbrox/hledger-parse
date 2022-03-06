@@ -2,8 +2,8 @@ use nom::{
     branch::alt,
     character::complete::char,
     character::complete::{not_line_ending, space0},
-    combinator::{rest, eof},
-    sequence::{preceded},
+    combinator::{eof, rest},
+    sequence::preceded,
 };
 
 use crate::types::HLParserIResult;
@@ -21,7 +21,10 @@ pub fn parse_transaction_comment(input: &str) -> HLParserIResult<&str, &str> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{parsers::comments::{parse_line_comment, parse_transaction_comment}, types::HLParserError};
+    use crate::{
+        parsers::comments::{parse_line_comment, parse_transaction_comment},
+        types::HLParserError,
+    };
 
     #[test]
     fn test_parse_line_comment() {
@@ -32,13 +35,19 @@ mod tests {
 
     #[test]
     fn test_parse_transaction_comment() {
-        assert_eq!(parse_transaction_comment("; comment").unwrap(), ("", "comment"));
         assert_eq!(
-            parse_transaction_comment("# comment").unwrap_err().to_string(),
+            parse_transaction_comment("; comment").unwrap(),
+            ("", "comment")
+        );
+        assert_eq!(
+            parse_transaction_comment("# comment")
+                .unwrap_err()
+                .to_string(),
             nom::Err::Error(HLParserError::Parse(
                 "# comment",
                 nom::error::ErrorKind::Char
-            )).to_string()
+            ))
+            .to_string()
         );
     }
 

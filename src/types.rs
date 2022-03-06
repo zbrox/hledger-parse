@@ -1,7 +1,7 @@
 use std::{cmp::PartialEq, fmt::Display, path::PathBuf};
 
 use chrono::NaiveDate;
-use nom::error::{ErrorKind, ParseError, FromExternalError};
+use nom::error::{ErrorKind, FromExternalError, ParseError};
 use thiserror::Error;
 
 use crate::parsers::journal::parse_journal;
@@ -177,7 +177,7 @@ impl<I, E> FromExternalError<I, E> for HLParserError<I> {
     fn from_external_error(input: I, kind: ErrorKind, _e: E) -> Self {
         HLParserError::Parse(input, kind)
     }
-  }
+}
 
 impl<I> ParseError<I> for HLParserError<I> {
     fn from_error_kind(input: I, kind: ErrorKind) -> Self {

@@ -22,9 +22,13 @@ fn parse_sign(input: &str) -> HLParserIResult<&str, AmountSign> {
 fn parse_amount_prefix_currency(input: &str) -> HLParserIResult<&str, Amount> {
     let (tail, sign) = terminated(parse_sign, space0)(input)?;
     let (tail, currency) = terminated(
-        alt((in_quotes, terminated(take_till(|c| is_char_digit(c) || is_char_minus(c)), space0))),
+        alt((
+            in_quotes,
+            terminated(take_till(|c| is_char_digit(c) || is_char_minus(c)), space0),
+        )),
         space0,
-    )(tail).map_err(nom::Err::convert)?;
+    )(tail)
+    .map_err(nom::Err::convert)?;
     let (tail, sign) = match sign {
         AmountSign::Minus => (tail, sign),
         AmountSign::Plus => terminated(parse_sign, space0)(tail)?,
@@ -45,7 +49,8 @@ fn parse_amount_sufix_currency(input: &str) -> HLParserIResult<&str, Amount> {
     let (tail, sign) = terminated(parse_sign, space0)(input)?;
     let (tail, value) = terminated(i32, space0)(tail)?;
 
-    let (tail, currency) = terminated(alt((in_quotes, rest)), space0)(tail).map_err(nom::Err::convert)?;
+    let (tail, currency) =
+        terminated(alt((in_quotes, rest)), space0)(tail).map_err(nom::Err::convert)?;
 
     Ok((
         tail,
