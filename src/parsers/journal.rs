@@ -41,12 +41,10 @@ pub fn parse_journal(input: &str) -> Result<Journal, HLParserError<&str>> {
 
     Ok(Journal {
         transactions: values
-            .into_iter()
-            .map(|v| match v {
+            .into_iter().filter_map(|v| match v {
                 Value::Transaction(t) => Some(t),
                 _ => None,
             })
-            .flatten()
             .collect::<Vec<Transaction>>(),
     })
 }

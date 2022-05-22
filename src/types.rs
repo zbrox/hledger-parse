@@ -117,9 +117,7 @@ impl<'a> Transaction {
 
         let postings_sum = self
             .postings
-            .iter()
-            .map(|p| &p.amount)
-            .flatten()
+            .iter().flat_map(|p| &p.amount)
             .map(|a| a.value) // TODO: different currencies, conversion rates
             .sum::<i32>();
 
