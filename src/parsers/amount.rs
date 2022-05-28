@@ -1,14 +1,27 @@
+use std::str::FromStr;
+
 use nom::{
     branch::alt,
     bytes::complete::take_till,
-    character::complete::{char, i32, space0},
+    character::complete::{char, i64, space0, u32},
     combinator::{opt, rest},
-    sequence::terminated,
+    error::ErrorKind,
+    sequence::{terminated, tuple},
 };
+use rust_decimal::Decimal;
 
-use crate::types::{Amount, AmountSign, HLParserIResult};
+use crate::types::{Amount, AmountSign, HLParserError, HLParserIResult};
 
 use super::utils::{in_quotes, is_char_digit, is_char_minus};
+
+pub fn parse_money_amount(input: &str) -> HLParserIResult<&str, Decimal> {
+    let (tail, (num, _, scale)) = tuple((i64, opt(alt((char('.'), char(',')))), opt(u32)))(input)?;
+    let value = format!("{}.{}", num, scale.unwrap_or(0));
+    let value = Decimal::from_str(&value)
+        .map_err(|_| nom::Err::Error(HLParserError::Parse(value.to_string(), ErrorKind::Float)))?;
+
+    Ok((tail, value))
+}
 
 fn parse_sign(input: &str) -> HLParserIResult<&str, AmountSign> {
     let (tail, char) = opt(char('-'))(input)?;
@@ -34,20 +47,26 @@ fn parse_amount_prefix_currency(input: &str) -> HLParserIResult<&str, Amount> {
         AmountSign::Plus => terminated(parse_sign, space0)(tail)?,
     };
 
-    let (tail, value) = i32(tail)?;
+    let (tail, mut value) = parse_money_amount(tail)?;
+    if sign == AmountSign::Minus {
+        value.set_sign_negative(true);
+    }
 
     Ok((
         tail,
         Amount {
             currency: currency.trim().into(),
-            value: value * sign.multiplier() as i32,
+            value,
         },
     ))
 }
 
 fn parse_amount_suffix_currency(input: &str) -> HLParserIResult<&str, Amount> {
     let (tail, sign) = terminated(parse_sign, space0)(input)?;
-    let (tail, value) = terminated(i32, space0)(tail)?;
+    let (tail, mut value) = terminated(parse_money_amount, space0)(tail)?;
+    if sign == AmountSign::Minus {
+        value.set_sign_negative(true);
+    }
 
     let (tail, currency) =
         terminated(alt((in_quotes, rest)), space0)(tail).map_err(nom::Err::convert)?;
@@ -56,7 +75,7 @@ fn parse_amount_suffix_currency(input: &str) -> HLParserIResult<&str, Amount> {
         tail,
         Amount {
             currency: currency.trim().into(),
-            value: value * sign.multiplier() as i32,
+            value,
         },
     ))
 }
@@ -70,7 +89,12 @@ pub fn parse_amount(input: &str) -> HLParserIResult<&str, Amount> {
 
 #[cfg(test)]
 mod tests {
+    use rust_decimal::Decimal;
+    use rust_decimal_macros::dec;
+
     use crate::{parsers::amount::parse_amount, types::Amount};
+
+    use super::parse_money_amount;
 
     #[test]
     fn test_parse_amount_currency_prefixed() {
@@ -80,7 +104,7 @@ mod tests {
                 "",
                 Amount {
                     currency: "$".into(),
-                    value: 100
+                    value: dec!(100)
                 }
             )
         );
@@ -90,7 +114,7 @@ mod tests {
                 "",
                 Amount {
                     currency: "$".into(),
-                    value: 100
+                    value: dec!(100)
                 }
             )
         );
@@ -100,7 +124,7 @@ mod tests {
                 "",
                 Amount {
                     currency: "$".into(),
-                    value: 100
+                    value: dec!(100)
                 }
             )
         );
@@ -110,7 +134,7 @@ mod tests {
                 "",
                 Amount {
                     currency: "silver coins".into(),
-                    value: 100
+                    value: dec!(100)
                 }
             )
         );
@@ -120,7 +144,7 @@ mod tests {
                 "",
                 Amount {
                     currency: "silver coins".into(),
-                    value: 100
+                    value: dec!(100)
                 }
             )
         );
@@ -134,7 +158,7 @@ mod tests {
                 "",
                 Amount {
                     currency: "EUR".into(),
-                    value: 100
+                    value: dec!(100)
                 }
             )
         );
@@ -144,7 +168,7 @@ mod tests {
                 "",
                 Amount {
                     currency: "EUR".into(),
-                    value: 100
+                    value: dec!(100)
                 }
             )
         );
@@ -154,7 +178,7 @@ mod tests {
                 "",
                 Amount {
                     currency: "EUR".into(),
-                    value: 100
+                    value: dec!(100)
                 }
             )
         );
@@ -164,7 +188,7 @@ mod tests {
                 "",
                 Amount {
                     currency: "silver coins".into(),
-                    value: 100
+                    value: dec!(100)
                 }
             )
         );
@@ -174,7 +198,7 @@ mod tests {
                 "",
                 Amount {
                     currency: "silver coins".into(),
-                    value: 100
+                    value: dec!(100)
                 }
             )
         );
@@ -188,7 +212,7 @@ mod tests {
                 "",
                 Amount {
                     currency: "EUR".into(),
-                    value: -100
+                    value: dec!(-100)
                 }
             )
         );
@@ -198,7 +222,7 @@ mod tests {
                 "",
                 Amount {
                     currency: "EUR".into(),
-                    value: -100
+                    value: dec!(-100)
                 }
             )
         );
@@ -208,7 +232,7 @@ mod tests {
                 "",
                 Amount {
                     currency: "EUR".into(),
-                    value: -100
+                    value: dec!(-100)
                 }
             )
         );
@@ -218,7 +242,7 @@ mod tests {
                 "",
                 Amount {
                     currency: "EUR".into(),
-                    value: -100
+                    value: dec!(-100)
                 }
             )
         );
@@ -228,7 +252,7 @@ mod tests {
                 "",
                 Amount {
                     currency: "EUR".into(),
-                    value: -100
+                    value: dec!(-100)
                 }
             )
         );
@@ -238,7 +262,7 @@ mod tests {
                 "",
                 Amount {
                     currency: "EUR".into(),
-                    value: -100
+                    value: dec!(-100)
                 }
             )
         );
@@ -248,7 +272,7 @@ mod tests {
                 "",
                 Amount {
                     currency: "EUR".into(),
-                    value: -100
+                    value: dec!(-100)
                 }
             )
         );
@@ -262,7 +286,7 @@ mod tests {
                 "",
                 Amount {
                     currency: "$".into(),
-                    value: -100
+                    value: dec!(-100)
                 }
             )
         );
@@ -272,9 +296,43 @@ mod tests {
                 "",
                 Amount {
                     currency: "$".into(),
-                    value: -100
+                    value: dec!(-100)
                 }
             )
         );
+    }
+
+    #[test]
+    fn test_parse_money_amount_int() {
+        assert_eq!(
+            parse_money_amount("100EUR").unwrap(),
+            ("EUR", Decimal::new(100, 0))
+        )
+    }
+
+    #[test]
+    fn test_parse_money_amount_double() {
+        assert_eq!(
+            parse_money_amount("100.00EUR").unwrap(),
+            ("EUR", Decimal::new(100, 0))
+        );
+        assert_eq!(
+            parse_money_amount("100,00EUR").unwrap(),
+            ("EUR", Decimal::new(100, 0))
+        );
+    }
+
+    #[test]
+    fn test_parse_fractional_amount() {
+        assert_eq!(
+            parse_amount("$100.95").unwrap(),
+            (
+                "",
+                Amount {
+                    currency: "$".into(),
+                    value: dec!(100.95),
+                }
+            )
+        )
     }
 }

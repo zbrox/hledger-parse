@@ -65,6 +65,7 @@ pub fn parse_transaction(input: &str) -> HLParserIResult<&str, Transaction> {
 #[cfg(test)]
 mod tests {
     use chrono::NaiveDate;
+    use rust_decimal_macros::dec;
 
     use crate::{
         parsers::transactions::parse_transaction,
@@ -99,7 +100,7 @@ mod tests {
                             status: Status::Unmarked,
                             amount: Some(Amount {
                                 currency: "$".into(),
-                                value: 1
+                                value: dec!(1),
                             }),
                         },
                         Posting {
@@ -107,7 +108,7 @@ mod tests {
                             status: Status::Unmarked,
                             amount: Some(Amount {
                                 currency: "$".into(),
-                                value: -1
+                                value: dec!(-1),
                             }),
                         },
                     ],
@@ -147,7 +148,7 @@ mod tests {
                             status: Status::Unmarked,
                             amount: Some(Amount {
                                 currency: "$".into(),
-                                value: 1
+                                value: dec!(1),
                             }),
                         },
                         Posting {
@@ -189,7 +190,7 @@ mod tests {
                             status: Status::Unmarked,
                             amount: Some(Amount {
                                 currency: "$".into(),
-                                value: 1
+                                value: dec!(1),
                             }),
                         },
                         Posting {
@@ -231,7 +232,7 @@ mod tests {
                             status: Status::Unmarked,
                             amount: Some(Amount {
                                 currency: "$".into(),
-                                value: 1
+                                value: dec!(1)
                             }),
                         },
                         Posting {
@@ -239,7 +240,7 @@ mod tests {
                             status: Status::Unmarked,
                             amount: Some(Amount {
                                 currency: "$".into(),
-                                value: -1
+                                value: dec!(-1)
                             }),
                         },
                     ],
@@ -276,7 +277,7 @@ mod tests {
                             status: Status::Unmarked,
                             amount: Some(Amount {
                                 currency: "$".into(),
-                                value: 1
+                                value: dec!(1)
                             }),
                         },
                         Posting {
@@ -284,7 +285,7 @@ mod tests {
                             status: Status::Unmarked,
                             amount: Some(Amount {
                                 currency: "$".into(),
-                                value: -1
+                                value: dec!(-1)
                             }),
                         },
                     ],
@@ -321,7 +322,7 @@ mod tests {
                             status: Status::Unmarked,
                             amount: Some(Amount {
                                 currency: "$".into(),
-                                value: 1
+                                value: dec!(1)
                             }),
                         },
                         Posting {
@@ -329,7 +330,7 @@ mod tests {
                             status: Status::Unmarked,
                             amount: Some(Amount {
                                 currency: "$".into(),
-                                value: -1
+                                value: dec!(-1)
                             }),
                         },
                     ],
@@ -379,7 +380,7 @@ mod tests {
                             status: Status::Unmarked,
                             amount: Some(Amount {
                                 currency: "$".into(),
-                                value: 1
+                                value: dec!(1)
                             }),
                         },
                         Posting {
@@ -387,7 +388,7 @@ mod tests {
                             status: Status::Unmarked,
                             amount: Some(Amount {
                                 currency: "$".into(),
-                                value: -1
+                                value: dec!(-1)
                             }),
                         },
                     ],

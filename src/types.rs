@@ -2,6 +2,8 @@ use std::{cmp::PartialEq, fmt::Display, path::PathBuf};
 
 use chrono::NaiveDate;
 use nom::error::{ErrorKind, FromExternalError, ParseError};
+use rust_decimal::Decimal;
+use rust_decimal_macros::dec;
 use thiserror::Error;
 
 use crate::parsers::journal::parse_journal;
@@ -42,24 +44,16 @@ impl Display for Description {
     }
 }
 
+#[derive(PartialEq)]
 pub enum AmountSign {
     Plus,
     Minus,
 }
 
-impl AmountSign {
-    pub fn multiplier(&self) -> i8 {
-        match *self {
-            AmountSign::Plus => 1,
-            AmountSign::Minus => -1,
-        }
-    }
-}
-
 #[derive(PartialEq, Debug, Clone)]
 pub struct Amount {
     pub currency: String,
-    pub value: i32,
+    pub value: Decimal,
 }
 
 #[derive(PartialEq, Debug, Clone)]
@@ -67,6 +61,13 @@ pub struct Posting {
     pub status: Status,
     pub account_name: String,
     pub amount: Option<Amount>,
+}
+
+#[derive(PartialEq, Debug, Clone)]
+pub struct Price {
+    pub commodity: String,
+    pub date: NaiveDate,
+    pub amount: Amount,
 }
 
 #[derive(PartialEq, Debug, Clone)]
@@ -120,9 +121,9 @@ impl<'a> Transaction {
             .iter()
             .flat_map(|p| &p.amount)
             .map(|a| a.value) // TODO: different currencies, conversion rates
-            .sum::<i32>();
+            .sum::<Decimal>();
 
-        if postings_sum != 0 {
+        if postings_sum != dec!(0) {
             return Err(HLParserError::Validation(format!(
                 "Transaction {} postings' sum does not equal 0",
                 self
@@ -196,16 +197,9 @@ impl ParseError<&str> for HLParserError {
 #[cfg(test)]
 mod tests {
     use chrono::NaiveDate;
-
-    use crate::types::AmountSign;
+    use rust_decimal_macros::dec;
 
     use super::{Amount, Description, Posting, Status, Transaction};
-
-    #[test]
-    fn test_amount_sign_multiplier() {
-        assert_eq!(AmountSign::Plus.multiplier(), 1);
-        assert_eq!(AmountSign::Minus.multiplier(), -1);
-    }
 
     #[test]
     fn test_transaction_validate_none_amount_postings() {
@@ -223,7 +217,7 @@ mod tests {
                     account_name: "assets:bank:checking".into(),
                     amount: Some(Amount {
                         currency: "$".into(),
-                        value: 1,
+                        value: dec!(1),
                     }),
                     status: Status::Unmarked,
                 },
@@ -255,7 +249,7 @@ mod tests {
                     account_name: "assets:bank:checking".into(),
                     amount: Some(Amount {
                         currency: "$".into(),
-                        value: 1,
+                        value: dec!(1),
                     }),
                     status: Status::Unmarked,
                 },
@@ -263,7 +257,7 @@ mod tests {
                     account_name: "income:salary".into(),
                     amount: Some(Amount {
                         currency: "$".into(),
-                        value: 0,
+                        value: dec!(0),
                     }),
                     status: Status::Unmarked,
                 },

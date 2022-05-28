@@ -43,6 +43,7 @@ pub fn parse_posting(input: &str) -> HLParserIResult<&str, Posting> {
 #[cfg(test)]
 mod tests {
     use nom::error::ErrorKind;
+    use rust_decimal_macros::dec;
 
     use crate::{
         parsers::postings::parse_posting,
@@ -60,7 +61,7 @@ mod tests {
                     account_name: "assets:cash".into(),
                     amount: Some(Amount {
                         currency: "$".into(),
-                        value: 100
+                        value: dec!(100),
                     })
                 }
             )
@@ -93,7 +94,7 @@ mod tests {
                     account_name: "assets:cash".into(),
                     amount: Some(Amount {
                         currency: "$".into(),
-                        value: 100
+                        value: dec!(100)
                     })
                 }
             )

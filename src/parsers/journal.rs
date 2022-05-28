@@ -95,6 +95,7 @@ pub fn parse_journal(input: &str, base_path: Option<PathBuf>) -> Result<Journal,
 #[cfg(test)]
 mod tests {
     use chrono::NaiveDate;
+    use rust_decimal_macros::dec;
 
     use crate::{
         parsers::journal::{parse_comment_value, parse_empty_line, Value},
@@ -194,7 +195,7 @@ mod tests {
                                 account_name: "assets:bank:checking".into(),
                                 amount: Some(Amount {
                                     currency: "$".into(),
-                                    value: 1,
+                                    value: dec!(1),
                                 }),
                                 status: Status::Unmarked,
                             },
@@ -220,7 +221,7 @@ mod tests {
                                 account_name: "assets:bank:checking".into(),
                                 amount: Some(Amount {
                                     currency: "$".into(),
-                                    value: 1,
+                                    value: dec!(1),
                                 }),
                                 status: Status::Unmarked,
                             },
@@ -246,7 +247,7 @@ mod tests {
                                 account_name: "assets:bank:saving".into(),
                                 amount: Some(Amount {
                                     currency: "$".into(),
-                                    value: 1,
+                                    value: dec!(1),
                                 }),
                                 status: Status::Unmarked,
                             },
@@ -272,7 +273,7 @@ mod tests {
                                 account_name: "expenses:food".into(),
                                 amount: Some(Amount {
                                     currency: "$".into(),
-                                    value: 1,
+                                    value: dec!(1),
                                 }),
                                 status: Status::Unmarked,
                             },
@@ -280,7 +281,7 @@ mod tests {
                                 account_name: "expenses:supplies".into(),
                                 amount: Some(Amount {
                                     currency: "$".into(),
-                                    value: 1,
+                                    value: dec!(1),
                                 }),
                                 status: Status::Unmarked,
                             },
@@ -306,7 +307,7 @@ mod tests {
                                 account_name: "liabilities:debts".into(),
                                 amount: Some(Amount {
                                     currency: "$".into(),
-                                    value: 1,
+                                    value: dec!(1),
                                 }),
                                 status: Status::Unmarked,
                             },
