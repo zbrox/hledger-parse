@@ -45,7 +45,7 @@ fn parse_amount_prefix_currency(input: &str) -> HLParserIResult<&str, Amount> {
     ))
 }
 
-fn parse_amount_sufix_currency(input: &str) -> HLParserIResult<&str, Amount> {
+fn parse_amount_suffix_currency(input: &str) -> HLParserIResult<&str, Amount> {
     let (tail, sign) = terminated(parse_sign, space0)(input)?;
     let (tail, value) = terminated(i32, space0)(tail)?;
 
@@ -63,7 +63,7 @@ fn parse_amount_sufix_currency(input: &str) -> HLParserIResult<&str, Amount> {
 
 pub fn parse_amount(input: &str) -> HLParserIResult<&str, Amount> {
     alt((
-        parse_amount_sufix_currency, // this needs to go first
+        parse_amount_suffix_currency, // this needs to go first
         parse_amount_prefix_currency,
     ))(input)
 }
@@ -73,7 +73,7 @@ mod tests {
     use crate::{parsers::amount::parse_amount, types::Amount};
 
     #[test]
-    fn test_parse_amount_currecy_prefixed() {
+    fn test_parse_amount_currency_prefixed() {
         assert_eq!(
             parse_amount("$100").unwrap(),
             (
@@ -127,7 +127,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_amount_currecy_sufixed() {
+    fn test_parse_amount_currency_suffixed() {
         assert_eq!(
             parse_amount("100EUR").unwrap(),
             (
@@ -181,7 +181,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_amount_negative_currency_sufixed() {
+    fn test_parse_amount_negative_currency_suffixed() {
         assert_eq!(
             parse_amount("-100EUR").unwrap(),
             (
