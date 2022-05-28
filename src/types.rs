@@ -117,7 +117,8 @@ impl<'a> Transaction {
 
         let postings_sum = self
             .postings
-            .iter().flat_map(|p| &p.amount)
+            .iter()
+            .flat_map(|p| &p.amount)
             .map(|a| a.value) // TODO: different currencies, conversion rates
             .sum::<i32>();
 
@@ -149,7 +150,7 @@ pub enum HLParserError {
     #[error("Validation error: {0}")]
     Validation(String),
     #[error("Invalid include path: {0}")]
-    IncludePath(String)
+    IncludePath(String),
 }
 
 impl TryFrom<PathBuf> for Journal {

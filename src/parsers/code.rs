@@ -30,8 +30,11 @@ mod tests {
     fn test_parse_invalid_code() {
         assert_eq!(
             parse_code("()").unwrap_err().to_string(),
-            nom::Err::Error(HLParserError::Parse(")".to_owned(), nom::error::ErrorKind::TakeUntil))
-                .to_string()
+            nom::Err::Error(HLParserError::Parse(
+                ")".to_owned(),
+                nom::error::ErrorKind::TakeUntil
+            ))
+            .to_string()
         )
     }
 }

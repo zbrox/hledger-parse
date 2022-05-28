@@ -38,9 +38,11 @@ mod tests {
     #[test]
     fn test_parse_tag_with_space() {
         let err = parse_tag("not a tag:").unwrap_err().to_string();
-        let expected_err =
-            nom::Err::Error(HLParserError::Parse(" a tag:".to_string(), nom::error::ErrorKind::Tag))
-                .to_string();
+        let expected_err = nom::Err::Error(HLParserError::Parse(
+            " a tag:".to_string(),
+            nom::error::ErrorKind::Tag,
+        ))
+        .to_string();
         assert_eq!(err, expected_err,)
     }
 

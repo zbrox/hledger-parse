@@ -126,11 +126,19 @@ mod tests {
     fn test_parse_date_invalid_month() {
         assert_eq!(
             parse_date("2020.13.01").unwrap_err().to_string(),
-            nom::Err::Error(HLParserError::Parse("2020.13.01".to_string(), ErrorKind::Tag)).to_string()
+            nom::Err::Error(HLParserError::Parse(
+                "2020.13.01".to_string(),
+                ErrorKind::Tag
+            ))
+            .to_string()
         );
         assert_eq!(
             parse_date("2020.00.01").unwrap_err().to_string(),
-            nom::Err::Error(HLParserError::Parse("2020.00.01".to_string(), ErrorKind::Tag)).to_string()
+            nom::Err::Error(HLParserError::Parse(
+                "2020.00.01".to_string(),
+                ErrorKind::Tag
+            ))
+            .to_string()
         );
     }
 
@@ -138,11 +146,19 @@ mod tests {
     fn test_parse_date_invalid_day() {
         assert_eq!(
             parse_date("2021.02.29").unwrap_err().to_string(),
-            nom::Err::Error(HLParserError::Parse("2021.02.29".to_string(), ErrorKind::Tag)).to_string()
+            nom::Err::Error(HLParserError::Parse(
+                "2021.02.29".to_string(),
+                ErrorKind::Tag
+            ))
+            .to_string()
         );
         assert_eq!(
             parse_date("2021.02.60").unwrap_err().to_string(),
-            nom::Err::Error(HLParserError::Parse("2021.02.60".to_string(), ErrorKind::Tag)).to_string()
+            nom::Err::Error(HLParserError::Parse(
+                "2021.02.60".to_string(),
+                ErrorKind::Tag
+            ))
+            .to_string()
         );
     }
 
@@ -150,7 +166,11 @@ mod tests {
     fn test_parse_date_mix_separator() {
         assert_eq!(
             parse_date("2021/02.29").unwrap_err().to_string(),
-            nom::Err::Error(HLParserError::Parse("2021/02.29".to_string(), ErrorKind::MapRes)).to_string()
+            nom::Err::Error(HLParserError::Parse(
+                "2021/02.29".to_string(),
+                ErrorKind::MapRes
+            ))
+            .to_string()
         );
     }
 
