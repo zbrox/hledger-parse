@@ -44,7 +44,7 @@ mod tests {
                 .unwrap_err()
                 .to_string(),
             nom::Err::Error(HLParserError::Parse(
-                "# comment",
+                "# comment".to_owned(),
                 nom::error::ErrorKind::Char
             ))
             .to_string()

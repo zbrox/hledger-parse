@@ -96,12 +96,12 @@ impl Display for Transaction {
 }
 
 impl<'a> Transaction {
-    pub fn validate<I>(&self) -> Result<(), HLParserError<I>> {
+    pub fn validate(&self) -> Result<(), HLParserError> {
         self.validate_postings()?;
         Ok(())
     }
 
-    fn validate_postings<I>(&self) -> Result<(), HLParserError<I>> {
+    fn validate_postings(&self) -> Result<(), HLParserError> {
         let none_amounts = self.postings.iter().filter(|p| p.amount.is_none()).count();
 
         if none_amounts > 1_usize {
@@ -137,25 +137,26 @@ pub struct Journal {
     pub transactions: Vec<Transaction>,
 }
 
-pub type HLParserIResult<I, O> = nom::IResult<I, O, HLParserError<I>>;
+pub type HLParserIResult<I, O> = nom::IResult<I, O, HLParserError>;
+pub type HLParserResult<O> = Result<O, HLParserError>;
 
 #[derive(Error, Debug)]
-pub enum HLParserError<I> {
+pub enum HLParserError {
     #[error("IO error: {0}")]
     IO(#[from] std::io::Error),
-    #[error("Parse error: {0}")]
-    Parse(I, ErrorKind),
+    #[error("Parse error: {1:?} {0}")]
+    Parse(String, ErrorKind),
     #[error("Validation error: {0}")]
     Validation(String),
 }
 
 impl TryFrom<PathBuf> for Journal {
-    type Error = HLParserError<String>;
+    type Error = HLParserError;
 
-    fn try_from(journal_path: PathBuf) -> Result<Self, HLParserError<String>> {
+    fn try_from(journal_path: PathBuf) -> Result<Self, HLParserError> {
         let journal_contents = std::fs::read_to_string(journal_path)?;
         let journal = parse_journal(&journal_contents).map_err(|e| match e {
-            HLParserError::Parse(i, ek) => HLParserError::Parse(i.to_string(), ek),
+            HLParserError::Parse(i, ek) => HLParserError::Parse(i, ek),
             HLParserError::Validation(desc) => HLParserError::Validation(desc),
             HLParserError::IO(e) => HLParserError::IO(e),
         })?;
@@ -164,25 +165,25 @@ impl TryFrom<PathBuf> for Journal {
     }
 }
 
-impl<'a> From<nom::error::Error<&'a str>> for HLParserError<&'a str> {
+impl<'a> From<nom::error::Error<&'a str>> for HLParserError {
     fn from(err: nom::error::Error<&'a str>) -> Self {
-        HLParserError::Parse(err.input, err.code)
+        HLParserError::Parse(err.input.to_string(), err.code)
     }
 }
 
-impl<I, E> FromExternalError<I, E> for HLParserError<I> {
+impl<E> FromExternalError<&str, E> for HLParserError {
     /// Create a new error from an input position and an external error
-    fn from_external_error(input: I, kind: ErrorKind, _e: E) -> Self {
-        HLParserError::Parse(input, kind)
+    fn from_external_error(input: &str, kind: ErrorKind, _e: E) -> Self {
+        HLParserError::Parse(input.to_string(), kind)
     }
 }
 
-impl<I> ParseError<I> for HLParserError<I> {
-    fn from_error_kind(input: I, kind: ErrorKind) -> Self {
-        HLParserError::Parse(input, kind)
+impl ParseError<&str> for HLParserError {
+    fn from_error_kind(input: &str, kind: ErrorKind) -> Self {
+        HLParserError::Parse(input.to_string(), kind)
     }
 
-    fn append(_: I, _: ErrorKind, other: Self) -> Self {
+    fn append(_: &str, _: ErrorKind, other: Self) -> Self {
         other
     }
 }
@@ -230,7 +231,7 @@ mod tests {
             tags: vec![],
         };
 
-        assert!(transaction.validate::<&str>().is_ok());
+        assert!(transaction.validate().is_ok());
     }
 
     #[test]
@@ -265,6 +266,6 @@ mod tests {
             tags: vec![],
         };
 
-        assert!(transaction.validate::<&str>().is_err());
+        assert!(transaction.validate().is_err());
     }
 }

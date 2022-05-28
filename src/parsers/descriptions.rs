@@ -43,7 +43,7 @@ pub fn parse_description(input: &str) -> HLParserIResult<&str, Description> {
                 },
             )),
             Err(_) => Err(nom::Err::Error(HLParserError::Parse(
-                input,
+                input.to_owned(),
                 nom::error::ErrorKind::Tag,
             ))),
         },

@@ -119,7 +119,7 @@ mod tests {
     fn test_parse_posting_no_starting_space() {
         assert_eq!(
             parse_posting("assets:cash").unwrap_err().to_string(),
-            nom::Err::Error(HLParserError::Parse("assets:cash", ErrorKind::Space)).to_string()
+            nom::Err::Error(HLParserError::Parse("assets:cash".to_string(), ErrorKind::Space)).to_string()
         )
     }
 }

@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use hledger_parse::types::{HLParserError, Journal};
 
-fn main() -> Result<(), HLParserError<String>> {
+fn main() -> Result<(), HLParserError> {
     let journal_path = PathBuf::from("./examples/simple.journal");
 
     let journal: Journal = journal_path.try_into()?;
