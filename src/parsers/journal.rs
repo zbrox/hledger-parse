@@ -1,9 +1,12 @@
+use std::{path::PathBuf, str::FromStr};
+
 use nom::{
     branch::alt,
-    character::complete::{line_ending, space0},
-    combinator::{all_consuming, eof, map, value},
+    bytes::complete::tag,
+    character::complete::{line_ending, not_line_ending, space0, space1},
+    combinator::{all_consuming, eof, map, map_res, value},
     multi::many_till,
-    sequence::terminated,
+    sequence::{preceded, terminated, tuple},
     Finish,
 };
 
@@ -12,9 +15,18 @@ use crate::types::{HLParserError, HLParserIResult, Journal, Transaction};
 use super::{comments::parse_line_comment, transactions::parse_transaction};
 
 #[derive(Debug, Clone, PartialEq)]
-enum Value {
+pub enum Value {
     Ignore,
     Transaction(Transaction),
+    Included(Vec<Value>),
+}
+
+fn parse_include_statement(input: &str) -> HLParserIResult<&str, PathBuf> {
+    let (rest, path) =
+        preceded(tuple((tag("include"), space1)), alt((not_line_ending, eof)))(input)?;
+    let path = PathBuf::from_str(path)
+        .map_err(|_| nom::Err::Error(HLParserError::IncludePath(path.to_owned())))?;
+    Ok((rest, path))
 }
 
 fn parse_comment_value(input: &str) -> HLParserIResult<&str, Value> {
@@ -28,20 +40,51 @@ fn parse_empty_line(input: &str) -> HLParserIResult<&str, Value> {
     value(Value::Ignore, terminated(space0, alt((line_ending, eof))))(input)
 }
 
-pub fn parse_journal(input: &str) -> Result<Journal, HLParserError<&str>> {
-    let (_, (values, _)) = all_consuming(many_till(
-        alt((
-            map(parse_transaction, Value::Transaction),
-            parse_comment_value,
-            parse_empty_line,
-        )),
-        eof,
+pub fn parse_journal_contents(
+    input: &str,
+    base_path: PathBuf,
+) -> HLParserIResult<&str, Vec<Value>> {
+    all_consuming(map(
+        many_till(
+            alt((
+                map(parse_transaction, Value::Transaction),
+                parse_comment_value,
+                parse_empty_line,
+                map_res::<_, _, _, _, nom::Err<HLParserError>, _, _>(
+                    parse_include_statement,
+                    |v| {
+                        let path: PathBuf = base_path.clone().join(v);
+                        if !path.exists() {
+                            return Err(nom::Err::Error(HLParserError::IncludePath(
+                                path.to_str().unwrap_or("").to_owned(),
+                            )));
+                        }
+                        let included_journal_contents = std::fs::read_to_string(path.clone())
+                            .map_err(|e| nom::Err::Error(HLParserError::IO(e)))?;
+                        let (_, values) = parse_journal_contents(
+                            &included_journal_contents,
+                            path.parent()
+                                .map(|v| v.to_owned())
+                                .expect("Cannot get parent directory"),
+                        )?;
+                        Ok(Value::Included(values))
+                    },
+                ),
+            )),
+            eof,
+        ),
+        |(v, _)| v,
     ))(input)
-    .finish()?;
+}
+
+pub fn parse_journal(input: &str, base_path: Option<PathBuf>) -> Result<Journal, HLParserError> {
+    let (_, values) =
+        parse_journal_contents(input, base_path.unwrap_or(std::env::current_dir()?)).finish()?;
 
     Ok(Journal {
         transactions: values
-            .into_iter().filter_map(|v| match v {
+            .into_iter()
+            .filter_map(|v| match v {
                 Value::Transaction(t) => Some(t),
                 _ => None,
             })
@@ -134,7 +177,7 @@ mod tests {
 ;final comment
         "#;
         assert_eq!(
-            parse_journal(input).unwrap(),
+            parse_journal(input, None).unwrap(),
             Journal {
                 transactions: vec![
                     Transaction {

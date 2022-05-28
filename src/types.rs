@@ -148,17 +148,21 @@ pub enum HLParserError {
     Parse(String, ErrorKind),
     #[error("Validation error: {0}")]
     Validation(String),
+    #[error("Invalid include path: {0}")]
+    IncludePath(String)
 }
 
 impl TryFrom<PathBuf> for Journal {
     type Error = HLParserError;
 
     fn try_from(journal_path: PathBuf) -> Result<Self, HLParserError> {
+        let base_path = journal_path.parent().map(|v| v.to_owned());
         let journal_contents = std::fs::read_to_string(journal_path)?;
-        let journal = parse_journal(&journal_contents).map_err(|e| match e {
+        let journal = parse_journal(&journal_contents, base_path).map_err(|e| match e {
             HLParserError::Parse(i, ek) => HLParserError::Parse(i, ek),
             HLParserError::Validation(desc) => HLParserError::Validation(desc),
             HLParserError::IO(e) => HLParserError::IO(e),
+            HLParserError::IncludePath(path) => HLParserError::IncludePath(path),
         })?;
 
         Ok(journal)
