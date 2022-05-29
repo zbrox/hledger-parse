@@ -12,7 +12,7 @@ use rust_decimal::Decimal;
 
 use crate::types::{Amount, AmountSign, HLParserError, HLParserIResult};
 
-use super::utils::{in_quotes, is_char_digit, is_char_minus, is_char_space};
+use super::utils::{in_quotes, is_char_digit, is_char_minus, is_char_space, is_char_newline};
 
 pub fn parse_money_amount(input: &str) -> HLParserIResult<&str, Decimal> {
     let (tail, (num, _, scale)) = tuple((i64, opt(alt((char('.'), char(',')))), opt(u32)))(input)?;
@@ -35,7 +35,7 @@ fn parse_sign(input: &str) -> HLParserIResult<&str, AmountSign> {
 pub fn parse_currency_string(input: &str) -> HLParserIResult<&str, &str> {
     alt((
         in_quotes,
-        take_till(|c| is_char_digit(c) || is_char_minus(c) || is_char_space(c)),
+        take_till(|c| is_char_digit(c) || is_char_minus(c) || is_char_space(c) || is_char_newline(c)),
     ))(input)
     .map_err(nom::Err::convert)
 }
