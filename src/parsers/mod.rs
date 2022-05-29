@@ -5,6 +5,7 @@ pub mod dates;
 pub mod descriptions;
 pub mod journal;
 pub mod postings;
+pub mod prices;
 pub mod status;
 pub mod tags;
 pub mod transactions;
