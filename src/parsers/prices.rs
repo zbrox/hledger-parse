@@ -20,18 +20,6 @@ pub fn parse_price(input: &str) -> HLParserIResult<&str, Price> {
     let (tail, amount) = parse_amount(tail)?;
     let (tail, _) = alt((line_ending, eof))(tail)?;
 
-    // let (rest, ((date, _), commodity, amount)) = terminated(
-    //     preceded(
-    //         tuple((tag("P"), space1)),
-    //         tuple((
-    //             parse_date,
-    //             preceded(space1, parse_currency_string),
-    //             preceded(space1, parse_amount),
-    //         )),
-    //     ),
-    //     alt((line_ending, eof)),
-    // )(input)?;
-
     Ok((
         tail,
         Price {
