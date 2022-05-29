@@ -10,15 +10,16 @@ use nom::{
     Finish,
 };
 
-use crate::types::{HLParserError, HLParserIResult, Journal, Transaction};
+use crate::types::{HLParserError, HLParserIResult, Journal, Price, Transaction};
 
-use super::{comments::parse_line_comment, transactions::parse_transaction};
+use super::{comments::parse_line_comment, prices::parse_price, transactions::parse_transaction};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Value {
     Ignore,
     Transaction(Transaction),
     Included(Vec<Value>),
+    Price(Price),
 }
 
 fn parse_include_statement(input: &str) -> HLParserIResult<&str, PathBuf> {
@@ -50,6 +51,7 @@ pub fn parse_journal_contents(
                 map(parse_transaction, Value::Transaction),
                 parse_comment_value,
                 parse_empty_line,
+                map(parse_price, Value::Price),
                 map_res::<_, _, _, _, nom::Err<HLParserError>, _, _>(
                     parse_include_statement,
                     |v| {
