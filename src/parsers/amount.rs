@@ -4,7 +4,7 @@ use nom::{
     branch::alt,
     bytes::complete::take_till,
     character::complete::{char, i64, space0, u32},
-    combinator::{opt, rest},
+    combinator::opt,
     error::ErrorKind,
     sequence::{terminated, tuple},
 };
@@ -12,7 +12,7 @@ use rust_decimal::Decimal;
 
 use crate::types::{Amount, AmountSign, HLParserError, HLParserIResult};
 
-use super::utils::{in_quotes, is_char_digit, is_char_minus};
+use super::utils::{in_quotes, is_char_digit, is_char_minus, is_char_space};
 
 pub fn parse_money_amount(input: &str) -> HLParserIResult<&str, Decimal> {
     let (tail, (num, _, scale)) = tuple((i64, opt(alt((char('.'), char(',')))), opt(u32)))(input)?;
@@ -32,16 +32,17 @@ fn parse_sign(input: &str) -> HLParserIResult<&str, AmountSign> {
     Ok((tail, sign))
 }
 
+pub fn parse_currency_string(input: &str) -> HLParserIResult<&str, &str> {
+    alt((
+        in_quotes,
+        take_till(|c| is_char_digit(c) || is_char_minus(c) || is_char_space(c)),
+    ))(input)
+    .map_err(nom::Err::convert)
+}
+
 fn parse_amount_prefix_currency(input: &str) -> HLParserIResult<&str, Amount> {
     let (tail, sign) = terminated(parse_sign, space0)(input)?;
-    let (tail, currency) = terminated(
-        alt((
-            in_quotes,
-            terminated(take_till(|c| is_char_digit(c) || is_char_minus(c)), space0),
-        )),
-        space0,
-    )(tail)
-    .map_err(nom::Err::convert)?;
+    let (tail, currency) = parse_currency_string(tail)?;
     let (tail, sign) = match sign {
         AmountSign::Minus => (tail, sign),
         AmountSign::Plus => terminated(parse_sign, space0)(tail)?,
@@ -68,8 +69,7 @@ fn parse_amount_suffix_currency(input: &str) -> HLParserIResult<&str, Amount> {
         value.set_sign_negative(true);
     }
 
-    let (tail, currency) =
-        terminated(alt((in_quotes, rest)), space0)(tail).map_err(nom::Err::convert)?;
+    let (tail, currency) = parse_currency_string(tail)?;
 
     Ok((
         tail,
@@ -94,7 +94,7 @@ mod tests {
 
     use crate::{parsers::amount::parse_amount, types::Amount};
 
-    use super::parse_money_amount;
+    use super::{parse_currency_string, parse_money_amount};
 
     #[test]
     fn test_parse_amount_currency_prefixed() {
@@ -334,5 +334,29 @@ mod tests {
                 }
             )
         )
+    }
+
+    #[test]
+    fn test_parse_currency_string_symbol() {
+        assert_eq!(parse_currency_string("$").unwrap(), ("", "$"));
+        assert_eq!(parse_currency_string("$ ").unwrap(), (" ", "$"));
+    }
+
+    #[test]
+    fn test_parse_currency_string_quotes() {
+        assert_eq!(
+            parse_currency_string("\"Imaginary money\"").unwrap(),
+            ("", "Imaginary money")
+        );
+        assert_eq!(
+            parse_currency_string("\"Imaginary money\" ").unwrap(),
+            (" ", "Imaginary money")
+        );
+    }
+
+    #[test]
+    fn test_parse_currency_string_iso() {
+        assert_eq!(parse_currency_string("USD").unwrap(), ("", "USD"));
+        assert_eq!(parse_currency_string("USD ").unwrap(), (" ", "USD"));
     }
 }
