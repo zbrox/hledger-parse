@@ -2,6 +2,7 @@ pub mod accounts;
 pub mod amounts;
 pub mod codes;
 pub mod comments;
+pub mod commodities;
 pub mod dates;
 pub mod descriptions;
 pub mod journal;

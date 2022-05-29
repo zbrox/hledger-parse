@@ -194,6 +194,12 @@ impl ParseError<&str> for HLParserError {
     }
 }
 
+#[derive(PartialEq, Debug, Clone)]
+pub struct Commodity {
+    pub name: String,
+    pub format: String, // TODO: temp before I decide how to store the format properly
+}
+
 #[cfg(test)]
 mod tests {
     use chrono::NaiveDate;
