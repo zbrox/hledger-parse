@@ -26,8 +26,16 @@ pub fn parse_description(input: &str) -> HLParserIResult<&str, Description> {
         Ok((t, (p, n))) => Ok((
             t,
             Description {
-                payee: p.map(str::trim).map(str::to_string),
-                note: n.map(str::trim).map(str::to_string),
+                payee: match p.map(str::trim) {
+                    None => None,
+                    Some(v) if v.is_empty() => None,
+                    Some(v) => Some(v.into()),
+                },
+                note: match n.map(str::trim) {
+                    None => None,
+                    Some(v) if v.is_empty() => None,
+                    Some(v) => Some(v.into()),
+                },
             },
         )),
         Err(_) => match opt(parse_only_note)(input) {

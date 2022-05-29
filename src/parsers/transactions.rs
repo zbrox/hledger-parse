@@ -118,6 +118,96 @@ mod tests {
     }
 
     #[test]
+    fn test_empty_description_cleared_transaction() {
+        assert_eq!(
+            parse_transaction(
+                r#"2008/01/01 * |
+    assets:bank:checking   $1
+    income:salary         $-1
+"#
+            )
+            .unwrap(),
+            (
+                "",
+                Transaction {
+                    primary_date: NaiveDate::from_ymd(2008, 1, 1),
+                    secondary_date: None,
+                    code: None,
+                    description: Description {
+                        note: None,
+                        payee: None,
+                    },
+                    tags: vec![],
+                    status: Status::Cleared,
+                    postings: vec![
+                        Posting {
+                            account_name: "assets:bank:checking".into(),
+                            status: Status::Unmarked,
+                            amount: Some(Amount {
+                                currency: "$".into(),
+                                value: dec!(1),
+                            }),
+                        },
+                        Posting {
+                            account_name: "income:salary".into(),
+                            status: Status::Unmarked,
+                            amount: Some(Amount {
+                                currency: "$".into(),
+                                value: dec!(-1),
+                            }),
+                        },
+                    ],
+                }
+            )
+        )
+    }
+
+    #[test]
+    fn test_empty_description_unmarked_transaction() {
+        assert_eq!(
+            parse_transaction(
+                r#"2008/01/01 |
+    assets:bank:checking   $1
+    income:salary         $-1
+"#
+            )
+            .unwrap(),
+            (
+                "",
+                Transaction {
+                    primary_date: NaiveDate::from_ymd(2008, 1, 1),
+                    secondary_date: None,
+                    code: None,
+                    description: Description {
+                        note: None,
+                        payee: None,
+                    },
+                    tags: vec![],
+                    status: Status::Unmarked,
+                    postings: vec![
+                        Posting {
+                            account_name: "assets:bank:checking".into(),
+                            status: Status::Unmarked,
+                            amount: Some(Amount {
+                                currency: "$".into(),
+                                value: dec!(1),
+                            }),
+                        },
+                        Posting {
+                            account_name: "income:salary".into(),
+                            status: Status::Unmarked,
+                            amount: Some(Amount {
+                                currency: "$".into(),
+                                value: dec!(-1),
+                            }),
+                        },
+                    ],
+                }
+            )
+        )
+    }
+
+    #[test]
     fn test_transaction_ending_after_postings() {
         assert_eq!(
             parse_transaction(
