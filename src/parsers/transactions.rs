@@ -1,5 +1,4 @@
 use nom::{
-    branch::alt,
     bytes::complete::tag,
     character::complete::{line_ending, not_line_ending, space0},
     combinator::opt,
@@ -44,8 +43,8 @@ pub fn parse_transaction(input: &str) -> HLParserIResult<&str, Transaction> {
 
     let (_, (_comment, tags)) =
         parse_comments_tags(comment_and_tags.unwrap_or("")).map_err(nom::Err::convert)?;
-    let (tail, postings) = many0(terminated(parse_posting, alt((tag("\r\n"), tag("\n")))))(tail)
-        .map_err(nom::Err::convert)?;
+    let (tail, postings) =
+        many0(terminated(parse_posting, line_ending))(tail).map_err(nom::Err::convert)?;
 
     let transaction = Transaction {
         primary_date,
