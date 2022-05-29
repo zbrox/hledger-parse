@@ -16,7 +16,7 @@ pub fn parse_code(input: &str) -> HLParserIResult<&str, &str> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{parsers::code::parse_code, types::HLParserError};
+    use crate::{parsers::codes::parse_code, types::HLParserError};
 
     #[test]
     fn test_parse_code() {

@@ -10,7 +10,7 @@ use nom::{
 use crate::types::{HLParserIResult, Tag, Transaction};
 
 use super::{
-    code::parse_code, comments::parse_transaction_comment, dates::parse_date,
+    codes::parse_code, comments::parse_transaction_comment, dates::parse_date,
     descriptions::parse_description, postings::parse_posting, status::parse_status,
     tags::parse_tag, utils::split_on_space_before_char,
 };

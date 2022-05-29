@@ -8,7 +8,7 @@ use nom::{
 
 use crate::types::{Amount, HLParserIResult, Posting};
 
-use super::{amount::parse_amount, status::parse_status};
+use super::{amounts::parse_amount, status::parse_status};
 
 fn parse_posting_with_amount(input: &str) -> HLParserIResult<&str, (&str, Option<Amount>)> {
     pair(

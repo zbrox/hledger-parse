@@ -92,7 +92,7 @@ mod tests {
     use rust_decimal::Decimal;
     use rust_decimal_macros::dec;
 
-    use crate::{parsers::amount::parse_amount, types::Amount};
+    use crate::{parsers::amounts::parse_amount, types::Amount};
 
     use super::{parse_currency_string, parse_money_amount};
 

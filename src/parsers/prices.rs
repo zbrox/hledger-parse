@@ -9,7 +9,7 @@ use nom::{
 use crate::types::{HLParserIResult, Price};
 
 use super::{
-    amount::{parse_amount, parse_currency_string},
+    amounts::{parse_amount, parse_currency_string},
     dates::parse_date,
 };
 

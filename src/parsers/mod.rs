@@ -1,5 +1,5 @@
-pub mod amount;
-pub mod code;
+pub mod amounts;
+pub mod codes;
 pub mod comments;
 pub mod dates;
 pub mod descriptions;
