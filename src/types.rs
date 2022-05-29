@@ -197,7 +197,7 @@ impl ParseError<&str> for HLParserError {
 #[derive(PartialEq, Debug, Clone)]
 pub struct Commodity {
     pub name: String,
-    pub format: String, // TODO: temp before I decide how to store the format properly
+    pub format: Option<String>, // TODO: temp before I decide how to store the format properly
 }
 
 #[cfg(test)]

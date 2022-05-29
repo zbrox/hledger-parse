@@ -2,7 +2,7 @@ use nom::{
     branch::alt,
     bytes::complete::tag,
     character::complete::{line_ending, not_line_ending, space0, space1},
-    combinator::{consumed, eof, map},
+    combinator::{consumed, eof, map, opt},
     sequence::{delimited, separated_pair, terminated},
 };
 
@@ -19,20 +19,20 @@ fn parse_commodity_directive_single_line(input: &str) -> HLParserIResult<&str, C
                 space0,
                 parse_currency_string,
             )),
-            |(full_format, ((_number_format, _), name))| Commodity {
+            |(full_format, (_, name))| Commodity {
                 name: name.to_string(),
-                format: full_format.to_string(),
+                format: Some(full_format.to_string()),
             },
         ),
         map(
             consumed(separated_pair(
                 parse_currency_string,
                 space0,
-                consumed(parse_money_amount),
+                opt(consumed(parse_money_amount)),
             )),
-            |(full_format, (name, (_number_format, _)))| Commodity {
+            |(full_format, (name, format))| Commodity {
                 name: name.to_string(),
-                format: full_format.to_string(),
+                format: format.map(|_| full_format.to_string()),
             },
         ),
     ))(tail)
@@ -48,7 +48,7 @@ fn parse_commodity_directive_multi_line(input: &str) -> HLParserIResult<&str, Co
         tail,
         Commodity {
             name: name.to_string(),
-            format: full_format.to_string(),
+            format: Some(full_format.to_string()),
         },
     ))
 }
@@ -76,7 +76,7 @@ mod tests {
                 "",
                 Commodity {
                     name: "$".to_string(),
-                    format: "$1000.00".to_string(),
+                    format: Some("$1000.00".to_string()),
                 }
             )
         );
@@ -86,7 +86,7 @@ mod tests {
                 "",
                 Commodity {
                     name: "$".to_string(),
-                    format: "$ 1000.00".to_string(),
+                    format: Some("$ 1000.00".to_string()),
                 }
             )
         );
@@ -100,7 +100,7 @@ mod tests {
                 "",
                 Commodity {
                     name: "USD".to_string(),
-                    format: "1000.00USD".to_string(),
+                    format: Some("1000.00USD".to_string()),
                 }
             )
         );
@@ -110,7 +110,7 @@ mod tests {
                 "",
                 Commodity {
                     name: "USD".to_string(),
-                    format: "1000.00 USD".to_string(),
+                    format: Some("1000.00 USD".to_string()),
                 }
             )
         )
@@ -129,7 +129,7 @@ mod tests {
                 "",
                 Commodity {
                     name: "USD".to_string(),
-                    format: "1000.00USD".to_string(),
+                    format: Some("1000.00USD".to_string()),
                 }
             )
         );
