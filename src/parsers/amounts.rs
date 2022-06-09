@@ -4,7 +4,7 @@ use nom::{
     branch::alt,
     bytes::complete::take_till,
     character::complete::{char, i64, space0, u32},
-    combinator::opt,
+    combinator::{opt, recognize},
     error::ErrorKind,
     sequence::{terminated, tuple},
 };
@@ -12,11 +12,15 @@ use rust_decimal::Decimal;
 
 use crate::types::{Amount, AmountSign, HLParserError, HLParserIResult};
 
-use super::utils::{in_quotes, is_char_digit, is_char_minus, is_char_space, is_char_newline};
+use super::utils::{in_quotes, is_char_digit, is_char_minus, is_char_newline, is_char_space};
 
 pub fn parse_money_amount(input: &str) -> HLParserIResult<&str, Decimal> {
-    let (tail, (num, _, scale)) = tuple((i64, opt(alt((char('.'), char(',')))), opt(u32)))(input)?;
-    let value = format!("{}.{}", num, scale.unwrap_or(0));
+    let (tail, (num, _, scale)) = tuple((
+        recognize(i64),
+        opt(alt((char('.'), char(',')))),
+        opt(recognize(u32)),
+    ))(input)?;
+    let value = format!("{}.{}", num, scale.unwrap_or("0"));
     let value = Decimal::from_str(&value)
         .map_err(|_| nom::Err::Error(HLParserError::Parse(value.to_string(), ErrorKind::Float)))?;
 
@@ -35,7 +39,9 @@ fn parse_sign(input: &str) -> HLParserIResult<&str, AmountSign> {
 pub fn parse_currency_string(input: &str) -> HLParserIResult<&str, &str> {
     alt((
         in_quotes,
-        take_till(|c| is_char_digit(c) || is_char_minus(c) || is_char_space(c) || is_char_newline(c)),
+        take_till(|c| {
+            is_char_digit(c) || is_char_minus(c) || is_char_space(c) || is_char_newline(c)
+        }),
     ))(input)
     .map_err(nom::Err::convert)
 }
@@ -303,22 +309,13 @@ mod tests {
 
     #[test]
     fn test_parse_money_amount_int() {
-        assert_eq!(
-            parse_money_amount("100EUR").unwrap(),
-            ("EUR", dec!(100))
-        )
+        assert_eq!(parse_money_amount("100EUR").unwrap(), ("EUR", dec!(100)))
     }
 
     #[test]
     fn test_parse_money_amount_double() {
-        assert_eq!(
-            parse_money_amount("100.00EUR").unwrap(),
-            ("EUR", dec!(100))
-        );
-        assert_eq!(
-            parse_money_amount("100,00EUR").unwrap(),
-            ("EUR", dec!(100))
-        );
+        assert_eq!(parse_money_amount("100.00EUR").unwrap(), ("EUR", dec!(100)));
+        assert_eq!(parse_money_amount("100,00EUR").unwrap(), ("EUR", dec!(100)));
     }
 
     #[test]
