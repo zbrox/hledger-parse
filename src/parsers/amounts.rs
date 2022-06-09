@@ -89,7 +89,6 @@ pub fn parse_amount(input: &str) -> HLParserIResult<&str, Amount> {
 
 #[cfg(test)]
 mod tests {
-    use rust_decimal::Decimal;
     use rust_decimal_macros::dec;
 
     use crate::{parsers::amounts::parse_amount, types::Amount};
@@ -306,7 +305,7 @@ mod tests {
     fn test_parse_money_amount_int() {
         assert_eq!(
             parse_money_amount("100EUR").unwrap(),
-            ("EUR", Decimal::new(100, 0))
+            ("EUR", dec!(100))
         )
     }
 
@@ -314,11 +313,11 @@ mod tests {
     fn test_parse_money_amount_double() {
         assert_eq!(
             parse_money_amount("100.00EUR").unwrap(),
-            ("EUR", Decimal::new(100, 0))
+            ("EUR", dec!(100))
         );
         assert_eq!(
             parse_money_amount("100,00EUR").unwrap(),
-            ("EUR", Decimal::new(100, 0))
+            ("EUR", dec!(100))
         );
     }
 
