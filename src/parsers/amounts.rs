@@ -322,6 +322,14 @@ mod tests {
     }
 
     #[test]
+    fn test_parse_money_amount_small() {
+        assert_eq!(
+            parse_money_amount("0.007EUR").unwrap(),
+            ("EUR", dec!(0.007))
+        );
+    }
+
+    #[test]
     fn test_parse_fractional_amount() {
         assert_eq!(
             parse_amount("$100.95").unwrap(),
