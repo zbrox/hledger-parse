@@ -134,4 +134,18 @@ mod tests {
             )
         );
     }
+
+    #[test]
+    fn test_parse_commodity_name_only() {
+        assert_eq!(
+            parse_commodity_directive("commodity INR").unwrap(),
+            (
+                "",
+                Commodity {
+                    name: "INR".to_string(),
+                    format: None
+                }
+            )
+        )
+    }
 }
