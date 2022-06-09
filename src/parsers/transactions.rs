@@ -101,6 +101,8 @@ mod tests {
                                 currency: "$".into(),
                                 value: dec!(1),
                             }),
+                            unit_price: None,
+                            total_price: None,
                         },
                         Posting {
                             account_name: "income:salary".into(),
@@ -109,6 +111,8 @@ mod tests {
                                 currency: "$".into(),
                                 value: dec!(-1),
                             }),
+                            unit_price: None,
+                            total_price: None,
                         },
                     ],
                 }
@@ -146,6 +150,8 @@ mod tests {
                                 currency: "$".into(),
                                 value: dec!(1),
                             }),
+                            unit_price: None,
+                            total_price: None,
                         },
                         Posting {
                             account_name: "income:salary".into(),
@@ -154,6 +160,8 @@ mod tests {
                                 currency: "$".into(),
                                 value: dec!(-1),
                             }),
+                            unit_price: None,
+                            total_price: None,
                         },
                     ],
                 }
@@ -191,6 +199,8 @@ mod tests {
                                 currency: "$".into(),
                                 value: dec!(1),
                             }),
+                            unit_price: None,
+                            total_price: None,
                         },
                         Posting {
                             account_name: "income:salary".into(),
@@ -199,6 +209,8 @@ mod tests {
                                 currency: "$".into(),
                                 value: dec!(-1),
                             }),
+                            unit_price: None,
+                            total_price: None,
                         },
                     ],
                 }
@@ -239,11 +251,15 @@ mod tests {
                                 currency: "$".into(),
                                 value: dec!(1),
                             }),
+                            unit_price: None,
+                            total_price: None,
                         },
                         Posting {
                             account_name: "income:salary".into(),
                             status: Status::Unmarked,
                             amount: None,
+                            unit_price: None,
+                            total_price: None,
                         },
                     ],
                 }
@@ -281,11 +297,15 @@ mod tests {
                                 currency: "$".into(),
                                 value: dec!(1),
                             }),
+                            unit_price: None,
+                            total_price: None,
                         },
                         Posting {
                             account_name: "income:salary".into(),
                             status: Status::Unmarked,
                             amount: None,
+                            unit_price: None,
+                            total_price: None,
                         },
                     ],
                 }
@@ -323,6 +343,8 @@ mod tests {
                                 currency: "$".into(),
                                 value: dec!(1)
                             }),
+                            unit_price: None,
+                            total_price: None,
                         },
                         Posting {
                             account_name: "income:salary".into(),
@@ -331,6 +353,8 @@ mod tests {
                                 currency: "$".into(),
                                 value: dec!(-1)
                             }),
+                            unit_price: None,
+                            total_price: None,
                         },
                     ],
                 }
@@ -368,6 +392,8 @@ mod tests {
                                 currency: "$".into(),
                                 value: dec!(1)
                             }),
+                            unit_price: None,
+                            total_price: None,
                         },
                         Posting {
                             account_name: "income:salary".into(),
@@ -376,6 +402,8 @@ mod tests {
                                 currency: "$".into(),
                                 value: dec!(-1)
                             }),
+                            unit_price: None,
+                            total_price: None,
                         },
                     ],
                 }
@@ -413,6 +441,8 @@ mod tests {
                                 currency: "$".into(),
                                 value: dec!(1)
                             }),
+                            unit_price: None,
+                            total_price: None,
                         },
                         Posting {
                             account_name: "income:salary".into(),
@@ -421,6 +451,8 @@ mod tests {
                                 currency: "$".into(),
                                 value: dec!(-1)
                             }),
+                            unit_price: None,
+                            total_price: None,
                         },
                     ],
                 }
@@ -471,6 +503,8 @@ mod tests {
                                 currency: "$".into(),
                                 value: dec!(1)
                             }),
+                            unit_price: None,
+                            total_price: None,
                         },
                         Posting {
                             account_name: "income:salary".into(),
@@ -479,6 +513,8 @@ mod tests {
                                 currency: "$".into(),
                                 value: dec!(-1)
                             }),
+                            unit_price: None,
+                            total_price: None,
                         },
                     ],
                 }

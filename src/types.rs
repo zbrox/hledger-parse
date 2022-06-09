@@ -61,6 +61,8 @@ pub struct Posting {
     pub status: Status,
     pub account_name: String,
     pub amount: Option<Amount>,
+    pub unit_price: Option<Amount>,
+    pub total_price: Option<Amount>,
 }
 
 #[derive(PartialEq, Debug, Clone)]
@@ -226,11 +228,15 @@ mod tests {
                         value: dec!(1),
                     }),
                     status: Status::Unmarked,
+                    unit_price: None,
+                    total_price: None,
                 },
                 Posting {
                     account_name: "income:salary".into(),
                     amount: None,
                     status: Status::Unmarked,
+                    unit_price: None,
+                    total_price: None,
                 },
             ],
             tags: vec![],
@@ -258,6 +264,8 @@ mod tests {
                         value: dec!(1),
                     }),
                     status: Status::Unmarked,
+                    unit_price: None,
+                    total_price: None,
                 },
                 Posting {
                     account_name: "income:salary".into(),
@@ -266,6 +274,8 @@ mod tests {
                         value: dec!(0),
                     }),
                     status: Status::Unmarked,
+                    unit_price: None,
+                    total_price: None,
                 },
             ],
             tags: vec![],
