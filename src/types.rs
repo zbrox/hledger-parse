@@ -121,7 +121,10 @@ impl<'a> Transaction {
         let postings_sum = self
             .postings
             .iter()
-            .flat_map(|p| &p.amount)
+            .flat_map(|p| match &p.total_price {
+                Some(v) => Some(v.clone()),
+                None => p.amount.clone(),
+            })
             .map(|a| a.value) // TODO: different currencies, conversion rates
             .sum::<Decimal>();
 
