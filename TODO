@@ -1,10 +1,12 @@
+# TODO
+
 - account validation
 - virtual postings
 - comments
-    - multi line
-    - posting
+  - multi line
+  - posting
 - better error reporting
-    - custom errors for some structs
+  - custom errors for some structs
 - unicode support (test what works now)
 - transaction validation
 - include statements
