@@ -10,11 +10,14 @@ use nom::{
     Finish,
 };
 
-use crate::types::{Commodity, HLParserError, HLParserIResult, Journal, Price, Transaction};
+use crate::{HLParserError, HLParserIResult};
 
 use super::{
-    accounts::parse_account_directive, comments::parse_line_comment,
-    commodities::parse_commodity_directive, prices::parse_price, transactions::parse_transaction,
+    accounts::parse_account_directive,
+    comments::parse_line_comment,
+    commodities::{parse_commodity_directive, Commodity},
+    prices::{parse_price, Price},
+    transactions::{parse_transaction, Transaction},
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -25,6 +28,28 @@ pub enum Value {
     Price(Price),
     Account(String),
     Commodity(Commodity),
+}
+
+#[derive(PartialEq, Debug)]
+pub struct Journal {
+    pub transactions: Vec<Transaction>,
+}
+
+impl TryFrom<PathBuf> for Journal {
+    type Error = HLParserError;
+
+    fn try_from(journal_path: PathBuf) -> Result<Self, HLParserError> {
+        let base_path = journal_path.parent().map(|v| v.to_owned());
+        let journal_contents = std::fs::read_to_string(journal_path)?;
+        let journal = parse_journal(&journal_contents, base_path).map_err(|e| match e {
+            HLParserError::Parse(i, ek) => HLParserError::Parse(i, ek),
+            HLParserError::Validation(desc) => HLParserError::Validation(desc),
+            HLParserError::IO(e) => HLParserError::IO(e),
+            HLParserError::IncludePath(path) => HLParserError::IncludePath(path),
+        })?;
+
+        Ok(journal)
+    }
 }
 
 fn parse_include_statement(input: &str) -> HLParserIResult<&str, PathBuf> {
@@ -87,12 +112,13 @@ pub fn parse_journal_contents(
 }
 
 fn flatten_values(values: Vec<Value>) -> Vec<Value> {
-    values.into_iter().flat_map(|v| {
-        match v {
+    values
+        .into_iter()
+        .flat_map(|v| match v {
             Value::Included(contents) => flatten_values(contents),
             _ => vec![v],
-        }
-    }).collect()
+        })
+        .collect()
 }
 
 pub fn parse_journal(input: &str, base_path: Option<PathBuf>) -> Result<Journal, HLParserError> {
@@ -116,12 +142,16 @@ mod tests {
     use chrono::NaiveDate;
     use rust_decimal_macros::dec;
 
-    use crate::{
-        parsers::journal::{parse_comment_value, parse_empty_line, Value},
-        types::{Amount, Description, Journal, Posting, Status, Transaction},
+    use crate::parsers::{
+        amounts::Amount,
+        descriptions::Description,
+        journal::{parse_comment_value, parse_empty_line, Journal, Value},
+        postings::Posting,
+        status::Status,
+        transactions::Transaction,
     };
 
-    use super::{parse_journal, flatten_values};
+    use super::{flatten_values, parse_journal};
 
     #[test]
     fn test_parse_comment_value() {
@@ -203,132 +233,133 @@ mod tests {
                     ],
                     tags: vec![],
                 }),
-                Value::Included(vec![
-                    Value::Transaction(Transaction {
-                        primary_date: NaiveDate::from_ymd(2008, 1, 1),
-                        secondary_date: None,
-                        code: None,
-                        status: Status::Unmarked,
-                        description: Description {
-                            note: Some("income".into()),
-                            payee: None,
+                Value::Included(vec![Value::Transaction(Transaction {
+                    primary_date: NaiveDate::from_ymd(2008, 1, 1),
+                    secondary_date: None,
+                    code: None,
+                    status: Status::Unmarked,
+                    description: Description {
+                        note: Some("income".into()),
+                        payee: None,
+                    },
+                    postings: vec![
+                        Posting {
+                            account_name: "assets:bank:checking".into(),
+                            amount: Some(Amount {
+                                currency: "$".into(),
+                                value: dec!(1),
+                            }),
+                            status: Status::Unmarked,
+                            unit_price: None,
+                            total_price: None,
                         },
-                        postings: vec![
-                            Posting {
-                                account_name: "assets:bank:checking".into(),
-                                amount: Some(Amount {
-                                    currency: "$".into(),
-                                    value: dec!(1),
-                                }),
-                                status: Status::Unmarked,
-                                unit_price: None,
-                                total_price: None,
-                            },
-                            Posting {
-                                account_name: "income:salary".into(),
-                                amount: None,
-                                status: Status::Unmarked,
-                                unit_price: None,
-                                total_price: None,
-                            },
-                        ],
-                        tags: vec![],
-                    },)
-                ])
-            ])
+                        Posting {
+                            account_name: "income:salary".into(),
+                            amount: None,
+                            status: Status::Unmarked,
+                            unit_price: None,
+                            total_price: None,
+                        },
+                    ],
+                    tags: vec![],
+                })]),
+            ]),
         ];
-        assert_eq!(flatten_values(values), [
-            Value::Transaction(Transaction {
-                primary_date: NaiveDate::from_ymd(2008, 1, 1),
-                secondary_date: None,
-                code: None,
-                status: Status::Unmarked,
-                description: Description {
-                    note: Some("income".into()),
-                    payee: None,
-                },
-                postings: vec![
-                    Posting {
-                        account_name: "assets:bank:checking".into(),
-                        amount: Some(Amount {
-                            currency: "$".into(),
-                            value: dec!(1),
-                        }),
-                        status: Status::Unmarked,
-                        unit_price: None,
-                        total_price: None,
+        assert_eq!(
+            flatten_values(values),
+            [
+                Value::Transaction(Transaction {
+                    primary_date: NaiveDate::from_ymd(2008, 1, 1),
+                    secondary_date: None,
+                    code: None,
+                    status: Status::Unmarked,
+                    description: Description {
+                        note: Some("income".into()),
+                        payee: None,
                     },
-                    Posting {
-                        account_name: "income:salary".into(),
-                        amount: None,
-                        status: Status::Unmarked,
-                        unit_price: None,
-                        total_price: None,
+                    postings: vec![
+                        Posting {
+                            account_name: "assets:bank:checking".into(),
+                            amount: Some(Amount {
+                                currency: "$".into(),
+                                value: dec!(1),
+                            }),
+                            status: Status::Unmarked,
+                            unit_price: None,
+                            total_price: None,
+                        },
+                        Posting {
+                            account_name: "income:salary".into(),
+                            amount: None,
+                            status: Status::Unmarked,
+                            unit_price: None,
+                            total_price: None,
+                        },
+                    ],
+                    tags: vec![],
+                }),
+                Value::Transaction(Transaction {
+                    primary_date: NaiveDate::from_ymd(2008, 1, 1),
+                    secondary_date: None,
+                    code: None,
+                    status: Status::Unmarked,
+                    description: Description {
+                        note: Some("income".into()),
+                        payee: None,
                     },
-                ],
-                tags: vec![],
-            }),
-            Value::Transaction(Transaction {
-                primary_date: NaiveDate::from_ymd(2008, 1, 1),
-                secondary_date: None,
-                code: None,
-                status: Status::Unmarked,
-                description: Description {
-                    note: Some("income".into()),
-                    payee: None,
-                },
-                postings: vec![
-                    Posting {
-                        account_name: "assets:bank:checking".into(),
-                        amount: Some(Amount {
-                            currency: "$".into(),
-                            value: dec!(1),
-                        }),
-                        status: Status::Unmarked,
-                        unit_price: None,
-                        total_price: None,
+                    postings: vec![
+                        Posting {
+                            account_name: "assets:bank:checking".into(),
+                            amount: Some(Amount {
+                                currency: "$".into(),
+                                value: dec!(1),
+                            }),
+                            status: Status::Unmarked,
+                            unit_price: None,
+                            total_price: None,
+                        },
+                        Posting {
+                            account_name: "income:salary".into(),
+                            amount: None,
+                            status: Status::Unmarked,
+                            unit_price: None,
+                            total_price: None,
+                        },
+                    ],
+                    tags: vec![],
+                }),
+                Value::Transaction(Transaction {
+                    primary_date: NaiveDate::from_ymd(2008, 1, 1),
+                    secondary_date: None,
+                    code: None,
+                    status: Status::Unmarked,
+                    description: Description {
+                        note: Some("income".into()),
+                        payee: None,
                     },
-                    Posting {
-                        account_name: "income:salary".into(),
-                        amount: None,
-                        status: Status::Unmarked,
-                        unit_price: None,
-                        total_price: None,
-                    },
-                ],
-                tags: vec![],
-            }),
-            Value::Transaction(Transaction {
-                primary_date: NaiveDate::from_ymd(2008, 1, 1),
-                secondary_date: None,
-                code: None,
-                status: Status::Unmarked,
-                description: Description {
-                    note: Some("income".into()),
-                    payee: None,
-                },
-                postings: vec![
-                    Posting {
-                        account_name: "assets:bank:checking".into(),
-                        amount: Some(Amount {
-                            currency: "$".into(),
-                            value: dec!(1),
-                        }),
-                        status: Status::Unmarked,
-                        unit_price: None,
-                        total_price: None,
-                    },
-                    Posting {
-                        account_name: "income:salary".into(),
-                        amount: None,
-                        status: Status::Unmarked,
-                        unit_price: None,
-                        total_price: None,
-                    },
-                ],
-                tags: vec![],
-            }),
-        ])
+                    postings: vec![
+                        Posting {
+                            account_name: "assets:bank:checking".into(),
+                            amount: Some(Amount {
+                                currency: "$".into(),
+                                value: dec!(1),
+                            }),
+                            status: Status::Unmarked,
+                            unit_price: None,
+                            total_price: None,
+                        },
+                        Posting {
+                            account_name: "income:salary".into(),
+                            amount: None,
+                            status: Status::Unmarked,
+                            unit_price: None,
+                            total_price: None,
+                        },
+                    ],
+                    tags: vec![],
+                }),
+            ]
+        )
     }
 
     #[test]

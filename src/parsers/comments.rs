@@ -6,7 +6,7 @@ use nom::{
     sequence::preceded,
 };
 
-use crate::types::HLParserIResult;
+use crate::HLParserIResult;
 
 pub fn parse_line_comment(input: &str) -> HLParserIResult<&str, &str> {
     preceded(
@@ -23,7 +23,7 @@ pub fn parse_transaction_comment(input: &str) -> HLParserIResult<&str, &str> {
 mod tests {
     use crate::{
         parsers::comments::{parse_line_comment, parse_transaction_comment},
-        types::HLParserError,
+        HLParserError,
     };
 
     #[test]

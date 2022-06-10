@@ -6,9 +6,21 @@ use nom::{
     sequence::{delimited, pair, preceded, separated_pair, terminated, tuple},
 };
 
-use crate::types::{Amount, HLParserError, HLParserIResult, Posting};
+use crate::{HLParserError, HLParserIResult};
 
-use super::{amounts::parse_amount, status::parse_status};
+use super::{
+    amounts::{parse_amount, Amount},
+    status::{parse_status, Status},
+};
+
+#[derive(PartialEq, Debug, Clone)]
+pub struct Posting {
+    pub status: Status,
+    pub account_name: String,
+    pub amount: Option<Amount>,
+    pub unit_price: Option<Amount>,
+    pub total_price: Option<Amount>,
+}
 
 #[derive(Clone)]
 struct PostingComplexAmount {
@@ -104,9 +116,11 @@ mod tests {
     use rust_decimal_macros::dec;
 
     use crate::{
-        parsers::postings::parse_posting,
-        types::{Amount, HLParserError, Posting},
+        parsers::{amounts::Amount, postings::parse_posting, status::Status},
+        HLParserError,
     };
+
+    use super::Posting;
 
     #[test]
     fn test_parse_simple_posting() {
@@ -115,7 +129,7 @@ mod tests {
             (
                 "",
                 Posting {
-                    status: crate::types::Status::Unmarked,
+                    status: Status::Unmarked,
                     account_name: "assets:cash".into(),
                     amount: Some(Amount {
                         currency: "$".into(),
@@ -135,7 +149,7 @@ mod tests {
             (
                 "\n2008/06/01 gift\n  assets:bank:checking  $1",
                 Posting {
-                    status: crate::types::Status::Unmarked,
+                    status: Status::Unmarked,
                     account_name: "assets:cash".into(),
                     amount: None,
                     unit_price: None,
@@ -152,7 +166,7 @@ mod tests {
             (
                 "",
                 Posting {
-                    status: crate::types::Status::Pending,
+                    status: Status::Pending,
                     account_name: "assets:cash".into(),
                     amount: Some(Amount {
                         currency: "$".into(),
@@ -172,7 +186,7 @@ mod tests {
             (
                 "",
                 Posting {
-                    status: crate::types::Status::Unmarked,
+                    status: Status::Unmarked,
                     account_name: "assets:cash".into(),
                     amount: None,
                     unit_price: None,
@@ -201,7 +215,7 @@ mod tests {
             (
                 "",
                 Posting {
-                    status: crate::types::Status::Pending,
+                    status: Status::Pending,
                     account_name: "assets:cash".into(),
                     amount: Some(Amount {
                         currency: "$".into(),
@@ -224,7 +238,7 @@ mod tests {
             (
                 "",
                 Posting {
-                    status: crate::types::Status::Pending,
+                    status: Status::Pending,
                     account_name: "assets:cash".into(),
                     amount: Some(Amount {
                         currency: "$".into(),

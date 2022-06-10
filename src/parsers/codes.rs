@@ -4,7 +4,7 @@ use nom::{
     sequence::{delimited, pair},
 };
 
-use crate::types::HLParserIResult;
+use crate::HLParserIResult;
 
 pub fn parse_code(input: &str) -> HLParserIResult<&str, &str> {
     delimited(
@@ -16,7 +16,7 @@ pub fn parse_code(input: &str) -> HLParserIResult<&str, &str> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{parsers::codes::parse_code, types::HLParserError};
+    use crate::{parsers::codes::parse_code, HLParserError};
 
     #[test]
     fn test_parse_code() {

@@ -1,3 +1,4 @@
+use chrono::NaiveDate;
 use nom::{
     branch::alt,
     bytes::complete::tag,
@@ -6,12 +7,19 @@ use nom::{
     sequence::terminated,
 };
 
-use crate::types::{HLParserIResult, Price};
+use crate::HLParserIResult;
 
 use super::{
-    amounts::{parse_amount, parse_currency_string},
+    amounts::{parse_amount, parse_currency_string, Amount},
     dates::parse_date,
 };
+
+#[derive(PartialEq, Debug, Clone)]
+pub struct Price {
+    pub commodity: String,
+    pub date: NaiveDate,
+    pub amount: Amount,
+}
 
 pub fn parse_price(input: &str) -> HLParserIResult<&str, Price> {
     let (tail, _) = terminated(tag("P"), space1)(input)?;
@@ -35,9 +43,9 @@ mod tests {
     use chrono::NaiveDate;
     use rust_decimal_macros::dec;
 
-    use crate::types::{Amount, Price};
+    use crate::parsers::amounts::Amount;
 
-    use super::parse_price;
+    use super::{parse_price, Price};
 
     #[test]
     fn test_valid_price() {

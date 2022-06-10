@@ -1,3 +1,6 @@
+use std::fmt::Display;
+
+use chrono::NaiveDate;
 use nom::{
     bytes::complete::tag,
     character::complete::{line_ending, not_line_ending, space0},
@@ -5,14 +8,82 @@ use nom::{
     multi::{many0, separated_list0},
     sequence::terminated,
 };
+use rust_decimal::Decimal;
+use rust_decimal_macros::dec;
 
-use crate::types::{HLParserIResult, Tag, Transaction};
+use crate::{HLParserError, HLParserIResult};
 
 use super::{
-    codes::parse_code, comments::parse_transaction_comment, dates::parse_date,
-    descriptions::parse_description, postings::parse_posting, status::parse_status,
-    tags::parse_tag, utils::split_on_space_before_char,
+    codes::parse_code,
+    comments::parse_transaction_comment,
+    dates::parse_date,
+    descriptions::{parse_description, Description},
+    postings::{parse_posting, Posting},
+    status::{parse_status, Status},
+    tags::{parse_tag, Tag},
+    utils::split_on_space_before_char,
 };
+
+#[derive(PartialEq, Debug, Clone)]
+pub struct Transaction {
+    pub primary_date: NaiveDate,
+    pub secondary_date: Option<NaiveDate>,
+    pub status: Status,
+    pub code: Option<String>,
+    pub description: Description,
+    pub postings: Vec<Posting>,
+    pub tags: Vec<Tag>,
+}
+
+impl Display for Transaction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match &self.secondary_date {
+            Some(sec_date) => write!(f, "{}={} {}", self.primary_date, sec_date, self.description),
+            None => write!(f, "{} {}", self.primary_date, self.description),
+        }
+    }
+}
+
+impl<'a> Transaction {
+    pub fn validate(&self) -> Result<(), HLParserError> {
+        self.validate_postings()?;
+        Ok(())
+    }
+
+    fn validate_postings(&self) -> Result<(), HLParserError> {
+        let none_amounts = self.postings.iter().filter(|p| p.amount.is_none()).count();
+
+        if none_amounts > 1_usize {
+            return Err(HLParserError::Validation(format!(
+                "Transaction {} cannot have more than 1 posting with missing amounts",
+                self
+            )));
+        }
+
+        if none_amounts == 1_usize {
+            return Ok(());
+        }
+
+        let postings_sum = self
+            .postings
+            .iter()
+            .flat_map(|p| match &p.total_price {
+                Some(v) => Some(v.clone()),
+                None => p.amount.clone(),
+            })
+            .map(|a| a.value) // TODO: different currencies, conversion rates
+            .sum::<Decimal>();
+
+        if postings_sum != dec!(0) {
+            return Err(HLParserError::Validation(format!(
+                "Transaction {} postings' sum does not equal 0",
+                self
+            )));
+        }
+
+        Ok(())
+    }
+}
 
 fn parse_comments_tags(input: &str) -> HLParserIResult<&str, (Option<&str>, Vec<Tag>)> {
     let (comment_input, tags_input) = split_on_space_before_char(input, ':');
@@ -66,10 +137,12 @@ mod tests {
     use chrono::NaiveDate;
     use rust_decimal_macros::dec;
 
-    use crate::{
-        parsers::transactions::parse_transaction,
-        types::{Amount, Description, Posting, Status, Tag, Transaction},
+    use crate::parsers::{
+        amounts::Amount, descriptions::Description, postings::Posting, status::Status, tags::Tag,
+        transactions::parse_transaction,
     };
+
+    use super::Transaction;
 
     #[test]
     fn test_simple_transaction() {
@@ -520,5 +593,80 @@ mod tests {
                 }
             )
         )
+    }
+
+    #[test]
+    fn test_transaction_validate_none_amount_postings() {
+        let transaction = Transaction {
+            primary_date: NaiveDate::from_ymd(2008, 1, 1),
+            secondary_date: None,
+            status: Status::Unmarked,
+            code: None,
+            description: Description {
+                note: Some("income".into()),
+                payee: None,
+            },
+            postings: vec![
+                Posting {
+                    account_name: "assets:bank:checking".into(),
+                    amount: Some(Amount {
+                        currency: "$".into(),
+                        value: dec!(1),
+                    }),
+                    status: Status::Unmarked,
+                    unit_price: None,
+                    total_price: None,
+                },
+                Posting {
+                    account_name: "income:salary".into(),
+                    amount: None,
+                    status: Status::Unmarked,
+                    unit_price: None,
+                    total_price: None,
+                },
+            ],
+            tags: vec![],
+        };
+
+        assert!(transaction.validate().is_ok());
+    }
+
+    #[test]
+    fn test_transaction_validate_not_zero_sum_postings() {
+        let transaction = Transaction {
+            primary_date: NaiveDate::from_ymd(2008, 1, 1),
+            secondary_date: None,
+            status: Status::Unmarked,
+            code: None,
+            description: Description {
+                note: Some("income".into()),
+                payee: None,
+            },
+            postings: vec![
+                Posting {
+                    account_name: "assets:bank:checking".into(),
+                    amount: Some(Amount {
+                        currency: "$".into(),
+                        value: dec!(1),
+                    }),
+                    status: Status::Unmarked,
+                    unit_price: None,
+                    total_price: None,
+                },
+                Posting {
+                    account_name: "income:salary".into(),
+                    amount: Some(Amount {
+                        currency: "$".into(),
+                        value: dec!(0),
+                    }),
+                    status: Status::Unmarked,
+                    unit_price: None,
+                    total_price: None,
+                },
+            ],
+            tags: vec![],
+        };
+
+        assert!(transaction.validate().is_err());
     }
 }

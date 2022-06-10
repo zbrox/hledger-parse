@@ -5,7 +5,7 @@ use nom::{
     sequence::{preceded, tuple},
 };
 
-use crate::types::HLParserIResult;
+use crate::HLParserIResult;
 
 pub fn parse_account_directive(input: &str) -> HLParserIResult<&str, &str> {
     verify(
@@ -18,7 +18,7 @@ pub fn parse_account_directive(input: &str) -> HLParserIResult<&str, &str> {
 mod tests {
     use nom::error::ErrorKind;
 
-    use crate::types::HLParserError;
+    use crate::HLParserError;
 
     use super::parse_account_directive;
 

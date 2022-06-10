@@ -3,9 +3,15 @@ use nom::{
     sequence::terminated,
 };
 
-use crate::types::{HLParserIResult, Tag};
+use crate::HLParserIResult;
 
 use super::utils::is_char_alphanumeric;
+
+#[derive(PartialEq, Debug, Clone)]
+pub struct Tag {
+    pub name: String,
+    pub value: Option<String>,
+}
 
 pub fn parse_tag(input: &str) -> HLParserIResult<&str, Tag> {
     let (tail, name) = terminated(
@@ -30,10 +36,9 @@ pub fn parse_tag(input: &str) -> HLParserIResult<&str, Tag> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        parsers::tags::parse_tag,
-        types::{HLParserError, Tag},
-    };
+    use crate::{parsers::tags::parse_tag, HLParserError};
+
+    use super::Tag;
 
     #[test]
     fn test_parse_tag_with_space() {

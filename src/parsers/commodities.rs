@@ -6,9 +6,15 @@ use nom::{
     sequence::{delimited, separated_pair, terminated},
 };
 
-use crate::types::{Commodity, HLParserIResult};
+use crate::HLParserIResult;
 
 use super::amounts::{parse_currency_string, parse_money_amount};
+
+#[derive(PartialEq, Debug, Clone)]
+pub struct Commodity {
+    pub name: String,
+    pub format: Option<String>, // TODO: temp before I decide how to store the format properly
+}
 
 fn parse_commodity_directive_single_line(input: &str) -> HLParserIResult<&str, Commodity> {
     let (tail, _) = terminated(tag("commodity"), space1)(input)?;
@@ -66,7 +72,7 @@ pub fn parse_commodity_directive(input: &str) -> HLParserIResult<&str, Commodity
 
 #[cfg(test)]
 mod tests {
-    use crate::{parsers::commodities::parse_commodity_directive, types::Commodity};
+    use crate::parsers::commodities::{parse_commodity_directive, Commodity};
 
     #[test]
     fn test_parse_commodity_directive_single_line_name_prefix() {

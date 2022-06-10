@@ -1,6 +1,13 @@
 use nom::{branch::alt, character::complete::char, combinator::opt, sequence::terminated};
 
-use crate::types::{HLParserIResult, Status};
+use crate::HLParserIResult;
+
+#[derive(PartialEq, Debug, Clone)]
+pub enum Status {
+    Unmarked,
+    Pending,
+    Cleared,
+}
 
 pub fn parse_status(input: &str) -> HLParserIResult<&str, Status> {
     let (tail, status) = opt(terminated(alt((char('!'), char('*'))), char(' ')))(input)?;
@@ -16,7 +23,7 @@ pub fn parse_status(input: &str) -> HLParserIResult<&str, Status> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{parsers::status::parse_status, types::Status};
+    use crate::parsers::status::{parse_status, Status};
 
     #[test]
     fn test_status_cleared() {

@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use nom::{
     branch::alt,
     bytes::complete::{tag, take_until},
@@ -6,7 +8,36 @@ use nom::{
     sequence::{delimited, separated_pair},
 };
 
-use crate::types::{Description, HLParserError, HLParserIResult};
+use crate::{HLParserError, HLParserIResult};
+
+#[derive(PartialEq, Debug, Clone)]
+pub struct Description {
+    pub payee: Option<String>,
+    pub note: Option<String>,
+}
+
+impl Display for Description {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Description {
+                payee: Some(p),
+                note: Some(n),
+            } => write!(f, "{} | {}", p, n),
+            Description {
+                payee: None,
+                note: Some(n),
+            } => write!(f, "{}", n),
+            Description {
+                payee: Some(p),
+                note: None,
+            } => write!(f, "{} |", p),
+            Description {
+                payee: None,
+                note: None,
+            } => write!(f, ""),
+        }
+    }
+}
 
 fn parse_only_note(input: &str) -> HLParserIResult<&str, &str> {
     rest(input)
@@ -60,7 +91,9 @@ pub fn parse_description(input: &str) -> HLParserIResult<&str, Description> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{parsers::descriptions::parse_description, types::Description};
+    use crate::parsers::descriptions::parse_description;
+
+    use super::Description;
 
     #[test]
     fn test_parse_description() {

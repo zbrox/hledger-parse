@@ -10,9 +10,21 @@ use nom::{
 };
 use rust_decimal::Decimal;
 
-use crate::types::{Amount, AmountSign, HLParserError, HLParserIResult};
+use crate::{HLParserError, HLParserIResult};
 
 use super::utils::{in_quotes, is_char_digit, is_char_minus, is_char_newline, is_char_space};
+
+#[derive(PartialEq)]
+pub enum AmountSign {
+    Plus,
+    Minus,
+}
+
+#[derive(PartialEq, Debug, Clone)]
+pub struct Amount {
+    pub currency: String,
+    pub value: Decimal,
+}
 
 pub fn parse_money_amount(input: &str) -> HLParserIResult<&str, Decimal> {
     let (tail, (num, _, scale)) = tuple((
@@ -97,7 +109,7 @@ pub fn parse_amount(input: &str) -> HLParserIResult<&str, Amount> {
 mod tests {
     use rust_decimal_macros::dec;
 
-    use crate::{parsers::amounts::parse_amount, types::Amount};
+    use crate::parsers::amounts::{parse_amount, Amount};
 
     use super::{parse_currency_string, parse_money_amount};
 

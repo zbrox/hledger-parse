@@ -7,7 +7,7 @@ use nom::{
     sequence::{preceded, tuple},
 };
 
-use crate::types::{HLParserError, HLParserIResult};
+use crate::{HLParserError, HLParserIResult};
 
 fn parse_date_components(
     separator: char,
@@ -96,7 +96,7 @@ mod tests {
     use chrono::NaiveDate;
     use nom::error::ErrorKind;
 
-    use crate::{parsers::dates::parse_date, types::HLParserError};
+    use crate::{parsers::dates::parse_date, HLParserError};
 
     #[test]
     fn test_parse_date_dash() {
