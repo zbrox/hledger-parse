@@ -42,7 +42,7 @@ mod tests {
     #[test]
     fn test_valid_price() {
         assert_eq!(
-            parse_price("P 2017-01-01 EUR SEK 9.5525").unwrap(),
+            parse_price("P 2017-01-01 EUR SEK 9.552532877").unwrap(),
             (
                 "",
                 Price {
@@ -50,7 +50,7 @@ mod tests {
                     date: NaiveDate::from_ymd(2017, 1, 1),
                     amount: Amount {
                         currency: "SEK".to_string(),
-                        value: dec!(9.5525),
+                        value: dec!(9.552532877),
                     }
                 }
             )
