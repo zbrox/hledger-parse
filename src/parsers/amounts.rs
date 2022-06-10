@@ -3,7 +3,7 @@ use std::str::FromStr;
 use nom::{
     branch::alt,
     bytes::complete::take_till,
-    character::complete::{char, i64, space0, u32},
+    character::complete::{char, i64, space0, u64},
     combinator::{opt, recognize},
     error::ErrorKind,
     sequence::{terminated, tuple},
@@ -18,7 +18,7 @@ pub fn parse_money_amount(input: &str) -> HLParserIResult<&str, Decimal> {
     let (tail, (num, _, scale)) = tuple((
         recognize(i64),
         opt(alt((char('.'), char(',')))),
-        opt(recognize(u32)),
+        opt(recognize(u64)),
     ))(input)?;
     let value = format!("{}.{}", num, scale.unwrap_or("0"));
     let value = Decimal::from_str(&value)
