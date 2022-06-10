@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use hledger_parse::{parsers::journal::Journal, HLParserError};
+use hledger_parse::{HLParserError, Journal};
 
 fn main() -> Result<(), HLParserError> {
     let journal_path = PathBuf::from("./examples/simple.journal");

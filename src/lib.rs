@@ -1,4 +1,9 @@
-pub mod parsers;
+mod parsers;
+
+pub use crate::parsers::{
+    amounts::Amount, commodities::Commodity, descriptions::Description, journal::Journal,
+    postings::Posting, prices::Price, tags::Tag, transactions::Transaction,
+};
 
 use nom::error::{ErrorKind, FromExternalError, ParseError};
 use thiserror::Error;
