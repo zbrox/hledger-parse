@@ -1,6 +1,6 @@
 use nom::{
     bytes::complete::take_until,
-    character::{complete::char, complete::space0, is_digit, is_space, is_newline},
+    character::{complete::char, complete::space0, is_digit, is_newline, is_space},
     sequence::{delimited, preceded, terminated},
     IResult,
 };

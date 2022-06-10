@@ -33,7 +33,9 @@ mod tests {
     #[test]
     fn test_parse_account_directive_invalid_name() {
         assert_eq!(
-            parse_account_directive("account assets:cash  ").unwrap_err().to_string(),
+            parse_account_directive("account assets:cash  ")
+                .unwrap_err()
+                .to_string(),
             nom::Err::Error(HLParserError::Parse(
                 "account assets:cash  ".to_string(),
                 ErrorKind::Verify

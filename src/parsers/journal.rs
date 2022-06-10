@@ -10,11 +10,11 @@ use nom::{
     Finish,
 };
 
-use crate::types::{HLParserError, HLParserIResult, Journal, Price, Transaction, Commodity};
+use crate::types::{Commodity, HLParserError, HLParserIResult, Journal, Price, Transaction};
 
 use super::{
-    accounts::parse_account_directive, comments::parse_line_comment, prices::parse_price,
-    transactions::parse_transaction, commodities::parse_commodity_directive,
+    accounts::parse_account_directive, comments::parse_line_comment,
+    commodities::parse_commodity_directive, prices::parse_price, transactions::parse_transaction,
 };
 
 #[derive(Debug, Clone, PartialEq)]
