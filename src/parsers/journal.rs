@@ -32,10 +32,10 @@ pub enum Value {
 
 #[derive(PartialEq, Debug)]
 pub struct Journal {
-    pub transactions: Vec<Transaction>,
-    pub accounts: Vec<String>,
-    pub prices: Vec<Price>,
-    pub commodities: Vec<Commodity>,
+    transactions: Vec<Transaction>,
+    accounts: Vec<String>,
+    prices: Vec<Price>,
+    commodities: Vec<Commodity>,
 }
 
 impl TryFrom<PathBuf> for Journal {
@@ -53,6 +53,24 @@ impl TryFrom<PathBuf> for Journal {
         })?;
 
         Ok(journal)
+    }
+}
+
+impl Journal {
+    pub fn transactions(&self) -> Vec<Transaction> {
+        self.transactions.clone()
+    }
+
+    pub fn accounts(&self) -> Vec<Account> {
+        self.accounts.clone()
+    }
+
+    pub fn prices(&self) -> Vec<Price> {
+        self.prices.clone()
+    }
+
+    pub fn commodities(&self) -> Vec<Commodity> {
+        self.commodities.clone()
     }
 }
 

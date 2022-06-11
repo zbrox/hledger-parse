@@ -7,7 +7,7 @@ fn main() -> Result<(), HLParserError> {
 
     let journal: Journal = journal_path.try_into()?;
 
-    println!("Transactions: {}", journal.transactions.len());
+    println!("Transactions: {}", journal.transactions().len());
 
     Ok(())
 }
