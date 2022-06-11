@@ -1,6 +1,8 @@
 # TODO
 
 - account validation
+- account structure, more than a string
+- be able to print journal
 - virtual postings
 - comments
   - multi line
@@ -10,3 +12,4 @@
 - unicode support (test what works now)
 - transaction validation
 - more test cases
+- optimize
