@@ -6,14 +6,29 @@ use nom::{
     sequence::{delimited, separated_pair, terminated},
 };
 
-use crate::HLParserIResult;
+use crate::{HLParserError, HLParserIResult};
 
-use super::amounts::{parse_currency_string, parse_money_amount};
+use super::{
+    amounts::{parse_currency_string, parse_money_amount},
+    journal::Value,
+};
 
 #[derive(PartialEq, Debug, Clone)]
 pub struct Commodity {
     pub name: String,
     pub format: Option<String>, // TODO: temp before I decide how to store the format properly
+}
+
+impl TryInto<Commodity> for Value {
+    type Error = HLParserError;
+
+    fn try_into(self) -> Result<Commodity, Self::Error> {
+        if let Value::Commodity(c) = self {
+            Ok(c)
+        } else {
+            Err(HLParserError::Extract(self))
+        }
+    }
 }
 
 fn parse_commodity_directive_single_line(input: &str) -> HLParserIResult<&str, Commodity> {

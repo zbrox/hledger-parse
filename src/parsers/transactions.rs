@@ -18,6 +18,7 @@ use super::{
     comments::parse_transaction_comment,
     dates::parse_date,
     descriptions::{parse_description, Description},
+    journal::Value,
     postings::{parse_posting, Posting},
     status::{parse_status, Status},
     tags::{parse_tag, Tag},
@@ -33,6 +34,18 @@ pub struct Transaction {
     pub description: Description,
     pub postings: Vec<Posting>,
     pub tags: Vec<Tag>,
+}
+
+impl TryInto<Transaction> for Value {
+    type Error = HLParserError;
+
+    fn try_into(self) -> Result<Transaction, Self::Error> {
+        if let Value::Transaction(t) = self {
+            Ok(t)
+        } else {
+            Err(HLParserError::Extract(self))
+        }
+    }
 }
 
 impl Display for Transaction {

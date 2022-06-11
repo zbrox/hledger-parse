@@ -13,7 +13,7 @@ use nom::{
 use crate::{HLParserError, HLParserIResult};
 
 use super::{
-    accounts::parse_account_directive,
+    accounts::{parse_account_directive, Account},
     comments::parse_line_comment,
     commodities::{parse_commodity_directive, Commodity},
     prices::{parse_price, Price},
@@ -26,13 +26,16 @@ pub enum Value {
     Transaction(Transaction),
     Included(Vec<Value>),
     Price(Price),
-    Account(String),
+    Account(Account),
     Commodity(Commodity),
 }
 
 #[derive(PartialEq, Debug)]
 pub struct Journal {
     pub transactions: Vec<Transaction>,
+    pub accounts: Vec<String>,
+    pub prices: Vec<Price>,
+    pub commodities: Vec<Commodity>,
 }
 
 impl TryFrom<PathBuf> for Journal {
@@ -46,6 +49,7 @@ impl TryFrom<PathBuf> for Journal {
             HLParserError::Validation(desc) => HLParserError::Validation(desc),
             HLParserError::IO(e) => HLParserError::IO(e),
             HLParserError::IncludePath(path) => HLParserError::IncludePath(path),
+            HLParserError::Extract(v) => HLParserError::Extract(v),
         })?;
 
         Ok(journal)
@@ -82,7 +86,7 @@ pub fn parse_journal_contents(
                 parse_comment_value,
                 parse_empty_line,
                 map(parse_price, Value::Price),
-                map(parse_account_directive, |v| Value::Account(v.to_string())),
+                map(parse_account_directive, |v| Value::Account(v.into())),
                 map(parse_commodity_directive, Value::Commodity),
                 map_res::<_, _, _, _, nom::Err<HLParserError>, _, _>(
                     parse_include_statement,
@@ -128,12 +132,25 @@ pub fn parse_journal(input: &str, base_path: Option<PathBuf>) -> Result<Journal,
 
     Ok(Journal {
         transactions: values
-            .into_iter()
-            .filter_map(|v| match v {
-                Value::Transaction(t) => Some(t),
-                _ => None,
-            })
+            .iter()
+            .cloned()
+            .filter_map(|v| v.try_into().ok())
             .collect::<Vec<Transaction>>(),
+        accounts: values
+            .iter()
+            .cloned()
+            .filter_map(|v| v.try_into().ok())
+            .collect::<Vec<Account>>(),
+        prices: values
+            .iter()
+            .cloned()
+            .filter_map(|v| v.try_into().ok())
+            .collect::<Vec<Price>>(),
+        commodities: values
+            .iter()
+            .cloned()
+            .filter_map(|v| v.try_into().ok())
+            .collect::<Vec<Commodity>>(),
     })
 }
 
@@ -422,6 +439,9 @@ mod tests {
         assert_eq!(
             parse_journal(input, None).unwrap(),
             Journal {
+                accounts: vec![],
+                prices: vec![],
+                commodities: vec![],
                 transactions: vec![
                     Transaction {
                         primary_date: NaiveDate::from_ymd(2008, 1, 1),

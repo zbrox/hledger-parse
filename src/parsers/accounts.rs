@@ -5,7 +5,23 @@ use nom::{
     sequence::{preceded, tuple},
 };
 
-use crate::HLParserIResult;
+use crate::{HLParserError, HLParserIResult};
+
+use super::journal::Value;
+
+pub type Account = String;
+
+impl TryInto<Account> for Value {
+    type Error = HLParserError;
+
+    fn try_into(self) -> Result<Account, Self::Error> {
+        if let Value::Account(t) = self {
+            Ok(t)
+        } else {
+            Err(HLParserError::Extract(self))
+        }
+    }
+}
 
 pub fn parse_account_directive(input: &str) -> HLParserIResult<&str, &str> {
     verify(

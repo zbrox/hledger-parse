@@ -7,11 +7,12 @@ use nom::{
     sequence::terminated,
 };
 
-use crate::HLParserIResult;
+use crate::{HLParserError, HLParserIResult};
 
 use super::{
     amounts::{parse_amount, parse_currency_string, Amount},
     dates::parse_date,
+    journal::Value,
 };
 
 #[derive(PartialEq, Debug, Clone)]
@@ -19,6 +20,18 @@ pub struct Price {
     pub commodity: String,
     pub date: NaiveDate,
     pub amount: Amount,
+}
+
+impl TryInto<Price> for Value {
+    type Error = HLParserError;
+
+    fn try_into(self) -> Result<Price, Self::Error> {
+        if let Value::Price(p) = self {
+            Ok(p)
+        } else {
+            Err(HLParserError::Extract(self))
+        }
+    }
 }
 
 pub fn parse_price(input: &str) -> HLParserIResult<&str, Price> {

@@ -6,6 +6,7 @@ pub use crate::parsers::{
 };
 
 use nom::error::{ErrorKind, FromExternalError, ParseError};
+use parsers::journal::Value;
 use thiserror::Error;
 
 pub type HLParserIResult<I, O> = nom::IResult<I, O, HLParserError>;
@@ -21,6 +22,8 @@ pub enum HLParserError {
     Validation(String),
     #[error("Invalid include path: {0}")]
     IncludePath(String),
+    #[error("Error extracting parsed value")]
+    Extract(Value),
 }
 
 impl<'a> From<nom::error::Error<&'a str>> for HLParserError {
