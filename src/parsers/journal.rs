@@ -72,6 +72,24 @@ impl Journal {
     pub fn commodities(&self) -> Vec<Commodity> {
         self.commodities.clone()
     }
+
+    pub fn payees(&self) -> Vec<String> {
+        let mut tx_payees: Vec<String> = self
+            .transactions
+            .iter()
+            .filter_map(|t| t.description.payee.clone())
+            .collect();
+        tx_payees.sort();
+        let mut unique_payees: Vec<String> = vec![];
+
+        tx_payees.iter().for_each(|p| {
+            if !unique_payees.contains(p) {
+                unique_payees.push(p.clone());
+            }
+        });
+
+        unique_payees
+    }
 }
 
 fn parse_include_statement(input: &str) -> HLParserIResult<&str, PathBuf> {
