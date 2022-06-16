@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use nom::{branch::alt, character::complete::char, combinator::opt, sequence::terminated};
 
 use crate::HLParserIResult;
@@ -7,6 +9,16 @@ pub enum Status {
     Unmarked,
     Pending,
     Cleared,
+}
+
+impl Display for Status {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match &self {
+            Status::Unmarked => write!(f, ""),
+            Status::Pending => write!(f, " ! "),
+            Status::Cleared => write!(f, " * "),
+        }
+    }
 }
 
 pub fn parse_status(input: &str) -> HLParserIResult<&str, Status> {
