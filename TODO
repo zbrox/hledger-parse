@@ -13,3 +13,4 @@
 - transaction validation
 - more test cases
 - optimize
+- test validity of all display trait implementations
