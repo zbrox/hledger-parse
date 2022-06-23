@@ -35,9 +35,31 @@ impl TryInto<Transaction> for Value {
 impl Display for Transaction {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match &self.secondary_date {
-            Some(sec_date) => write!(f, "{}={} {}", self.primary_date, sec_date, self.description),
-            None => write!(f, "{} {}", self.primary_date, self.description),
+            Some(sec_date) => write!(f, "{}={}", self.primary_date, sec_date)?,
+            None => write!(f, "{} ", self.primary_date)?,
+        };
+        write!(f, "{}", self.status)?;
+        if self.status != Status::Unmarked {
+            write!(f, " ")?;
         }
+        write!(f, "{}", self.description)?;
+        if !self.tags.is_empty() {
+            write!(f, " ; ")?;
+            write!(
+                f,
+                "{}",
+                self.tags
+                    .iter()
+                    .map(|t| format!("{}", t))
+                    .collect::<Vec<String>>()
+                    .join(", ")
+            )?;
+        }
+        writeln!(f)?;
+        for p in &self.postings {
+            writeln!(f, "{}", p)?;
+        }
+        Ok(())
     }
 }
 
