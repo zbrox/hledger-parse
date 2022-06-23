@@ -1,7 +1,28 @@
+use std::fmt::Display;
+
 use chrono::NaiveDate;
 
 use crate::{amount::types::Amount, journal::types::Value, HLParserError};
 
+/// Stores information about declared market prices
+/// 
+/// # Example:
+/// 
+/// ```
+/// use chrono::NaiveDate;
+/// use rust_decimal_macros::dec;
+/// use hledger_parse::{Amount, Price};
+/// 
+/// let price = Price {
+///     commodity: "EUR".to_string(),
+///     date: NaiveDate::from_ymd(2022, 6, 23),
+///     amount: Amount {
+///         currency: "USD".to_string(),
+///         value: dec!(1.05),
+///     }
+/// };
+/// assert_eq!("P 2022-06-23 EUR 1.05 USD", format!("{}", price));
+/// ```
 #[derive(PartialEq, Debug, Clone)]
 pub struct Price {
     pub commodity: String,
