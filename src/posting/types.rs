@@ -1,5 +1,41 @@
+use std::fmt::Display;
+
 use crate::{amount::types::Amount, status::types::Status};
 
+/// Stores information about a posting of a transaction
+/// 
+/// # Example
+/// 
+/// ```
+/// use rust_decimal_macros::dec;
+/// use hledger_parse::{Posting, Status, Amount};
+/// 
+/// let posting = Posting {
+///     status: Status::Pending,
+///     account_name: "expenses:food".to_string(),
+///     amount: Some(Amount {
+///         currency: "EUR".to_string(),
+///         value: dec!(100)
+///     }),
+///     unit_price: None,
+///     total_price: None,
+/// };
+/// assert_eq!("  ! expenses:food  100 EUR", format!("{}", posting));
+/// let posting = Posting {
+///     status: Status::Pending,
+///     account_name: "expenses:food".to_string(),
+///     amount: Some(Amount {
+///         currency: "EUR".to_string(),
+///         value: dec!(100)
+///     }),
+///     unit_price: Some(Amount {
+///         currency: "USD".to_string(),
+///         value: dec!(1.05)
+///     }),
+///     total_price: None,
+/// };
+/// assert_eq!("  ! expenses:food  100 EUR @ 1.05 USD", format!("{}", posting));
+/// ```
 #[derive(PartialEq, Debug, Clone)]
 pub struct Posting {
     pub status: Status,
