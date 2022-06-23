@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, fmt::Display};
 
 use crate::{
     account::types::Account, commodity::types::Commodity, price::types::Price,
@@ -40,6 +40,25 @@ impl TryFrom<PathBuf> for Journal {
         })?;
 
         Ok(journal)
+    }
+}
+
+impl Display for Journal {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for a in &self.accounts {
+            writeln!(f, "account {}", a)?;
+        }
+        for c in &self.commodities {
+            writeln!(f, "{}", c)?;
+        }
+        for p in &self.prices {
+            writeln!(f, "{}", p)?;
+        }
+        for t in &self.transactions {
+            writeln!(f, "{}", t)?;
+        }
+
+        Ok(())
     }
 }
 
