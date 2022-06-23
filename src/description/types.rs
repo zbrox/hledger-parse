@@ -1,5 +1,21 @@
 use std::fmt::Display;
 
+/// Stores information about a transaction description
+/// 
+/// This can hold a note about the transaction and the payee
+/// 
+/// # Example
+/// 
+/// ```
+/// use hledger_parse::Description;
+/// 
+/// let description = Description { payee: None, note: Some("drinks".to_string()) };
+/// assert_eq!("drinks", format!("{}", description));
+/// let description = Description { payee: Some("Cheers bar".to_string()), note: Some("drinks".to_string()) };
+/// assert_eq!("Cheers bar | drinks", format!("{}", description));
+/// let description = Description { payee: Some("Cheers bar".to_string()), note: None };
+/// assert_eq!("Cheers bar |", format!("{}", description));
+/// ```
 #[derive(PartialEq, Debug, Clone)]
 pub struct Description {
     pub payee: Option<String>,
