@@ -9,6 +9,12 @@ pub struct Price {
     pub amount: Amount,
 }
 
+impl Display for Price {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "P {} {} {}", self.date, self.commodity, self.amount)
+    }
+}
+
 impl TryInto<Price> for Value {
     type Error = HLParserError;
 
