@@ -9,6 +9,62 @@ use crate::{
     status::types::Status, tag::types::Tag, HLParserError,
 };
 
+/// Transaction information
+///
+/// # Example
+///
+/// ```
+/// use rust_decimal_macros::dec;
+/// use chrono::NaiveDate;
+/// use hledger_parse::{Amount, Description, Posting, Status, Tag, Transaction};
+///
+/// let transaction = Transaction {
+///     primary_date: NaiveDate::from_ymd(2022, 6, 23),
+///     secondary_date: None,
+///     status: Status::Cleared,
+///     code: Some("12345".to_string()),
+///     description: Description {
+///         payee: Some("Cheers".to_string()),
+///         note: None,
+///     },
+///     postings: vec![
+///         Posting {
+///             status: Status::Unmarked,
+///             account_name: "assets:cash".into(),
+///             amount: Some(Amount {
+///                 currency: "EUR".into(),
+///                 value: dec!(-5),
+///             }),
+///             unit_price: None,
+///             total_price: None,
+///         },
+///         Posting {
+///             status: Status::Unmarked,
+///             account_name: "expenses:bars".into(),
+///             amount: Some(Amount {
+///                 currency: "EUR".into(),
+///                 value: dec!(5),
+///             }),
+///             unit_price: None,
+///             total_price: None,
+///         },
+///     ],
+///     tags: vec![
+///         Tag {
+///             name: "tag1".to_string(),
+///             value: Some("some value".to_string()),
+///         },
+///         Tag {
+///             name: "tag2".to_string(),
+///             value: None,
+///         },
+///     ]
+/// };
+/// assert_eq!(r#"2022-06-23 * Cheers | ; tag1:some value, tag2:
+///    assets:cash  -5 EUR
+///    expenses:bars  5 EUR
+/// "#, format!("{}", transaction));
+/// ```
 #[derive(PartialEq, Debug, Clone)]
 pub struct Transaction {
     pub primary_date: NaiveDate,
