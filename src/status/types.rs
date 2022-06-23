@@ -1,5 +1,16 @@
 use std::fmt::Display;
 
+/// Clearing status of a posting or a transaction
+/// 
+/// # Example
+/// 
+/// ```
+/// use hledger_parse::Status;
+/// 
+/// assert_eq!("", format!("{}", Status::Unmarked));
+/// assert_eq!("!", format!("{}", Status::Pending));
+/// assert_eq!("*", format!("{}", Status::Cleared));
+/// ```
 #[derive(PartialEq, Debug, Clone)]
 pub enum Status {
     Unmarked,
