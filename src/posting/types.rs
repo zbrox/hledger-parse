@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use crate::{amount::types::Amount, status::types::Status};
 
-/// Stores information about a posting of a transaction
+/// Posting of a transaction
 /// 
 /// # Example
 /// 

@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-/// Stores information about a transaction description
+/// Transaction description
 /// 
 /// This can hold a note about the transaction and the payee
 /// 

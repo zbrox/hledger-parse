@@ -8,7 +8,7 @@ pub enum AmountSign {
     Minus,
 }
 
-/// Stores information for an amount
+/// Amounts used throughout
 ///
 /// Defaults to displaying amounts in the format `<VALUE> <CURRENCY>`, using a dot as the decimal separator.
 ///

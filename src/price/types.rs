@@ -4,7 +4,7 @@ use chrono::NaiveDate;
 
 use crate::{amount::types::Amount, journal::types::Value, HLParserError};
 
-/// Stores information about declared market prices
+/// Declared market prices
 /// 
 /// # Example:
 /// 

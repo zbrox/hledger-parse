@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use crate::{journal::types::Value, HLParserError};
 
-/// Stores information on a declared commodity
+/// Declared commodity
 /// 
 /// # Example
 /// 

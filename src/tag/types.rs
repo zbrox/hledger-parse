@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 
-/// Stores information about a tag and its possible value
+/// A tag and its possible value
 /// 
 /// # Example
 /// 
