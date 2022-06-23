@@ -44,3 +44,9 @@ impl Display for Description {
         }
     }
 }
+
+impl Description {
+    pub fn is_missing(&self) -> bool {
+        self.payee.is_none() && self.note.is_none()
+    }
+}
