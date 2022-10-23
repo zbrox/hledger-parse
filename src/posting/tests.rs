@@ -13,7 +13,7 @@ fn test_parse_simple_posting() {
             "",
             Posting {
                 status: Status::Unmarked,
-                account_name: "assets:cash".into(),
+                account: "assets:cash".into(),
                 amount: Some(Amount {
                     currency: "$".into(),
                     value: dec!(100),
@@ -33,7 +33,7 @@ fn test_correct_termination_parse_posting() {
             "\n2008/06/01 gift\n  assets:bank:checking  $1",
             Posting {
                 status: Status::Unmarked,
-                account_name: "assets:cash".into(),
+                account: "assets:cash".into(),
                 amount: None,
                 unit_price: None,
                 total_price: None,
@@ -50,7 +50,7 @@ fn test_parse_posting_with_status() {
             "",
             Posting {
                 status: Status::Pending,
-                account_name: "assets:cash".into(),
+                account: "assets:cash".into(),
                 amount: Some(Amount {
                     currency: "$".into(),
                     value: dec!(100)
@@ -70,7 +70,7 @@ fn test_parse_posting_without_amount() {
             "",
             Posting {
                 status: Status::Unmarked,
-                account_name: "assets:cash".into(),
+                account: "assets:cash".into(),
                 amount: None,
                 unit_price: None,
                 total_price: None,
@@ -99,7 +99,7 @@ fn test_parse_posting_with_unit_price() {
             "",
             Posting {
                 status: Status::Pending,
-                account_name: "assets:cash".into(),
+                account: "assets:cash".into(),
                 amount: Some(Amount {
                     currency: "$".into(),
                     value: dec!(100)
@@ -122,7 +122,7 @@ fn test_parse_posting_with_total_price() {
             "",
             Posting {
                 status: Status::Pending,
-                account_name: "assets:cash".into(),
+                account: "assets:cash".into(),
                 amount: Some(Amount {
                     currency: "$".into(),
                     value: dec!(100)

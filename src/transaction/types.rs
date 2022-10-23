@@ -30,7 +30,7 @@ use crate::{
 ///     postings: vec![
 ///         Posting {
 ///             status: Status::Unmarked,
-///             account_name: "assets:cash".into(),
+///             account: "assets:cash".into(),
 ///             amount: Some(Amount {
 ///                 currency: "EUR".into(),
 ///                 value: dec!(-5),
@@ -40,7 +40,7 @@ use crate::{
 ///         },
 ///         Posting {
 ///             status: Status::Unmarked,
-///             account_name: "expenses:bars".into(),
+///             account: "expenses:bars".into(),
 ///             amount: Some(Amount {
 ///                 currency: "EUR".into(),
 ///                 value: dec!(5),

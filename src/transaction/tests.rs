@@ -32,7 +32,7 @@ fn test_simple_transaction() {
                 status: Status::Unmarked,
                 postings: vec![
                     Posting {
-                        account_name: "assets:bank:checking".into(),
+                        account: "assets:bank:checking".into(),
                         status: Status::Unmarked,
                         amount: Some(Amount {
                             currency: "$".into(),
@@ -42,7 +42,7 @@ fn test_simple_transaction() {
                         total_price: None,
                     },
                     Posting {
-                        account_name: "income:salary".into(),
+                        account: "income:salary".into(),
                         status: Status::Unmarked,
                         amount: Some(Amount {
                             currency: "$".into(),
@@ -81,7 +81,7 @@ fn test_empty_description_cleared_transaction() {
                 status: Status::Cleared,
                 postings: vec![
                     Posting {
-                        account_name: "assets:bank:checking".into(),
+                        account: "assets:bank:checking".into(),
                         status: Status::Unmarked,
                         amount: Some(Amount {
                             currency: "$".into(),
@@ -91,7 +91,7 @@ fn test_empty_description_cleared_transaction() {
                         total_price: None,
                     },
                     Posting {
-                        account_name: "income:salary".into(),
+                        account: "income:salary".into(),
                         status: Status::Unmarked,
                         amount: Some(Amount {
                             currency: "$".into(),
@@ -130,7 +130,7 @@ fn test_empty_description_unmarked_transaction() {
                 status: Status::Unmarked,
                 postings: vec![
                     Posting {
-                        account_name: "assets:bank:checking".into(),
+                        account: "assets:bank:checking".into(),
                         status: Status::Unmarked,
                         amount: Some(Amount {
                             currency: "$".into(),
@@ -140,7 +140,7 @@ fn test_empty_description_unmarked_transaction() {
                         total_price: None,
                     },
                     Posting {
-                        account_name: "income:salary".into(),
+                        account: "income:salary".into(),
                         status: Status::Unmarked,
                         amount: Some(Amount {
                             currency: "$".into(),
@@ -182,7 +182,7 @@ fn test_transaction_ending_after_postings() {
                 status: Status::Unmarked,
                 postings: vec![
                     Posting {
-                        account_name: "assets:bank:checking".into(),
+                        account: "assets:bank:checking".into(),
                         status: Status::Unmarked,
                         amount: Some(Amount {
                             currency: "$".into(),
@@ -192,7 +192,7 @@ fn test_transaction_ending_after_postings() {
                         total_price: None,
                     },
                     Posting {
-                        account_name: "income:salary".into(),
+                        account: "income:salary".into(),
                         status: Status::Unmarked,
                         amount: None,
                         unit_price: None,
@@ -228,7 +228,7 @@ fn test_simple_transaction_with_empty_amount_posting() {
                 status: Status::Unmarked,
                 postings: vec![
                     Posting {
-                        account_name: "assets:bank:checking".into(),
+                        account: "assets:bank:checking".into(),
                         status: Status::Unmarked,
                         amount: Some(Amount {
                             currency: "$".into(),
@@ -238,7 +238,7 @@ fn test_simple_transaction_with_empty_amount_posting() {
                         total_price: None,
                     },
                     Posting {
-                        account_name: "income:salary".into(),
+                        account: "income:salary".into(),
                         status: Status::Unmarked,
                         amount: None,
                         unit_price: None,
@@ -274,7 +274,7 @@ fn test_transaction_with_code() {
                 status: Status::Unmarked,
                 postings: vec![
                     Posting {
-                        account_name: "assets:bank:checking".into(),
+                        account: "assets:bank:checking".into(),
                         status: Status::Unmarked,
                         amount: Some(Amount {
                             currency: "$".into(),
@@ -284,7 +284,7 @@ fn test_transaction_with_code() {
                         total_price: None,
                     },
                     Posting {
-                        account_name: "income:salary".into(),
+                        account: "income:salary".into(),
                         status: Status::Unmarked,
                         amount: Some(Amount {
                             currency: "$".into(),
@@ -323,7 +323,7 @@ fn test_transaction_with_status() {
                 status: Status::Cleared,
                 postings: vec![
                     Posting {
-                        account_name: "assets:bank:checking".into(),
+                        account: "assets:bank:checking".into(),
                         status: Status::Unmarked,
                         amount: Some(Amount {
                             currency: "$".into(),
@@ -333,7 +333,7 @@ fn test_transaction_with_status() {
                         total_price: None,
                     },
                     Posting {
-                        account_name: "income:salary".into(),
+                        account: "income:salary".into(),
                         status: Status::Unmarked,
                         amount: Some(Amount {
                             currency: "$".into(),
@@ -372,7 +372,7 @@ fn test_transaction_no_description() {
                 status: Status::Unmarked,
                 postings: vec![
                     Posting {
-                        account_name: "assets:bank:checking".into(),
+                        account: "assets:bank:checking".into(),
                         status: Status::Unmarked,
                         amount: Some(Amount {
                             currency: "$".into(),
@@ -382,7 +382,7 @@ fn test_transaction_no_description() {
                         total_price: None,
                     },
                     Posting {
-                        account_name: "income:salary".into(),
+                        account: "income:salary".into(),
                         status: Status::Unmarked,
                         amount: Some(Amount {
                             currency: "$".into(),
@@ -434,7 +434,7 @@ fn test_transaction_with_tags() {
                 status: Status::Unmarked,
                 postings: vec![
                     Posting {
-                        account_name: "assets:bank:checking".into(),
+                        account: "assets:bank:checking".into(),
                         status: Status::Unmarked,
                         amount: Some(Amount {
                             currency: "$".into(),
@@ -444,7 +444,7 @@ fn test_transaction_with_tags() {
                         total_price: None,
                     },
                     Posting {
-                        account_name: "income:salary".into(),
+                        account: "income:salary".into(),
                         status: Status::Unmarked,
                         amount: Some(Amount {
                             currency: "$".into(),
@@ -472,7 +472,7 @@ fn test_transaction_validate_none_amount_postings() {
         },
         postings: vec![
             Posting {
-                account_name: "assets:bank:checking".into(),
+                account: "assets:bank:checking".into(),
                 amount: Some(Amount {
                     currency: "$".into(),
                     value: dec!(1),
@@ -482,7 +482,7 @@ fn test_transaction_validate_none_amount_postings() {
                 total_price: None,
             },
             Posting {
-                account_name: "income:salary".into(),
+                account: "income:salary".into(),
                 amount: None,
                 status: Status::Unmarked,
                 unit_price: None,
@@ -508,7 +508,7 @@ fn test_transaction_validate_not_zero_sum_postings() {
         },
         postings: vec![
             Posting {
-                account_name: "assets:bank:checking".into(),
+                account: "assets:bank:checking".into(),
                 amount: Some(Amount {
                     currency: "$".into(),
                     value: dec!(1),
@@ -518,7 +518,7 @@ fn test_transaction_validate_not_zero_sum_postings() {
                 total_price: None,
             },
             Posting {
-                account_name: "income:salary".into(),
+                account: "income:salary".into(),
                 amount: Some(Amount {
                     currency: "$".into(),
                     value: dec!(0),

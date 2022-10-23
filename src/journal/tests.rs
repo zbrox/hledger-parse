@@ -45,7 +45,7 @@ fn test_flatten_values() {
             },
             postings: vec![
                 Posting {
-                    account_name: "assets:bank:checking".into(),
+                    account: "assets:bank:checking".into(),
                     amount: Some(Amount {
                         currency: "$".into(),
                         value: dec!(1),
@@ -55,7 +55,7 @@ fn test_flatten_values() {
                     total_price: None,
                 },
                 Posting {
-                    account_name: "income:salary".into(),
+                    account: "income:salary".into(),
                     amount: None,
                     status: Status::Unmarked,
                     unit_price: None,
@@ -76,7 +76,7 @@ fn test_flatten_values() {
                 },
                 postings: vec![
                     Posting {
-                        account_name: "assets:bank:checking".into(),
+                        account: "assets:bank:checking".into(),
                         amount: Some(Amount {
                             currency: "$".into(),
                             value: dec!(1),
@@ -86,7 +86,7 @@ fn test_flatten_values() {
                         total_price: None,
                     },
                     Posting {
-                        account_name: "income:salary".into(),
+                        account: "income:salary".into(),
                         amount: None,
                         status: Status::Unmarked,
                         unit_price: None,
@@ -106,7 +106,7 @@ fn test_flatten_values() {
                 },
                 postings: vec![
                     Posting {
-                        account_name: "assets:bank:checking".into(),
+                        account: "assets:bank:checking".into(),
                         amount: Some(Amount {
                             currency: "$".into(),
                             value: dec!(1),
@@ -116,7 +116,7 @@ fn test_flatten_values() {
                         total_price: None,
                     },
                     Posting {
-                        account_name: "income:salary".into(),
+                        account: "income:salary".into(),
                         amount: None,
                         status: Status::Unmarked,
                         unit_price: None,
@@ -141,7 +141,7 @@ fn test_flatten_values() {
                 },
                 postings: vec![
                     Posting {
-                        account_name: "assets:bank:checking".into(),
+                        account: "assets:bank:checking".into(),
                         amount: Some(Amount {
                             currency: "$".into(),
                             value: dec!(1),
@@ -151,7 +151,7 @@ fn test_flatten_values() {
                         total_price: None,
                     },
                     Posting {
-                        account_name: "income:salary".into(),
+                        account: "income:salary".into(),
                         amount: None,
                         status: Status::Unmarked,
                         unit_price: None,
@@ -171,7 +171,7 @@ fn test_flatten_values() {
                 },
                 postings: vec![
                     Posting {
-                        account_name: "assets:bank:checking".into(),
+                        account: "assets:bank:checking".into(),
                         amount: Some(Amount {
                             currency: "$".into(),
                             value: dec!(1),
@@ -181,7 +181,7 @@ fn test_flatten_values() {
                         total_price: None,
                     },
                     Posting {
-                        account_name: "income:salary".into(),
+                        account: "income:salary".into(),
                         amount: None,
                         status: Status::Unmarked,
                         unit_price: None,
@@ -201,7 +201,7 @@ fn test_flatten_values() {
                 },
                 postings: vec![
                     Posting {
-                        account_name: "assets:bank:checking".into(),
+                        account: "assets:bank:checking".into(),
                         amount: Some(Amount {
                             currency: "$".into(),
                             value: dec!(1),
@@ -211,7 +211,7 @@ fn test_flatten_values() {
                         total_price: None,
                     },
                     Posting {
-                        account_name: "income:salary".into(),
+                        account: "income:salary".into(),
                         amount: None,
                         status: Status::Unmarked,
                         unit_price: None,
@@ -296,7 +296,7 @@ fn test_parse_journal_simple() {
                     },
                     postings: vec![
                         Posting {
-                            account_name: "assets:bank:checking".into(),
+                            account: "assets:bank:checking".into(),
                             amount: Some(Amount {
                                 currency: "$".into(),
                                 value: dec!(1),
@@ -306,7 +306,7 @@ fn test_parse_journal_simple() {
                             total_price: None,
                         },
                         Posting {
-                            account_name: "income:salary".into(),
+                            account: "income:salary".into(),
                             amount: None,
                             status: Status::Unmarked,
                             unit_price: None,
@@ -326,7 +326,7 @@ fn test_parse_journal_simple() {
                     },
                     postings: vec![
                         Posting {
-                            account_name: "assets:bank:checking".into(),
+                            account: "assets:bank:checking".into(),
                             amount: Some(Amount {
                                 currency: "$".into(),
                                 value: dec!(1),
@@ -336,7 +336,7 @@ fn test_parse_journal_simple() {
                             total_price: None,
                         },
                         Posting {
-                            account_name: "income:gifts".into(),
+                            account: "income:gifts".into(),
                             amount: None,
                             status: Status::Unmarked,
                             unit_price: None,
@@ -356,7 +356,7 @@ fn test_parse_journal_simple() {
                     },
                     postings: vec![
                         Posting {
-                            account_name: "assets:bank:saving".into(),
+                            account: "assets:bank:saving".into(),
                             amount: Some(Amount {
                                 currency: "$".into(),
                                 value: dec!(1),
@@ -366,7 +366,7 @@ fn test_parse_journal_simple() {
                             total_price: None,
                         },
                         Posting {
-                            account_name: "assets:bank:checking".into(),
+                            account: "assets:bank:checking".into(),
                             amount: None,
                             status: Status::Unmarked,
                             unit_price: None,
@@ -386,7 +386,7 @@ fn test_parse_journal_simple() {
                     },
                     postings: vec![
                         Posting {
-                            account_name: "expenses:food".into(),
+                            account: "expenses:food".into(),
                             amount: Some(Amount {
                                 currency: "$".into(),
                                 value: dec!(1),
@@ -396,7 +396,7 @@ fn test_parse_journal_simple() {
                             total_price: None,
                         },
                         Posting {
-                            account_name: "expenses:supplies".into(),
+                            account: "expenses:supplies".into(),
                             amount: Some(Amount {
                                 currency: "$".into(),
                                 value: dec!(1),
@@ -406,7 +406,7 @@ fn test_parse_journal_simple() {
                             total_price: None,
                         },
                         Posting {
-                            account_name: "assets:cash".into(),
+                            account: "assets:cash".into(),
                             amount: None,
                             status: Status::Unmarked,
                             unit_price: None,
@@ -426,7 +426,7 @@ fn test_parse_journal_simple() {
                     },
                     postings: vec![
                         Posting {
-                            account_name: "liabilities:debts".into(),
+                            account: "liabilities:debts".into(),
                             amount: Some(Amount {
                                 currency: "$".into(),
                                 value: dec!(1),
@@ -436,7 +436,7 @@ fn test_parse_journal_simple() {
                             total_price: None,
                         },
                         Posting {
-                            account_name: "assets:bank:checking".into(),
+                            account: "assets:bank:checking".into(),
                             amount: None,
                             status: Status::Unmarked,
                             unit_price: None,

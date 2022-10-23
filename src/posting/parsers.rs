@@ -85,7 +85,7 @@ pub fn parse_posting(input: &str) -> HLParserIResult<&str, Posting> {
         tail,
         Posting {
             status,
-            account_name: account_name.trim().into(),
+            account: account_name.trim().into(),
             amount: complex_amount.amount,
             unit_price: complex_amount.unit_price,
             total_price: complex_amount.total_price,
