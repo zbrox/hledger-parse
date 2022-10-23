@@ -23,7 +23,7 @@ use crate::{amount::types::Amount, journal::types::Value, HLParserError};
 /// };
 /// assert_eq!("P 2022-06-23 EUR 1.05 USD", format!("{}", price));
 /// ```
-#[derive(PartialEq, Debug, Clone)]
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub struct Price {
     pub commodity: String,
     pub date: NaiveDate,

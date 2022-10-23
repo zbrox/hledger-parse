@@ -65,7 +65,7 @@ use crate::{
 ///    expenses:bars  5 EUR
 /// "#, format!("{}", transaction));
 /// ```
-#[derive(PartialEq, Debug, Clone)]
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub struct Transaction {
     pub primary_date: NaiveDate,
     pub secondary_date: Option<NaiveDate>,
@@ -119,7 +119,7 @@ impl Display for Transaction {
     }
 }
 
-impl<'a> Transaction {
+impl Transaction {
     pub fn validate(&self) -> Result<(), HLParserError> {
         self.validate_postings()?;
         Ok(())

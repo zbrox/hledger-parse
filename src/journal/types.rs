@@ -17,7 +17,7 @@ pub enum Value {
     Commodity(Commodity),
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Eq, Debug)]
 pub struct Journal {
     transactions: Vec<Transaction>,
     accounts: Vec<Account>,

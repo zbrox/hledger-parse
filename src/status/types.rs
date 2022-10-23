@@ -11,7 +11,7 @@ use std::fmt::Display;
 /// assert_eq!("!", format!("{}", Status::Pending));
 /// assert_eq!("*", format!("{}", Status::Cleared));
 /// ```
-#[derive(PartialEq, Debug, Clone)]
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub enum Status {
     Unmarked,
     Pending,

@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use rust_decimal::Decimal;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Eq)]
 pub enum AmountSign {
     Plus,
     Minus,
@@ -21,7 +21,7 @@ pub enum AmountSign {
 /// let amount = Amount { currency: "EUR".to_string(), value: dec!(19.99) };
 /// assert_eq!("19.99 EUR", format!("{}", amount));
 /// ```
-#[derive(PartialEq, Debug, Clone)]
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub struct Amount {
     pub currency: String,
     pub value: Decimal,

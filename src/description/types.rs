@@ -16,7 +16,7 @@ use std::fmt::Display;
 /// let description = Description { payee: Some("Cheers bar".to_string()), note: None };
 /// assert_eq!("Cheers bar |", format!("{}", description));
 /// ```
-#[derive(PartialEq, Debug, Clone)]
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub struct Description {
     pub payee: Option<String>,
     pub note: Option<String>,

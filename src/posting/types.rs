@@ -36,7 +36,7 @@ use crate::{amount::types::Amount, status::types::Status, Account};
 /// };
 /// assert_eq!("  ! expenses:food  100 EUR @ 1.05 USD", format!("{}", posting));
 /// ```
-#[derive(PartialEq, Debug, Clone)]
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub struct Posting {
     pub status: Status,
     pub account: Account,

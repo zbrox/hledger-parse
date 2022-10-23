@@ -13,7 +13,7 @@ use std::fmt::Display;
 /// let tag = Tag { name: "tag1".to_string(), value: Some("some value".to_string()) };
 /// assert_eq!("tag1:some value", format!("{}", tag));
 /// ```
-#[derive(PartialEq, Debug, Clone)]
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub struct Tag {
     pub name: String,
     pub value: Option<String>,

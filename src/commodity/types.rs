@@ -14,7 +14,7 @@ use crate::{journal::types::Value, HLParserError};
 /// let commodity = Commodity { name: "INR".to_string(), format: Some("INR 1,00,00,000.00".to_string()) };
 /// assert_eq!("commodity INR\n  format INR 1,00,00,000.00", format!("{}", commodity));
 /// ```
-#[derive(PartialEq, Debug, Clone)]
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub struct Commodity {
     pub name: String,
     pub format: Option<String>, // TODO: temp before I decide how to store the format properly
