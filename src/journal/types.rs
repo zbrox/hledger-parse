@@ -1,4 +1,4 @@
-use std::{path::PathBuf, fmt::Display};
+use std::{fmt::Display, path::PathBuf};
 
 use crate::{
     account::types::Account, commodity::types::Commodity, price::types::Price,
@@ -109,5 +109,22 @@ impl Journal {
         });
 
         unique_payees
+    }
+
+    pub fn validate_accounts(&self) -> Result<(), HLParserError> {
+        let undefined_accounts: Vec<Account> = self
+            .transactions
+            .iter()
+            .flat_map(|t| t.postings.clone())
+            .map(|p| p.account)
+            .filter(|a| !self.accounts.contains(a))
+            .collect();
+        if !undefined_accounts.is_empty() {
+            return Err(HLParserError::Validation(format!(
+                "The following accounts are not defined:\n{}",
+                undefined_accounts.iter().map(|v| v.to_string()).collect::<Vec<String>>().join("\n")
+            )));
+        }
+        Ok(())
     }
 }
