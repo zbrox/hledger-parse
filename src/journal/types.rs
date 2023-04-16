@@ -122,7 +122,11 @@ impl Journal {
         if !undefined_accounts.is_empty() {
             return Err(HLParserError::Validation(format!(
                 "The following accounts are not defined:\n{}",
-                undefined_accounts.iter().map(|v| v.to_string()).collect::<Vec<String>>().join("\n")
+                undefined_accounts
+                    .iter()
+                    .map(|v| v.to_string())
+                    .collect::<Vec<String>>()
+                    .join("\n")
             )));
         }
         Ok(())

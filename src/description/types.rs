@@ -1,14 +1,14 @@
 use std::fmt::Display;
 
 /// Transaction description
-/// 
+///
 /// This can hold a note about the transaction and the payee
-/// 
+///
 /// # Example
-/// 
+///
 /// ```
 /// use hledger_parse::Description;
-/// 
+///
 /// let description = Description { payee: None, note: Some("drinks".to_string()) };
 /// assert_eq!("drinks", format!("{}", description));
 /// let description = Description { payee: Some("Cheers bar".to_string()), note: Some("drinks".to_string()) };

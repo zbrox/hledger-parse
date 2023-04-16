@@ -5,14 +5,14 @@ use chrono::NaiveDate;
 use crate::{amount::types::Amount, journal::types::Value, HLParserError};
 
 /// Declared market prices
-/// 
+///
 /// # Example:
-/// 
+///
 /// ```
 /// use chrono::NaiveDate;
 /// use rust_decimal_macros::dec;
 /// use hledger_parse::{Amount, Price};
-/// 
+///
 /// let price = Price {
 ///     commodity: "EUR".to_string(),
 ///     date: NaiveDate::from_ymd(2022, 6, 23),

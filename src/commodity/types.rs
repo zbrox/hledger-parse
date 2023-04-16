@@ -3,12 +3,12 @@ use std::fmt::Display;
 use crate::{journal::types::Value, HLParserError};
 
 /// Declared commodity
-/// 
+///
 /// # Example
-/// 
+///
 /// ```
 /// use hledger_parse::Commodity;
-/// 
+///
 /// let commodity = Commodity { name: "INR".to_string(), format: None };
 /// assert_eq!("commodity INR", format!("{}", commodity));
 /// let commodity = Commodity { name: "INR".to_string(), format: Some("INR 1,00,00,000.00".to_string()) };
