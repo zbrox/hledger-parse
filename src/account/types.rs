@@ -2,14 +2,17 @@ use std::fmt::Display;
 
 use crate::{journal::types::Value, HLParserError};
 
+/// A ledger account
 #[derive(Clone, Debug, PartialEq, Hash, Eq)]
 pub struct Account(String);
 
 impl Account {
+    /// Returns the full path components of an account
     pub fn components(&self) -> Vec<String> {
         self.0.split(':').map(|v| v.to_string()).collect()
     }
 
+    /// Returns true if the account is a child of the given account
     pub fn is_child_of(&self, account: &Account) -> bool {
         self.0.starts_with(&account.to_string())
     }

@@ -14,7 +14,9 @@ use std::fmt::Display;
 /// ```
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct Tag {
+    /// The name of the tag
     pub name: String,
+    /// The optional value of the tag
     pub value: Option<String>,
 }
 

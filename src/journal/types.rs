@@ -17,6 +17,7 @@ pub enum Value {
     Commodity(Commodity),
 }
 
+/// A journal is a collection of transactions, accounts, prices, and commodities
 #[derive(PartialEq, Eq, Debug)]
 pub struct Journal {
     transactions: Vec<Transaction>,

@@ -16,7 +16,9 @@ use crate::{journal::types::Value, HLParserError};
 /// ```
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct Commodity {
+    /// The name of the commodity
     pub name: String,
+    /// The format of the commodity
     pub format: Option<String>, // TODO: temp before I decide how to store the format properly
 }
 

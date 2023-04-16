@@ -67,12 +67,19 @@ use crate::{
 /// ```
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct Transaction {
+    /// The primary date of the transaction
     pub primary_date: NaiveDate,
+    /// The optional secondary date, e.g. the clearance date
     pub secondary_date: Option<NaiveDate>,
+    /// The status of the transaction
     pub status: Status,
+    /// The optional code of the transaction
     pub code: Option<String>,
+    /// The description of the transaction
     pub description: Description,
+    /// The postings of the transaction
     pub postings: Vec<Posting>,
+    /// The tags of the transaction
     pub tags: Vec<Tag>,
 }
 

@@ -25,8 +25,11 @@ use crate::{amount::types::Amount, journal::types::Value, HLParserError};
 /// ```
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct Price {
+    /// The commodity of the price
     pub commodity: String,
+    /// The date of the price
     pub date: NaiveDate,
+    /// The amount of the price
     pub amount: Amount,
 }
 

@@ -13,6 +13,7 @@ use std::fmt::Display;
 /// ```
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub enum Status {
+    /// The status has not been specified
     Unmarked,
     Pending,
     Cleared,

@@ -18,7 +18,9 @@ use std::fmt::Display;
 /// ```
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct Description {
+    /// The payee of the transaction
     pub payee: Option<String>,
+    /// The note of the transaction
     pub note: Option<String>,
 }
 

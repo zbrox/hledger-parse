@@ -23,7 +23,9 @@ pub enum AmountSign {
 /// ```
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct Amount {
+    /// The currency of the amount
     pub currency: String,
+    /// The value of the amount
     pub value: Decimal,
 }
 

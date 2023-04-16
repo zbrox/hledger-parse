@@ -38,10 +38,15 @@ use crate::{amount::types::Amount, status::types::Status, Account};
 /// ```
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub struct Posting {
+    /// The status of the posting
     pub status: Status,
+    /// The account of the posting
     pub account: Account,
+    /// The amount of the posting
     pub amount: Option<Amount>,
+    /// The unit price of the posting
     pub unit_price: Option<Amount>,
+    /// The total price of the posting
     pub total_price: Option<Amount>,
 }
 
