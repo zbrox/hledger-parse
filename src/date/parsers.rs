@@ -48,7 +48,7 @@ fn parse_separator_date(
             }
         };
 
-        let primary_date = match NaiveDate::from_ymd_opt(y, m as u32, d as u32) {
+        let primary_date = match NaiveDate::from_ymd_opt(y, m, d) {
             Some(date) => date,
             None => {
                 return Err(nom::Err::Error(HLParserError::Parse(
@@ -67,7 +67,7 @@ fn parse_separator_date(
         };
 
         let secondary_date = match secondary_date_components {
-            Some((y, m, d)) => match NaiveDate::from_ymd_opt(y, m as u32, d as u32) {
+            Some((y, m, d)) => match NaiveDate::from_ymd_opt(y, m, d) {
                 Some(date) => Some(date),
                 None => {
                     return Err(nom::Err::Error(HLParserError::Parse(
