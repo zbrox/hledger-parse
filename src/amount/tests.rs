@@ -1,3 +1,4 @@
+use rstest::rstest;
 use rust_decimal_macros::dec;
 
 use crate::amount::{
@@ -7,265 +8,79 @@ use crate::amount::{
 
 use super::parsers::parse_money_amount;
 
-#[test]
-fn test_parse_amount_currency_prefixed() {
+#[rstest]
+#[case::simple("$100", "", "$", dec!(100))]
+#[case::simple_negative_after_curr("$-100", "", "$", dec!(-100))]
+#[case::simple_negative_before_curr("-$100", "", "$", dec!(-100))]
+#[case::simple_single_space("$ 100", "", "$", dec!(100))]
+#[case::simple_negative_after_curr_with_space("$ -100", "", "$", dec!(-100))]
+#[case::simple_multiple_spaces("$  100", "", "$", dec!(100))]
+#[case::simple_negative_multiple_spaces("$  -100", "", "$", dec!(-100))]
+#[case::complex_curr("\"silver coins\" 100", "", "silver coins", dec!(100))]
+#[case::complex_curr_negative("\"silver coins\"- 100", "", "silver coins", dec!(-100))]
+#[case::complex_curr_negative_prefix("-\"silver coins\" 100", "", "silver coins", dec!(-100))]
+#[case::complex_curr_multiple_spaces("\"silver coins\"   100", "", "silver coins", dec!(100))]
+#[case::complex_curr_negative_before_amount_multiple_spaces("\"silver coins\"   -100", "", "silver coins", dec!(-100))]
+#[case::suffix_curr("100EUR", "", "EUR", dec!(100))]
+#[case::suffix_curr_negative("-100EUR", "", "EUR", dec!(-100))]
+#[case::suffix_curr_negative_with_space("- 100EUR", "", "EUR", dec!(-100))]
+#[case::suffix_curr_negative_multiple_spaces("-   100EUR", "", "EUR", dec!(-100))]
+#[case::suffix_curr_space("100 EUR", "", "EUR", dec!(100))]
+#[case::suffix_curr_space_negative_prefix("-100 EUR", "", "EUR", dec!(-100))]
+#[case::suffix_curr_space_negative_multispace_prefix("- 100 EUR", "", "EUR", dec!(-100))]
+#[case::suffix_curr_multispace("100   EUR", "", "EUR", dec!(100))]
+#[case::suffix_curr_multispace_negative_sufix("-100   EUR", "", "EUR", dec!(-100))]
+#[case::suffix_curr_negative_prefix_space("- 100   EUR", "", "EUR", dec!(-100))]
+#[case::complex_suffix("100 \"silver coins\"", "", "silver coins", dec!(100))]
+#[case::complex_suffix_multispace("100   \"silver coins\"", "", "silver coins", dec!(100))]
+fn test_parse_amount_currency(
+    #[case] input: &str,
+    #[case] expected_remaining: &str,
+    #[case] expected_currency: &str,
+    #[case] expected_value: rust_decimal::Decimal,
+) {
     assert_eq!(
-        parse_amount("$100").unwrap(),
+        parse_amount(input).unwrap(),
         (
-            "",
+            expected_remaining,
             Amount {
-                currency: "$".into(),
-                value: dec!(100)
-            }
-        )
-    );
-    assert_eq!(
-        parse_amount("$ 100").unwrap(),
-        (
-            "",
-            Amount {
-                currency: "$".into(),
-                value: dec!(100)
-            }
-        )
-    );
-    assert_eq!(
-        parse_amount("$  100").unwrap(),
-        (
-            "",
-            Amount {
-                currency: "$".into(),
-                value: dec!(100)
-            }
-        )
-    );
-    assert_eq!(
-        parse_amount("\"silver coins\" 100").unwrap(),
-        (
-            "",
-            Amount {
-                currency: "silver coins".into(),
-                value: dec!(100)
-            }
-        )
-    );
-    assert_eq!(
-        parse_amount("\"silver coins\"  100").unwrap(),
-        (
-            "",
-            Amount {
-                currency: "silver coins".into(),
-                value: dec!(100)
+                currency: expected_currency.into(),
+                value: expected_value
             }
         )
     );
 }
 
-#[test]
-fn test_parse_amount_currency_suffixed() {
+#[rstest]
+#[case::simple_int("100EUR", "EUR", dec!(100))]
+#[case::double_dot("100.95EUR", "EUR", dec!(100.95))]
+#[case::double_comma("100,95EUR", "EUR", dec!(100.95))]
+#[case::double_small_amount("0.007EUR", "EUR", dec!(0.007))]
+fn test_parse_money_amount(
+    #[case] input: &str,
+    #[case] expected_currency: &str,
+    #[case] expected_value: rust_decimal::Decimal,
+) {
     assert_eq!(
-        parse_amount("100EUR").unwrap(),
-        (
-            "",
-            Amount {
-                currency: "EUR".into(),
-                value: dec!(100)
-            }
-        )
-    );
-    assert_eq!(
-        parse_amount("100 EUR").unwrap(),
-        (
-            "",
-            Amount {
-                currency: "EUR".into(),
-                value: dec!(100)
-            }
-        )
-    );
-    assert_eq!(
-        parse_amount("100  EUR").unwrap(),
-        (
-            "",
-            Amount {
-                currency: "EUR".into(),
-                value: dec!(100)
-            }
-        )
-    );
-    assert_eq!(
-        parse_amount("100 \"silver coins\"").unwrap(),
-        (
-            "",
-            Amount {
-                currency: "silver coins".into(),
-                value: dec!(100)
-            }
-        )
-    );
-    assert_eq!(
-        parse_amount("100  \"silver coins\"").unwrap(),
-        (
-            "",
-            Amount {
-                currency: "silver coins".into(),
-                value: dec!(100)
-            }
-        )
-    );
-}
-
-#[test]
-fn test_parse_amount_negative_currency_suffixed() {
-    assert_eq!(
-        parse_amount("-100EUR").unwrap(),
-        (
-            "",
-            Amount {
-                currency: "EUR".into(),
-                value: dec!(-100)
-            }
-        )
-    );
-    assert_eq!(
-        parse_amount("- 100EUR").unwrap(),
-        (
-            "",
-            Amount {
-                currency: "EUR".into(),
-                value: dec!(-100)
-            }
-        )
-    );
-    assert_eq!(
-        parse_amount("-  100EUR").unwrap(),
-        (
-            "",
-            Amount {
-                currency: "EUR".into(),
-                value: dec!(-100)
-            }
-        )
-    );
-    assert_eq!(
-        parse_amount("-100 EUR").unwrap(),
-        (
-            "",
-            Amount {
-                currency: "EUR".into(),
-                value: dec!(-100)
-            }
-        )
-    );
-    assert_eq!(
-        parse_amount("-100  EUR").unwrap(),
-        (
-            "",
-            Amount {
-                currency: "EUR".into(),
-                value: dec!(-100)
-            }
-        )
-    );
-    assert_eq!(
-        parse_amount("- 100 EUR").unwrap(),
-        (
-            "",
-            Amount {
-                currency: "EUR".into(),
-                value: dec!(-100)
-            }
-        )
-    );
-    assert_eq!(
-        parse_amount("-  100 EUR").unwrap(),
-        (
-            "",
-            Amount {
-                currency: "EUR".into(),
-                value: dec!(-100)
-            }
-        )
-    );
-}
-
-#[test]
-fn test_parse_amount_negative_currency_prefixed() {
-    assert_eq!(
-        parse_amount("-$100").unwrap(),
-        (
-            "",
-            Amount {
-                currency: "$".into(),
-                value: dec!(-100)
-            }
-        )
-    );
-    assert_eq!(
-        parse_amount("$-100").unwrap(),
-        (
-            "",
-            Amount {
-                currency: "$".into(),
-                value: dec!(-100)
-            }
-        )
-    );
-}
-
-#[test]
-fn test_parse_money_amount_int() {
-    assert_eq!(parse_money_amount("100EUR").unwrap(), ("EUR", dec!(100)))
-}
-
-#[test]
-fn test_parse_money_amount_double() {
-    assert_eq!(parse_money_amount("100.00EUR").unwrap(), ("EUR", dec!(100)));
-    assert_eq!(parse_money_amount("100,00EUR").unwrap(), ("EUR", dec!(100)));
-}
-
-#[test]
-fn test_parse_money_amount_small() {
-    assert_eq!(
-        parse_money_amount("0.007EUR").unwrap(),
-        ("EUR", dec!(0.007))
-    );
-}
-
-#[test]
-fn test_parse_fractional_amount() {
-    assert_eq!(
-        parse_amount("$100.95").unwrap(),
-        (
-            "",
-            Amount {
-                currency: "$".into(),
-                value: dec!(100.95),
-            }
-        )
+        parse_money_amount(input).unwrap(),
+        (expected_currency, expected_value)
     )
 }
 
-#[test]
-fn test_parse_currency_string_symbol() {
-    assert_eq!(parse_currency_string("$").unwrap(), ("", "$"));
-    assert_eq!(parse_currency_string("$ ").unwrap(), (" ", "$"));
-}
-
-#[test]
-fn test_parse_currency_string_quotes() {
+#[rstest]
+#[case::simple("$", "", "$")]
+#[case::simple_space("$ ", " ", "$")]
+#[case::in_quotes("\"Imaginary money\"", "", "Imaginary money")]
+#[case::in_quotes_space("\"Imaginary money\" ", " ", "Imaginary money")]
+#[case::iso("USD", "", "USD")]
+#[case::iso_space("USD ", " ", "USD")]
+fn test_parse_currency_string(
+    #[case] input: &str,
+    #[case] expected_remaining: &str,
+    #[case] expected_currency: &str,
+) {
     assert_eq!(
-        parse_currency_string("\"Imaginary money\"").unwrap(),
-        ("", "Imaginary money")
+        parse_currency_string(input).unwrap(),
+        (expected_remaining, expected_currency)
     );
-    assert_eq!(
-        parse_currency_string("\"Imaginary money\" ").unwrap(),
-        (" ", "Imaginary money")
-    );
-}
-
-#[test]
-fn test_parse_currency_string_iso() {
-    assert_eq!(parse_currency_string("USD").unwrap(), ("", "USD"));
-    assert_eq!(parse_currency_string("USD ").unwrap(), (" ", "USD"));
 }
