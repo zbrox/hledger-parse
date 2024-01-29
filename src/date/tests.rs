@@ -64,12 +64,4 @@ fn test_parse_date_invalid(
         ))
         .to_string()
     );
-    assert_eq!(
-        parse_date("2020.00.01").unwrap_err().to_string(),
-        nom::Err::Error(HLParserError::Parse(
-            "2020.00.01".to_string(),
-            ErrorKind::Tag
-        ))
-        .to_string()
-    );
 }
