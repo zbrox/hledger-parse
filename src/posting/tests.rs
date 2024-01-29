@@ -1,22 +1,34 @@
 use nom::error::ErrorKind;
+use rstest::rstest;
+use rust_decimal::Decimal;
 use rust_decimal_macros::dec;
 
 use crate::{amount::types::Amount, status::types::Status, HLParserError};
 
 use super::{parsers::parse_posting, types::Posting};
 
-#[test]
-fn test_parse_simple_posting() {
+#[rstest]
+#[case::simple(" assets:cash  $100", "", Status::Unmarked, "assets:cash", "$", dec!(100))]
+#[case::various_spacing(" assets:cash      $100", "", Status::Unmarked, "assets:cash", "$", dec!(100))]
+#[case::with_status(" ! assets:cash  $100", "", Status::Pending, "assets:cash", "$", dec!(100))]
+fn test_parse_simple_posting(
+    #[case] input: &str,
+    #[case] expected_rest: &str,
+    #[case] expected_status: Status,
+    #[case] expected_account: &str,
+    #[case] expected_currency: &str,
+    #[case] expected_value: Decimal,
+) {
     assert_eq!(
-        parse_posting(" assets:cash  $100").unwrap(),
+        parse_posting(input).unwrap(),
         (
-            "",
+            expected_rest,
             Posting {
-                status: Status::Unmarked,
-                account: "assets:cash".into(),
+                status: expected_status,
+                account: expected_account.into(),
                 amount: Some(Amount {
-                    currency: "$".into(),
-                    value: dec!(100),
+                    currency: expected_currency.into(),
+                    value: expected_value,
                 }),
                 unit_price: None,
                 total_price: None,
@@ -35,26 +47,6 @@ fn test_correct_termination_parse_posting() {
                 status: Status::Unmarked,
                 account: "assets:cash".into(),
                 amount: None,
-                unit_price: None,
-                total_price: None,
-            }
-        )
-    )
-}
-
-#[test]
-fn test_parse_posting_with_status() {
-    assert_eq!(
-        parse_posting(" ! assets:cash  $100").unwrap(),
-        (
-            "",
-            Posting {
-                status: Status::Pending,
-                account: "assets:cash".into(),
-                amount: Some(Amount {
-                    currency: "$".into(),
-                    value: dec!(100)
-                }),
                 unit_price: None,
                 total_price: None,
             }

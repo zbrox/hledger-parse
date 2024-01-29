@@ -1,146 +1,67 @@
 use chrono::NaiveDate;
 use nom::error::ErrorKind;
+use rstest::rstest;
 
 use crate::{date::parsers::parse_date, HLParserError};
 
-#[test]
-fn test_parse_date_dash() {
+#[rstest]
+#[case::date_dash("2020-01-01", "", NaiveDate::from_ymd(2020, 1, 1), None)]
+#[case::date_slash("2020/01/01", "", NaiveDate::from_ymd(2020, 1, 1), None)]
+#[case::date_dot("2020.01.01", "", NaiveDate::from_ymd(2020, 1, 1), None)]
+#[case::date_dash_secondary(
+    "2020-01-01=2020-01-02",
+    "",
+    NaiveDate::from_ymd(2020, 1, 1),
+    Some(NaiveDate::from_ymd(2020, 1, 2))
+)]
+#[case::date_slash_secondary(
+    "2020/01/01=2020/01/02",
+    "",
+    NaiveDate::from_ymd(2020, 1, 1),
+    Some(NaiveDate::from_ymd(2020, 1, 2))
+)]
+#[case::date_dot_secondary(
+    "2020.01.01=2020.01.02",
+    "",
+    NaiveDate::from_ymd(2020, 1, 1),
+    Some(NaiveDate::from_ymd(2020, 1, 2))
+)]
+#[case::smart_secondary_date(
+    "2020-01-01=12-5",
+    "",
+    NaiveDate::from_ymd(2020, 1, 1),
+    Some(NaiveDate::from_ymd(2020, 12, 5))
+)]
+fn test_parse_date_dash(
+    #[case] input: &str,
+    #[case] expected_remaining: &str,
+    #[case] expected_date: NaiveDate,
+    #[case] expected_secondary_date: Option<NaiveDate>,
+) {
     assert_eq!(
-        parse_date("2020-01-01").unwrap(),
-        ("", (NaiveDate::from_ymd(2020, 1, 1), None))
+        parse_date(input).unwrap(),
+        (expected_remaining, (expected_date, expected_secondary_date))
     );
 }
 
-#[test]
-fn test_parse_date_slash() {
+#[rstest]
+#[case::month_greater_than_12("2020.13.01", "2020.13.01", ErrorKind::Tag)]
+#[case::month_zero("2020.00.01", "2020.00.01", ErrorKind::Tag)]
+#[case::day_greater_than_31("2020.01.32", "2020.01.32", ErrorKind::Tag)]
+#[case::day_zero("2020.01.00", "2020.01.00", ErrorKind::Tag)]
+#[case::day_29_non_leap_year("2021.02.29", "2021.02.29", ErrorKind::Tag)]
+#[case::mixed_separator("2021/02.29", "2021/02.29", ErrorKind::MapRes)]
+fn test_parse_date_invalid(
+    #[case] input: &str,
+    #[case] expected_error: &str,
+    #[case] expected_error_kind: ErrorKind,
+) {
     assert_eq!(
-        parse_date("2020/01/01").unwrap(),
-        ("", (NaiveDate::from_ymd(2020, 1, 1), None))
-    );
-}
-
-#[test]
-fn test_parse_date_dot() {
-    assert_eq!(
-        parse_date("2020.01.01").unwrap(),
-        ("", (NaiveDate::from_ymd(2020, 1, 1), None))
-    );
-}
-
-#[test]
-fn test_parse_date_invalid_month() {
-    assert_eq!(
-        parse_date("2020.13.01").unwrap_err().to_string(),
+        parse_date(input).unwrap_err().to_string(),
         nom::Err::Error(HLParserError::Parse(
-            "2020.13.01".to_string(),
-            ErrorKind::Tag
+            expected_error.to_string(),
+            expected_error_kind,
         ))
         .to_string()
-    );
-    assert_eq!(
-        parse_date("2020.00.01").unwrap_err().to_string(),
-        nom::Err::Error(HLParserError::Parse(
-            "2020.00.01".to_string(),
-            ErrorKind::Tag
-        ))
-        .to_string()
-    );
-}
-
-#[test]
-fn test_parse_date_invalid_day() {
-    assert_eq!(
-        parse_date("2021.02.29").unwrap_err().to_string(),
-        nom::Err::Error(HLParserError::Parse(
-            "2021.02.29".to_string(),
-            ErrorKind::Tag
-        ))
-        .to_string()
-    );
-    assert_eq!(
-        parse_date("2021.02.60").unwrap_err().to_string(),
-        nom::Err::Error(HLParserError::Parse(
-            "2021.02.60".to_string(),
-            ErrorKind::Tag
-        ))
-        .to_string()
-    );
-}
-
-#[test]
-fn test_parse_date_mix_separator() {
-    assert_eq!(
-        parse_date("2021/02.29").unwrap_err().to_string(),
-        nom::Err::Error(HLParserError::Parse(
-            "2021/02.29".to_string(),
-            ErrorKind::MapRes
-        ))
-        .to_string()
-    );
-}
-
-#[test]
-fn test_parse_date_secondary_dash() {
-    assert_eq!(
-        parse_date("2021-01-01=2021-01-05").unwrap(),
-        (
-            "",
-            (
-                NaiveDate::from_ymd(2021, 1, 1),
-                Some(NaiveDate::from_ymd(2021, 1, 5))
-            )
-        ),
-    )
-}
-
-#[test]
-fn test_parse_date_secondary_slash() {
-    assert_eq!(
-        parse_date("2021/01/01=2021/01/05").unwrap(),
-        (
-            "",
-            (
-                NaiveDate::from_ymd(2021, 1, 1),
-                Some(NaiveDate::from_ymd(2021, 1, 5))
-            )
-        ),
-    )
-}
-
-#[test]
-fn test_parse_date_secondary_dot() {
-    assert_eq!(
-        parse_date("2021.01.01=2021.01.05").unwrap(),
-        (
-            "",
-            (
-                NaiveDate::from_ymd(2021, 1, 1),
-                Some(NaiveDate::from_ymd(2021, 1, 5))
-            )
-        ),
-    )
-}
-
-#[test]
-fn test_parse_date_secondary_smart_date() {
-    assert_eq!(
-        parse_date("2021-01-01=01-05").unwrap(),
-        (
-            "",
-            (
-                NaiveDate::from_ymd(2021, 1, 1),
-                Some(NaiveDate::from_ymd(2021, 1, 5))
-            )
-        ),
-    );
-    assert_eq!(
-        parse_date("2021-01-01=12-5").unwrap(),
-        (
-            "",
-            (
-                NaiveDate::from_ymd(2021, 1, 1),
-                Some(NaiveDate::from_ymd(2021, 12, 5))
-            )
-        ),
     );
 }

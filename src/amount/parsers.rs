@@ -17,6 +17,7 @@ use crate::{
 
 use super::types::{Amount, AmountSign};
 
+// TODO: no scientific notation parsing
 pub fn parse_money_amount(input: &str) -> HLParserIResult<&str, Decimal> {
     let (tail, (num, _, scale)) = tuple((
         recognize(i64),
@@ -30,11 +31,12 @@ pub fn parse_money_amount(input: &str) -> HLParserIResult<&str, Decimal> {
     Ok((tail, value))
 }
 
-fn parse_sign(input: &str) -> HLParserIResult<&str, AmountSign> {
-    let (tail, char) = opt(char('-'))(input)?;
+fn parse_sign(input: &str) -> HLParserIResult<&str, Option<AmountSign>> {
+    let (tail, char) = opt(alt((char('-'), char('+'))))(input)?;
     let sign = match char {
-        Some(_) => AmountSign::Minus,
-        None => AmountSign::Plus,
+        Some('-') => Some(AmountSign::Minus),
+        Some('+') => Some(AmountSign::Plus),
+        _ => None,
     };
     Ok((tail, sign))
 }
@@ -51,15 +53,16 @@ pub fn parse_currency_string(input: &str) -> HLParserIResult<&str, &str> {
 
 fn parse_amount_prefix_currency(input: &str) -> HLParserIResult<&str, Amount> {
     let (tail, sign) = terminated(parse_sign, space0)(input)?;
-    let (tail, currency) = parse_currency_string(tail)?;
+    let (tail, currency) = terminated(parse_currency_string, space0)(tail)?;
     let (tail, sign) = match sign {
-        AmountSign::Minus => (tail, sign),
-        AmountSign::Plus => terminated(parse_sign, space0)(tail)?,
+        Some(s) => (tail, Some(s)),
+        None => terminated(parse_sign, space0)(tail)?,
     };
 
     let (tail, mut value) = parse_money_amount(tail)?;
-    if sign == AmountSign::Minus {
-        value.set_sign_negative(true);
+    match sign {
+        Some(AmountSign::Minus) => value.set_sign_negative(true),
+        _ => {}
     }
 
     Ok((
@@ -74,8 +77,9 @@ fn parse_amount_prefix_currency(input: &str) -> HLParserIResult<&str, Amount> {
 fn parse_amount_suffix_currency(input: &str) -> HLParserIResult<&str, Amount> {
     let (tail, sign) = terminated(parse_sign, space0)(input)?;
     let (tail, mut value) = terminated(parse_money_amount, space0)(tail)?;
-    if sign == AmountSign::Minus {
-        value.set_sign_negative(true);
+    match sign {
+        Some(AmountSign::Minus) => value.set_sign_negative(true),
+        _ => {}
     }
 
     let (tail, currency) = parse_currency_string(tail)?;

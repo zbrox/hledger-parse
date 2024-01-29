@@ -21,10 +21,6 @@ pub fn is_char_minus(char: char) -> bool {
     char == '-'
 }
 
-pub fn is_char_alphanumeric(char: char) -> bool {
-    char.is_alphanumeric()
-}
-
 pub fn in_quotes(input: &str) -> IResult<&str, &str> {
     delimited(
         terminated(char('"'), space0),
