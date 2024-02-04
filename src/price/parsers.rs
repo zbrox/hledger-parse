@@ -1,32 +1,26 @@
-use nom::{
-    branch::alt,
-    bytes::complete::tag,
-    character::complete::{line_ending, space1},
-    combinator::eof,
-    sequence::terminated,
+use winnow::{
+    ascii::{line_ending, space1},
+    combinator::{alt, eof, terminated},
+    PResult, Parser,
 };
 
 use crate::{
     amount::parsers::{parse_amount, parse_currency_string},
     date::parsers::parse_date,
-    HLParserIResult,
 };
 
 use super::types::Price;
 
-pub fn parse_price(input: &str) -> HLParserIResult<&str, Price> {
-    let (tail, _) = terminated(tag("P"), space1)(input)?;
-    let (tail, (date, _)) = terminated(parse_date, space1)(tail)?;
-    let (tail, commodity) = terminated(parse_currency_string, space1)(tail)?;
-    let (tail, amount) = parse_amount(tail)?;
-    let (tail, _) = alt((line_ending, eof))(tail)?;
+pub fn parse_price(input: &mut &str) -> PResult<Price> {
+    let _ = terminated("P", space1).parse_next(input)?;
+    let (date, _) = terminated(parse_date, space1).parse_next(input)?;
+    let commodity = terminated(parse_currency_string, space1).parse_next(input)?;
+    let amount = parse_amount(input)?;
+    let _ = alt((line_ending, eof)).parse_next(input)?;
 
-    Ok((
-        tail,
-        Price {
-            commodity: commodity.into(),
-            date,
-            amount,
-        },
-    ))
+    Ok(Price {
+        commodity: commodity.into(),
+        date,
+        amount,
+    })
 }

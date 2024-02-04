@@ -1,23 +1,18 @@
-use crate::HLParserError;
+use winnow::error::{ContextError, ErrMode};
 
 use super::parsers::parse_code;
 
 #[test]
 fn test_parse_code() {
-    assert_eq!(
-        parse_code("(code123-1!) rest").unwrap(),
-        (" rest", "code123-1!")
-    )
+    let mut input = "(code123-1!) rest";
+    assert_eq!(parse_code(&mut input).unwrap(), "code123-1!");
+    assert_eq!(input, " rest");
 }
 
 #[test]
 fn test_parse_invalid_code() {
     assert_eq!(
-        parse_code("()").unwrap_err().to_string(),
-        nom::Err::Error(HLParserError::Parse(
-            ")".to_owned(),
-            nom::error::ErrorKind::TakeUntil
-        ))
-        .to_string()
+        parse_code(&mut "()").unwrap_err(),
+        ErrMode::Backtrack(ContextError::new()) // TODO: errors
     )
 }

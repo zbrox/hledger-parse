@@ -13,6 +13,8 @@ mod tag;
 mod transaction;
 mod utils;
 
+use std::str::FromStr;
+
 pub use account::types::Account;
 pub use amount::types::Amount;
 pub use commodity::types::Commodity;
@@ -22,48 +24,42 @@ pub use posting::types::Posting;
 pub use price::types::Price;
 pub use status::types::Status;
 pub use tag::types::Tag;
+use thiserror::Error;
 pub use transaction::types::Transaction;
 
-use journal::types::Value;
-use nom::error::{ErrorKind, FromExternalError, ParseError};
-use thiserror::Error;
+pub use journal::parsers::parse_journal;
 
-pub type HLParserIResult<I, O> = nom::IResult<I, O, HLParserError>;
-pub type HLParserResult<O> = Result<O, HLParserError>;
+use journal::types::Value;
+use winnow::error::{ErrorKind, FromExternalError, ParserError};
 
 #[derive(Error, Debug)]
-pub enum HLParserError {
+pub enum HLParserError<I> {
     #[error("IO error: {0}")]
-    IO(#[from] std::io::Error),
-    #[error("Parse error: {1:?} {0}")]
-    Parse(String, ErrorKind),
+    IO(String),
+    #[error("Parse error: {0}")]
+    Parse(String),
     #[error("Validation error: {0}")]
     Validation(String),
-    #[error("Invalid include path: {0}")]
+    #[error("Included journal error: {0}")]
     IncludePath(String),
-    #[error("Error extracting parsed value")]
+    #[error("Extract error: {0:?}")]
     Extract(Value),
+    #[error("Parsing error: {0} {1:?}")]
+    Nom(I, ErrorKind),
 }
 
-impl<'a> From<nom::error::Error<&'a str>> for HLParserError {
-    fn from(err: nom::error::Error<&'a str>) -> Self {
-        HLParserError::Parse(err.input.to_string(), err.code)
+impl<I: Clone> ParserError<I> for HLParserError<I> {
+    fn from_error_kind(input: &I, kind: ErrorKind) -> Self {
+        HLParserError::Nom(input.clone(), kind)
+    }
+
+    fn append(self, _: &I, _: ErrorKind) -> Self {
+        self
     }
 }
 
-impl<E> FromExternalError<&str, E> for HLParserError {
-    /// Create a new error from an input position and an external error
-    fn from_external_error(input: &str, kind: ErrorKind, _e: E) -> Self {
-        HLParserError::Parse(input.to_string(), kind)
-    }
-}
-
-impl ParseError<&str> for HLParserError {
-    fn from_error_kind(input: &str, kind: ErrorKind) -> Self {
-        HLParserError::Parse(input.to_string(), kind)
-    }
-
-    fn append(_: &str, _: ErrorKind, other: Self) -> Self {
-        other
+impl<I: Clone, E: FromStr> FromExternalError<I, E> for HLParserError<I> {
+    fn from_external_error(input: &I, kind: ErrorKind, _e: E) -> Self {
+        HLParserError::Nom(input.to_owned(), kind)
     }
 }

@@ -17,18 +17,25 @@ use super::{parsers::flatten_values, types::Value};
 
 #[test]
 fn test_parse_comment_value() {
-    assert_eq!(
-        parse_comment_value("; A sample journal file\n").unwrap(),
-        ("", Value::Ignore)
-    );
-    assert_eq!(parse_comment_value(";\n").unwrap(), ("", Value::Ignore));
-    assert_eq!(parse_comment_value(";").unwrap(), ("", Value::Ignore));
+    let mut input = "; A sample journal file\n";
+    assert_eq!(parse_comment_value(&mut input).unwrap(), Value::Ignore);
+    assert_eq!(input, "");
+    let mut input = ";\n";
+    assert_eq!(parse_comment_value(&mut input).unwrap(), Value::Ignore);
+    assert_eq!(input, "");
+    let mut input = ";";
+    assert_eq!(parse_comment_value(&mut input).unwrap(), Value::Ignore);
+    assert_eq!(input, "");
 }
 
 #[test]
 fn test_parse_empty_line() {
-    assert_eq!(parse_empty_line("\n").unwrap(), ("", Value::Ignore));
-    assert_eq!(parse_empty_line("   \n").unwrap(), ("", Value::Ignore));
+    let mut input = "\n";
+    assert_eq!(parse_empty_line(&mut input).unwrap(), Value::Ignore);
+    assert_eq!(input, "");
+    let mut input = "   \n";
+    assert_eq!(parse_empty_line(&mut input).unwrap(), Value::Ignore);
+    assert_eq!(input, "");
 }
 
 #[test]
@@ -227,7 +234,7 @@ fn test_flatten_values() {
 #[test]
 fn test_parse_journal_simple() {
     // from https://github.com/simonmichael/hledger/blob/e9c19e12ef62d46f57d3cbbd6814dbcf04bbc508/examples/sample.journal
-    let input = r#"; A sample journal file.
+    let mut input = r#"; A sample journal file.
 ;
 ; Sets up this account tree:
 ; assets
@@ -282,7 +289,7 @@ fn test_parse_journal_simple() {
 ;final comment
         "#;
     assert_eq!(
-        parse_journal(input, None).unwrap(),
+        parse_journal(&mut input, None).unwrap(),
         Journal::new(
             vec![
                 Transaction {

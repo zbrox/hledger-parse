@@ -1,11 +1,12 @@
-use nom::{branch::alt, character::complete::char, combinator::opt, sequence::terminated};
-
-use crate::HLParserIResult;
+use winnow::{
+    combinator::{alt, opt, terminated},
+    PResult, Parser,
+};
 
 use super::types::Status;
 
-pub fn parse_status(input: &str) -> HLParserIResult<&str, Status> {
-    let (tail, status) = opt(terminated(alt((char('!'), char('*'))), char(' ')))(input)?;
+pub fn parse_status(input: &mut &str) -> PResult<Status> {
+    let status = opt(terminated(alt(('!', '*')), ' ')).parse_next(input)?;
 
     let status = match status {
         Some('!') => Status::Pending,
@@ -13,5 +14,5 @@ pub fn parse_status(input: &str) -> HLParserIResult<&str, Status> {
         _ => Status::Unmarked,
     };
 
-    Ok((tail, status))
+    Ok(status)
 }

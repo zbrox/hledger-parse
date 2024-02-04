@@ -40,7 +40,7 @@ impl Display for Price {
 }
 
 impl TryInto<Price> for Value {
-    type Error = HLParserError;
+    type Error = HLParserError<&'static str>;
 
     fn try_into(self) -> Result<Price, Self::Error> {
         if let Value::Price(p) = self {

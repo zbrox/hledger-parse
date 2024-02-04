@@ -1,18 +1,14 @@
 use rstest::rstest;
-
-use crate::HLParserError;
+use winnow::error::{ContextError, ErrMode};
 
 use super::{parsers::parse_tag, types::Tag};
 
 #[rstest]
-#[case("not a tag:", " a tag:")]
-fn test_parse_tag_with_space(#[case] input: &str, #[case] expected: &str) {
-    let err = parse_tag(input).unwrap_err().to_string();
-    let expected_err = nom::Err::Error(HLParserError::Parse(
-        expected.to_string(),
-        nom::error::ErrorKind::Tag,
-    ))
-    .to_string();
+#[case("not a tag:")]
+fn test_parse_tag_with_space(#[case] input: &str) {
+    let mut input = input;
+    let err = parse_tag(&mut input).unwrap_err();
+    let expected_err = ErrMode::Backtrack(ContextError::new()); // TODO: errors
     assert_eq!(err, expected_err)
 }
 
@@ -24,16 +20,15 @@ fn test_parse_tag_with_space(#[case] input: &str, #[case] expected: &str) {
 #[case::unicode("кеш:", "кеш")]
 #[case::emoji("👍:", "👍")]
 fn test_parse_tag_no_value(#[case] input: &str, #[case] expected: &str) {
+    let mut input = input;
     assert_eq!(
-        parse_tag(input).unwrap(),
-        (
-            "",
-            Tag {
-                name: expected.into(),
-                value: None,
-            }
-        )
-    )
+        parse_tag(&mut input).unwrap(),
+        Tag {
+            name: expected.into(),
+            value: None,
+        }
+    );
+    assert_eq!(input, "");
 }
 
 #[rstest]
@@ -49,14 +44,12 @@ fn test_parse_tag_with_value(
     #[case] expected_name: &str,
     #[case] expected_value: &str,
 ) {
+    let mut input = input;
     assert_eq!(
-        parse_tag(input).unwrap(),
-        (
-            "",
-            Tag {
-                name: expected_name.into(),
-                value: Some(expected_value.into()),
-            }
-        )
+        parse_tag(&mut input).unwrap(),
+        Tag {
+            name: expected_name.into(),
+            value: Some(expected_value.into()),
+        }
     )
 }

@@ -19,7 +19,7 @@ impl Account {
 }
 
 impl TryInto<Account> for Value {
-    type Error = HLParserError;
+    type Error = HLParserError<&'static str>;
 
     fn try_into(self) -> Result<Account, Self::Error> {
         if let Value::Account(t) = self {

@@ -39,16 +39,15 @@ fn test_parse_amount_currency(
     #[case] expected_currency: &str,
     #[case] expected_value: rust_decimal::Decimal,
 ) {
+    let mut input = input;
     assert_eq!(
-        parse_amount(input).unwrap(),
-        (
-            expected_remaining,
-            Amount {
-                currency: expected_currency.into(),
-                value: expected_value
-            }
-        )
+        parse_amount(&mut input).unwrap(),
+        Amount {
+            currency: expected_currency.into(),
+            value: expected_value
+        }
     );
+    assert_eq!(input, expected_remaining);
 }
 
 #[rstest]
@@ -58,13 +57,12 @@ fn test_parse_amount_currency(
 #[case::double_small_amount("0.007EUR", "EUR", dec!(0.007))]
 fn test_parse_money_amount(
     #[case] input: &str,
-    #[case] expected_currency: &str,
+    #[case] expected_remaining: &str,
     #[case] expected_value: rust_decimal::Decimal,
 ) {
-    assert_eq!(
-        parse_money_amount(input).unwrap(),
-        (expected_currency, expected_value)
-    )
+    let mut input = input;
+    assert_eq!(parse_money_amount(&mut input).unwrap(), expected_value);
+    assert_eq!(input, expected_remaining);
 }
 
 #[rstest]
@@ -79,8 +77,10 @@ fn test_parse_currency_string(
     #[case] expected_remaining: &str,
     #[case] expected_currency: &str,
 ) {
+    let mut input = input;
     assert_eq!(
-        parse_currency_string(input).unwrap(),
-        (expected_remaining, expected_currency)
+        parse_currency_string(&mut input).unwrap(),
+        expected_currency
     );
+    assert_eq!(input, expected_remaining);
 }

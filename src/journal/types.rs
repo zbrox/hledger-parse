@@ -1,13 +1,11 @@
-use std::{fmt::Display, path::PathBuf};
+use std::fmt::Display;
 
 use crate::{
     account::types::Account, commodity::types::Commodity, price::types::Price,
     transaction::types::Transaction, HLParserError,
 };
 
-use super::parsers::parse_journal;
-
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Value {
     Ignore,
     Transaction(Transaction),
@@ -26,23 +24,21 @@ pub struct Journal {
     commodities: Vec<Commodity>,
 }
 
-impl TryFrom<PathBuf> for Journal {
-    type Error = HLParserError;
+// impl<'s> TryFrom<&'s PathBuf> for Journal {
+//     type Error = HLParserError<&'s str>;
 
-    fn try_from(journal_path: PathBuf) -> Result<Self, HLParserError> {
-        let base_path = journal_path.parent().map(|v| v.to_owned());
-        let journal_contents = std::fs::read_to_string(journal_path)?;
-        let journal = parse_journal(&journal_contents, base_path).map_err(|e| match e {
-            HLParserError::Parse(i, ek) => HLParserError::Parse(i, ek),
-            HLParserError::Validation(desc) => HLParserError::Validation(desc),
-            HLParserError::IO(e) => HLParserError::IO(e),
-            HLParserError::IncludePath(path) => HLParserError::IncludePath(path),
-            HLParserError::Extract(v) => HLParserError::Extract(v),
-        })?;
+//     fn try_from(journal_path: &'s PathBuf) -> Result<Self, Self::Error> {
+//         let base_path = journal_path.parent().map(|v| v.to_owned());
 
-        Ok(journal)
-    }
-}
+//         let journal_contents = std::fs::read_to_string(journal_path).map_err(|e| {
+//             HLParserError::IO(format!("Error reading journal file: {}", e.to_string()))
+//         })?;
+//         let mut journal_contents = journal_contents.as_str();
+//         let journal = parse_journal(&mut journal_contents, base_path)?;
+
+//         Ok(journal)
+//     }
+// }
 
 impl Display for Journal {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -112,7 +108,7 @@ impl Journal {
         unique_payees
     }
 
-    pub fn validate_accounts(&self) -> Result<(), HLParserError> {
+    pub fn validate_accounts(&self) -> Result<(), HLParserError<&str>> {
         let undefined_accounts: Vec<Account> = self
             .transactions
             .iter()

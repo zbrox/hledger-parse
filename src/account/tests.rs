@@ -1,7 +1,7 @@
-use nom::error::ErrorKind;
 use rstest::rstest;
+use winnow::error::{AddContext, ContextError, ErrMode};
 
-use crate::{account::parsers::parse_account_directive, HLParserError};
+use crate::account::parsers::parse_account_directive;
 
 #[rstest]
 #[case("account assets:cash", "", "assets:cash")]
@@ -11,22 +11,21 @@ fn test_parse_account_directive(
     #[case] expected_remaining: &str,
     #[case] expected_account_name: &str,
 ) {
+    let mut input = input;
     assert_eq!(
-        parse_account_directive(input).unwrap(),
-        (expected_remaining, expected_account_name)
+        parse_account_directive(&mut input).unwrap(),
+        expected_account_name
     );
+    assert_eq!(input, expected_remaining);
 }
 
 #[test]
-fn test_parse_account_directive_invalid_name() {
+fn test_parse_invalid_account_directive() {
+    parse_account_directive(&mut "account assets:cash  ").unwrap_err();
     assert_eq!(
-        parse_account_directive("account assets:cash  ")
-            .unwrap_err()
-            .to_string(),
-        nom::Err::Error(HLParserError::Parse(
-            "account assets:cash  ".to_string(),
-            ErrorKind::Verify
-        ))
-        .to_string()
+        parse_account_directive(&mut "account assets:cash  ").unwrap_err(),
+        ErrMode::Backtrack(
+            ContextError::new().add_context(&"", winnow::error::StrContext::Label("account name"))
+        )
     );
 }

@@ -1,15 +1,5 @@
-use nom::{
-    bytes::complete::take_until1,
-    character::complete::{char, space0},
-    sequence::{delimited, pair},
-};
+use winnow::{ascii::space0, combinator::delimited, token::take_until, PResult, Parser};
 
-use crate::HLParserIResult;
-
-pub fn parse_code(input: &str) -> HLParserIResult<&str, &str> {
-    delimited(
-        pair(char('('), space0),
-        take_until1(")"),
-        pair(space0, char(')')),
-    )(input)
+pub fn parse_code<'s>(input: &mut &'s str) -> PResult<&'s str> {
+    delimited(('(', space0), take_until(1.., ")"), (space0, ')')).parse_next(input)
 }
