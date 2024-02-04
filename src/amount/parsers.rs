@@ -23,8 +23,8 @@ pub fn parse_money_amount(input: &mut &str) -> PResult<Decimal> {
     )
         .parse_next(input)?;
     let value = format!("{}.{}", num, scale.unwrap_or("0"));
-    let value = Decimal::from_str(&value)
-        .map_err(|_e| winnow::error::ErrMode::Backtrack(ContextError::new()))?; // TODO: errors
+    let value =
+        Decimal::from_str(&value).map_err(|_e| winnow::error::ErrMode::Cut(ContextError::new()))?; // TODO: errors
 
     Ok(value)
 }

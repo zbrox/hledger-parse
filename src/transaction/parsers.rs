@@ -1,5 +1,5 @@
 use winnow::{
-    ascii::{line_ending, space0},
+    ascii::{line_ending, space0, till_line_ending},
     combinator::{alt, eof, opt, preceded, repeat, separated, terminated},
     error::{AddContext, ContextError, ErrMode, StrContext},
     token::take,
@@ -20,8 +20,9 @@ use crate::{
 use super::types::Transaction;
 
 pub(super) fn parse_comments_tags<'s>(input: &mut &'s str) -> PResult<(&'s str, Vec<Tag>)> {
-    let comment = match find_space_before_char(input, ':') {
-        Some(pos) => take(pos + 1).parse_next(input)?,
+    let mut line = till_line_ending.parse_next(input)?;
+    let comment = match find_space_before_char(line, ':') {
+        Some(pos) => take(pos + 1).parse_next(&mut line)?,
         None => "",
     };
 
@@ -30,7 +31,7 @@ pub(super) fn parse_comments_tags<'s>(input: &mut &'s str) -> PResult<(&'s str, 
         alt((line_ending, eof)),
     )
     .context(StrContext::Label("tags"))
-    .parse_next(input)?;
+    .parse_next(&mut line)?;
 
     Ok((comment.trim(), tags))
 }
