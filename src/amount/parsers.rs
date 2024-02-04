@@ -1,101 +1,95 @@
 use std::str::FromStr;
 
-use nom::{
-    branch::alt,
-    bytes::complete::take_till,
-    character::complete::{char, i64, space0, u64},
-    combinator::{opt, recognize},
-    error::ErrorKind,
-    sequence::{terminated, tuple},
-};
 use rust_decimal::Decimal;
+use winnow::{
+    ascii::{dec_int, space0},
+    combinator::{alt, opt, terminated},
+    error::ContextError,
+    stream::AsChar,
+    token::take_till,
+    PResult, Parser,
+};
 
 use crate::{
-    utils::{in_quotes, is_char_digit, is_char_minus, is_char_newline, is_char_space},
-    HLParserError, HLParserIResult,
+    utils::{in_quotes, is_char_minus},
+    // HLParserError, PResult,
 };
 
 use super::types::{Amount, AmountSign};
 
 // TODO: no scientific notation parsing
-pub fn parse_money_amount(input: &str) -> HLParserIResult<&str, Decimal> {
-    let (tail, (num, _, scale)) = tuple((
-        recognize(i64),
-        opt(alt((char('.'), char(',')))),
-        opt(recognize(u64)),
-    ))(input)?;
+pub fn parse_money_amount(input: &mut &str) -> PResult<Decimal> {
+    let (num, _, scale) = (
+        dec_int::<_, i64, _>.recognize(),
+        opt(alt(('.', ','))),
+        opt(dec_int::<_, i64, _>.recognize()),
+    )
+        .parse_next(input)?;
     let value = format!("{}.{}", num, scale.unwrap_or("0"));
     let value = Decimal::from_str(&value)
-        .map_err(|_| nom::Err::Error(HLParserError::Parse(value.to_string(), ErrorKind::Float)))?;
+        .map_err(|_e| winnow::error::ErrMode::Backtrack(ContextError::new()))?; // TODO: errors
 
-    Ok((tail, value))
+    Ok(value)
 }
 
-fn parse_sign(input: &str) -> HLParserIResult<&str, Option<AmountSign>> {
-    let (tail, char) = opt(alt((char('-'), char('+'))))(input)?;
+fn parse_sign(input: &mut &str) -> PResult<Option<AmountSign>> {
+    let char = opt(alt(('-', '+'))).parse_next(input)?;
     let sign = match char {
         Some('-') => Some(AmountSign::Minus),
         Some('+') => Some(AmountSign::Plus),
         _ => None,
     };
-    Ok((tail, sign))
+    Ok(sign)
 }
 
-pub fn parse_currency_string(input: &str) -> HLParserIResult<&str, &str> {
+pub fn parse_currency_string<'s>(input: &mut &'s str) -> PResult<&'s str> {
     alt((
         in_quotes,
-        take_till(|c| {
-            is_char_digit(c) || is_char_minus(c) || is_char_space(c) || is_char_newline(c)
+        take_till(0.., |c: char| {
+            c.is_dec_digit() || is_char_minus(c) || c.is_space() || c.is_newline()
         }),
-    ))(input)
-    .map_err(nom::Err::convert)
+    ))
+    .parse_next(input)
 }
 
-fn parse_amount_prefix_currency(input: &str) -> HLParserIResult<&str, Amount> {
-    let (tail, sign) = terminated(parse_sign, space0)(input)?;
-    let (tail, currency) = terminated(parse_currency_string, space0)(tail)?;
-    let (tail, sign) = match sign {
-        Some(s) => (tail, Some(s)),
-        None => terminated(parse_sign, space0)(tail)?,
+fn parse_amount_prefix_currency(input: &mut &str) -> PResult<Amount> {
+    let sign = terminated(parse_sign, space0).parse_next(input)?;
+    let currency = terminated(parse_currency_string, space0).parse_next(input)?;
+    let sign = match sign {
+        Some(s) => Some(s),
+        None => terminated(parse_sign, space0).parse_next(input)?,
     };
 
-    let (tail, mut value) = parse_money_amount(tail)?;
-    match sign {
-        Some(AmountSign::Minus) => value.set_sign_negative(true),
-        _ => {}
+    let mut value = parse_money_amount(input)?;
+    if let Some(AmountSign::Minus) = sign {
+        value.set_sign_negative(true);
     }
 
-    Ok((
-        tail,
-        Amount {
-            currency: currency.trim().into(),
-            value,
-        },
-    ))
+    Ok(Amount {
+        currency: currency.trim().into(),
+        value,
+    })
 }
 
-fn parse_amount_suffix_currency(input: &str) -> HLParserIResult<&str, Amount> {
-    let (tail, sign) = terminated(parse_sign, space0)(input)?;
-    let (tail, mut value) = terminated(parse_money_amount, space0)(tail)?;
-    match sign {
-        Some(AmountSign::Minus) => value.set_sign_negative(true),
-        _ => {}
+fn parse_amount_suffix_currency(input: &mut &str) -> PResult<Amount> {
+    let sign = terminated(parse_sign, space0).parse_next(input)?;
+    let mut value = terminated(parse_money_amount, space0).parse_next(input)?;
+    if let Some(AmountSign::Minus) = sign {
+        value.set_sign_negative(true);
     }
 
-    let (tail, currency) = parse_currency_string(tail)?;
+    let currency = parse_currency_string(input)?;
 
-    Ok((
-        tail,
-        Amount {
-            currency: currency.trim().into(),
-            value,
-        },
-    ))
+    Ok(Amount {
+        currency: currency.trim().into(),
+        value,
+    })
 }
 
-pub fn parse_amount(input: &str) -> HLParserIResult<&str, Amount> {
+pub fn parse_amount(input: &mut &str) -> PResult<Amount> {
     alt((
         parse_amount_suffix_currency, // this needs to go first
         parse_amount_prefix_currency,
-    ))(input)
+    ))
+    .parse_next(input)
 }

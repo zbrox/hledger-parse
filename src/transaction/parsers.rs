@@ -1,9 +1,9 @@
-use nom::{
-    bytes::complete::tag,
-    character::complete::{line_ending, not_line_ending, space0},
-    combinator::opt,
-    multi::{many0, separated_list0},
-    sequence::terminated,
+use winnow::{
+    ascii::{line_ending, space0},
+    combinator::{alt, eof, opt, preceded, repeat, separated, terminated},
+    error::{AddContext, ContextError, ErrMode, StrContext},
+    token::take,
+    PResult, Parser,
 };
 
 use crate::{
@@ -14,43 +14,49 @@ use crate::{
     posting::parsers::parse_posting,
     status::parsers::parse_status,
     tag::{parsers::parse_tag, types::Tag},
-    utils::split_on_space_before_char,
-    HLParserIResult,
+    utils::find_space_before_char,
 };
 
 use super::types::Transaction;
 
-fn parse_comments_tags(input: &str) -> HLParserIResult<&str, (Option<&str>, Vec<Tag>)> {
-    let (comment_input, tags_input) = split_on_space_before_char(input, ':');
-    let comment = match comment_input.trim().len() {
-        0 => None,
-        _ => Some(comment_input.trim()),
+pub(super) fn parse_comments_tags<'s>(input: &mut &'s str) -> PResult<(&'s str, Vec<Tag>)> {
+    let comment = match find_space_before_char(input, ':') {
+        Some(pos) => take(pos + 1).parse_next(input)?,
+        None => "",
     };
-    let (tail, tags) = separated_list0(terminated(tag(","), space0), parse_tag)(tags_input)
-        .map_err(nom::Err::convert)?;
 
-    Ok((tail, (comment, tags)))
+    let tags = terminated(
+        separated(0.., parse_tag, terminated(',', space0)),
+        alt((line_ending, eof)),
+    )
+    .context(StrContext::Label("tags"))
+    .parse_next(input)?;
+
+    Ok((comment.trim(), tags))
 }
 
-pub fn parse_transaction(input: &str) -> HLParserIResult<&str, Transaction> {
-    let (tail, (primary_date, secondary_date)) =
-        terminated(parse_date, space0)(input).map_err(nom::Err::convert)?;
-    let (tail, status) = parse_status(tail).map_err(nom::Err::convert)?;
-    let (tail, code) = opt(parse_code)(tail).map_err(nom::Err::convert)?;
-    let (tail, rest_of_line) = terminated(opt(not_line_ending), line_ending)(tail)?;
+pub fn parse_transaction(input: &mut &str) -> PResult<Transaction> {
+    let (primary_date, secondary_date) = terminated(parse_date, space0).parse_next(input)?;
+    let status = parse_status
+        .context(StrContext::Label("transaction status"))
+        .parse_next(input)?;
+    let code = opt(parse_code.context(StrContext::Label("transaction code"))).parse_next(input)?;
 
-    // hmmmm...
-    let rest_of_line = rest_of_line.unwrap_or("");
-    let (description_input, comment_and_tags_input) =
-        rest_of_line.split_at(rest_of_line.find(';').unwrap_or(rest_of_line.len()));
-    let (_, description) = parse_description(description_input).map_err(nom::Err::convert)?;
-    let (_, comment_and_tags) =
-        opt(parse_transaction_comment)(comment_and_tags_input).map_err(nom::Err::convert)?;
+    let (description, comment_and_tags) = terminated(
+        (
+            parse_description.context(StrContext::Label("transaction description")),
+            opt(preceded(
+                space0,
+                parse_transaction_comment
+                    .and_then(parse_comments_tags)
+                    .context(StrContext::Label("transaction comment and tags")),
+            )),
+        ),
+        line_ending,
+    )
+    .parse_next(input)?;
 
-    let (_, (_comment, tags)) =
-        parse_comments_tags(comment_and_tags.unwrap_or("")).map_err(nom::Err::convert)?;
-    let (tail, postings) =
-        many0(terminated(parse_posting, line_ending))(tail).map_err(nom::Err::convert)?;
+    let postings = repeat(0.., terminated(parse_posting, line_ending)).parse_next(input)?;
 
     let transaction = Transaction {
         primary_date,
@@ -58,11 +64,19 @@ pub fn parse_transaction(input: &str) -> HLParserIResult<&str, Transaction> {
         code: code.map(str::to_string),
         status,
         description,
-        tags,
+        tags: match comment_and_tags {
+            Some((_, tags)) => tags,
+            None => vec![],
+        },
         postings,
     };
 
-    transaction.validate().map_err(nom::Err::Error)?;
+    transaction.validate().map_err(|_e| {
+        ErrMode::Cut(ContextError::new().add_context(
+            input,
+            winnow::error::StrContext::Label("invalid transaction"),
+        ))
+    })?; // TODO: errors
 
-    Ok((tail, transaction))
+    Ok(transaction)
 }

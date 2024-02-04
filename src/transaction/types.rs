@@ -84,7 +84,7 @@ pub struct Transaction {
 }
 
 impl TryInto<Transaction> for Value {
-    type Error = HLParserError;
+    type Error = HLParserError<&'static str>;
 
     fn try_into(self) -> Result<Transaction, Self::Error> {
         if let Value::Transaction(t) = self {
@@ -127,12 +127,12 @@ impl Display for Transaction {
 }
 
 impl Transaction {
-    pub fn validate(&self) -> Result<(), HLParserError> {
+    pub fn validate(&self) -> Result<(), HLParserError<&str>> {
         self.validate_postings()?;
         Ok(())
     }
 
-    fn validate_postings(&self) -> Result<(), HLParserError> {
+    fn validate_postings(&self) -> Result<(), HLParserError<&str>> {
         let none_amounts = self.postings.iter().filter(|p| p.amount.is_none()).count();
 
         if none_amounts > 1_usize {

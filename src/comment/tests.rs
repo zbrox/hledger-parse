@@ -1,9 +1,7 @@
 use rstest::rstest;
+use winnow::error::{ContextError, ErrMode};
 
-use crate::{
-    comment::parsers::{parse_line_comment, parse_transaction_comment},
-    HLParserError,
-};
+use crate::comment::parsers::{parse_line_comment, parse_transaction_comment};
 
 #[rstest]
 #[case::line_comment_temporary(";comment", "", "comment")]
@@ -19,10 +17,9 @@ fn test_parse_line_comment(
     #[case] expected_remaining: &str,
     #[case] expected_comment: &str,
 ) {
-    assert_eq!(
-        parse_line_comment(input).unwrap(),
-        (expected_remaining, expected_comment)
-    );
+    let mut input = input;
+    assert_eq!(parse_line_comment(&mut input).unwrap(), expected_comment);
+    assert_eq!(input, expected_remaining);
 }
 
 #[rstest]
@@ -35,22 +32,18 @@ fn test_parse_transaction_comment(
     #[case] expected_remaining: &str,
     #[case] expected_comment: &str,
 ) {
+    let mut input = input;
     assert_eq!(
-        parse_transaction_comment(input).unwrap(),
-        (expected_remaining, expected_comment)
+        parse_transaction_comment(&mut input).unwrap(),
+        expected_comment
     );
+    assert_eq!(input, expected_remaining);
 }
 
 #[test]
 fn test_parse_line_comment_as_transaction_comment() {
     assert_eq!(
-        parse_transaction_comment("# comment")
-            .unwrap_err()
-            .to_string(),
-        nom::Err::Error(HLParserError::Parse(
-            "# comment".to_owned(),
-            nom::error::ErrorKind::Char
-        ))
-        .to_string()
+        parse_transaction_comment(&mut "# comment").unwrap_err(),
+        ErrMode::Backtrack(ContextError::new()) // TODO: errors
     );
 }

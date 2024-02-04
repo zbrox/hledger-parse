@@ -1,15 +1,12 @@
-use nom::{
-    bytes::complete::tag,
-    character::complete::{not_line_ending, space1},
-    combinator::verify,
-    sequence::{preceded, tuple},
+use winnow::{
+    ascii::{space1, till_line_ending},
+    combinator::preceded,
+    PResult, Parser,
 };
 
-use crate::HLParserIResult;
-
-pub fn parse_account_directive(input: &str) -> HLParserIResult<&str, &str> {
-    verify(
-        preceded(tuple((tag("account"), space1)), not_line_ending),
-        |account_name: &str| !account_name.contains("  "),
-    )(input)
+pub fn parse_account_directive<'s>(input: &mut &'s str) -> PResult<&'s str> {
+    preceded(("account", space1), till_line_ending)
+        .verify(|account_name: &str| !account_name.contains("  "))
+        .context(winnow::error::StrContext::Label("account name"))
+        .parse_next(input)
 }

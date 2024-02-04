@@ -1,61 +1,45 @@
-use nom::{
-    bytes::complete::take_until,
-    character::{complete::char, complete::space0, is_digit, is_newline, is_space},
-    sequence::{delimited, preceded, terminated},
-    IResult,
+use winnow::{
+    ascii::space0,
+    combinator::{delimited, preceded, terminated},
+    token::take_until,
+    PResult, Parser,
 };
-
-pub fn is_char_newline(char: char) -> bool {
-    is_newline(char as u8)
-}
-
-pub fn is_char_space(char: char) -> bool {
-    is_space(char as u8)
-}
-
-pub fn is_char_digit(char: char) -> bool {
-    is_digit(char as u8)
-}
 
 pub fn is_char_minus(char: char) -> bool {
     char == '-'
 }
 
-pub fn in_quotes(input: &str) -> IResult<&str, &str> {
+pub fn in_quotes<'s>(input: &mut &'s str) -> PResult<&'s str> {
     delimited(
-        terminated(char('"'), space0),
-        take_until("\""),
-        preceded(space0, char('"')),
-    )(input)
+        terminated('"', space0),
+        take_until(0.., '"'),
+        preceded(space0, '"'),
+    )
+    .parse_next(input)
 }
 
-pub fn split_on_space_before_char(input: &str, char: char) -> (&str, &str) {
+pub fn find_space_before_char(input: &str, char: char) -> Option<usize> {
     let char_pos = input.find(char);
-    let space_pos = match char_pos {
+    match char_pos {
         Some(pos) => input[..pos].rfind(' '),
-        None => return (input, ""),
-    };
-
-    match space_pos {
-        Some(pos) => (input[..pos].into(), input[pos + 1..].into()),
-        None => (input, ""),
+        None => None,
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::utils::split_on_space_before_char;
+    use crate::utils::find_space_before_char;
 
     #[test]
     fn test_split_on_space_before_char() {
         assert_eq!(
-            split_on_space_before_char("before before source:salary", ':'),
-            ("before before", "source:salary")
+            find_space_before_char("before before source:salary", ':'),
+            Some(13)
         );
         assert_eq!(
-            split_on_space_before_char("преди преди източник:заплата", ':'),
-            ("преди преди", "източник:заплата")
+            find_space_before_char("преди преди източник:заплата", ':'),
+            Some(21)
         );
-        assert_eq!(split_on_space_before_char("", ':'), ("", ""));
+        assert_eq!(find_space_before_char("", ':'), None);
     }
 }
