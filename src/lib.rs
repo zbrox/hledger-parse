@@ -45,12 +45,12 @@ pub enum HLParserError<I> {
     #[error("Extract error: {0:?}")]
     Extract(Value),
     #[error("Parsing error: {0} {1:?}")]
-    Nom(I, ErrorKind),
+    Winnow(I, ErrorKind),
 }
 
 impl<I: Clone + winnow::stream::Stream> ParserError<I> for HLParserError<I> {
     fn from_error_kind(input: &I, kind: ErrorKind) -> Self {
-        HLParserError::Nom(input.clone(), kind)
+        HLParserError::Winnow(input.clone(), kind)
     }
 
     fn append(self, _: &I, _: &<I as winnow::stream::Stream>::Checkpoint, _: ErrorKind) -> Self {
@@ -60,7 +60,7 @@ impl<I: Clone + winnow::stream::Stream> ParserError<I> for HLParserError<I> {
 
 impl<I: Clone, E: FromStr> FromExternalError<I, E> for HLParserError<I> {
     fn from_external_error(input: &I, kind: ErrorKind, _e: E) -> Self {
-        HLParserError::Nom(input.to_owned(), kind)
+        HLParserError::Winnow(input.to_owned(), kind)
     }
 }
 
