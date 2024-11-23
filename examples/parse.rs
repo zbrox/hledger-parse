@@ -9,9 +9,7 @@ fn main() -> Result<(), HLParserError<String>> {
         .map_err(|e| HLParserError::IO(format!("Error reading journal file: {}", e.to_string())))?;
     let mut input = contents.as_str();
 
-    let journal: Journal = parse_journal(&mut input, base_path).map_err(|e| {
-        HLParserError::Parse(format!("Error parsing journal file: {}", e.to_string()))
-    })?;
+    let journal: Journal = parse_journal(&mut input, base_path)?;
 
     println!("Transactions: {}", journal.transactions().len());
     println!("{}", journal);

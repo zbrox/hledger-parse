@@ -1,7 +1,7 @@
-use std::fmt::Display;
+use std::{fmt::Display, path::PathBuf};
 
 use crate::{
-    account::types::Account, commodity::types::Commodity, price::types::Price,
+    account::types::Account, commodity::types::Commodity, parse_journal, price::types::Price,
     transaction::types::Transaction, HLParserError,
 };
 
@@ -22,6 +22,17 @@ pub struct Journal {
     accounts: Vec<Account>,
     prices: Vec<Price>,
     commodities: Vec<Commodity>,
+}
+
+impl TryFrom<PathBuf> for Journal {
+    type Error = HLParserError<String>;
+
+    fn try_from(value: PathBuf) -> Result<Self, Self::Error> {
+        let base_path = value.parent().map(|v| v.to_owned());
+        let journal_file_contents = std::fs::read_to_string(value).map_err(|e| HLParserError::IO(e.to_string()))?;
+        let mut journal_str = journal_file_contents.as_str();
+        parse_journal(&mut journal_str, base_path)
+    }
 }
 
 impl Display for Journal {
