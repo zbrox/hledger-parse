@@ -24,22 +24,6 @@ pub struct Journal {
     commodities: Vec<Commodity>,
 }
 
-// impl<'s> TryFrom<&'s PathBuf> for Journal {
-//     type Error = HLParserError<&'s str>;
-
-//     fn try_from(journal_path: &'s PathBuf) -> Result<Self, Self::Error> {
-//         let base_path = journal_path.parent().map(|v| v.to_owned());
-
-//         let journal_contents = std::fs::read_to_string(journal_path).map_err(|e| {
-//             HLParserError::IO(format!("Error reading journal file: {}", e.to_string()))
-//         })?;
-//         let mut journal_contents = journal_contents.as_str();
-//         let journal = parse_journal(&mut journal_contents, base_path)?;
-
-//         Ok(journal)
-//     }
-// }
-
 impl Display for Journal {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         for a in &self.accounts {
