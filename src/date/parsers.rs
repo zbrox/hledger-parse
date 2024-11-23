@@ -1,20 +1,21 @@
 use chrono::{Datelike, NaiveDate};
 use winnow::{
-    ascii::dec_int,
-    combinator::{alt, opt, preceded, separated},
-    error::{ContextError, ErrMode},
-    PResult, Parser,
+    combinator::{alt, opt, preceded, terminated}, error::{ErrMode, FromExternalError as _, StrContext}, PResult, Parser
 };
+
+use crate::{utils::{deci32_leading_zeros, decu32_leading_zeros}, ValidationError};
 
 fn parse_date_components<'s>(
     separator: char,
 ) -> impl FnMut(&mut &'s str) -> PResult<(Option<i32>, u32, u32)> {
     move |input: &mut &'s str| {
-        let comps: Vec<i32> = separated(0.., dec_int::<_, i32, _>, separator).parse_next(input)?;
-        match comps.len() {
-            3 => Ok((Some(comps[0]), comps[1] as u32, comps[2] as u32)),
-            2 => Ok((None, comps[0] as u32, comps[1] as u32)),
-            _ => Err(ErrMode::Backtrack(ContextError::new())), // TODO: better error
+        let first_part = terminated(deci32_leading_zeros, separator).parse_next(input)?;
+        let second_part = decu32_leading_zeros.parse_next(input)?;
+        let third_part = opt(preceded(separator, decu32_leading_zeros)).parse_next(input)?;
+
+        match third_part {
+            Some(third_part) => Ok((Some(first_part), second_part, third_part)),
+            None => Ok((None, first_part as u32, second_part)),
         }
     }
 }
@@ -25,22 +26,30 @@ fn parse_separator_date<'s>(
 ) -> impl FnMut(&mut &'s str) -> PResult<(NaiveDate, Option<NaiveDate>)> {
     move |i: &mut &'s str| {
         let (primary_date_components, secondary_date_components) = (
-            parse_date_components(separator),
-            opt(preceded('=', parse_date_components(separator))),
+            parse_date_components(separator).context(StrContext::Label("error parsing primary date components")),
+            opt(preceded('=', parse_date_components(separator))).context(StrContext::Label("error parsing secondary date components")),
         )
             .parse_next(i)?;
 
-        // TODO: need better errors
         let (y, m, d) = match primary_date_components {
             (Some(y), m, d) => (y, m, d),
-            _ => return Err(ErrMode::Backtrack(ContextError::new())), // TODO: better error
+            _ => return Err(ErrMode::from_external_error(
+                i,
+                winnow::error::ErrorKind::Verify,
+                ValidationError::InvalidDateComponents(primary_date_components.0, primary_date_components.1, primary_date_components.2),
+            )
+            .cut()),
         };
 
         let primary_date = match NaiveDate::from_ymd_opt(y, m, d) {
             Some(date) => date,
             None => {
-                return Err(ErrMode::Backtrack(ContextError::new())); // TODO: errors
-                                                                     // TODO: better error
+                return Err(ErrMode::from_external_error(
+                    i,
+                    winnow::error::ErrorKind::Verify,
+                    ValidationError::InvalidDateComponents(Some(y), m, d),
+                )
+                .cut());
             }
         };
 
@@ -55,7 +64,12 @@ fn parse_separator_date<'s>(
         let secondary_date = match secondary_date_components {
             Some((y, m, d)) => match NaiveDate::from_ymd_opt(y, m, d) {
                 Some(date) => Some(date),
-                None => return Err(ErrMode::Backtrack(ContextError::new())), // TODO: better error
+                None => return Err(ErrMode::from_external_error(
+                    i,
+                    winnow::error::ErrorKind::Verify,
+                    ValidationError::InvalidDateComponents(Some(y), m, d),
+                )
+                .cut()),
             },
             None => None,
         };

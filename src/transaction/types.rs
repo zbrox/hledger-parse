@@ -6,7 +6,7 @@ use rust_decimal_macros::dec;
 
 use crate::{
     description::types::Description, journal::types::Value, posting::types::Posting,
-    status::types::Status, tag::types::Tag, HLParserError,
+    status::types::Status, tag::types::Tag, HLParserError, ValidationError,
 };
 
 /// Transaction information
@@ -127,19 +127,16 @@ impl Display for Transaction {
 }
 
 impl Transaction {
-    pub fn validate(&self) -> Result<(), HLParserError<&str>> {
+    pub fn validate(&self) -> Result<(), ValidationError> {
         self.validate_postings()?;
         Ok(())
     }
 
-    fn validate_postings(&self) -> Result<(), HLParserError<&str>> {
+    fn validate_postings(&self) -> Result<(), ValidationError> {
         let none_amounts = self.postings.iter().filter(|p| p.amount.is_none()).count();
 
         if none_amounts > 1_usize {
-            return Err(HLParserError::Validation(format!(
-                "Transaction {} cannot have more than 1 posting with missing amounts",
-                self
-            )));
+            return Err(ValidationError::TransactionWithMissingAmountPostings(self.clone()));
         }
 
         if none_amounts == 1_usize {
@@ -157,10 +154,7 @@ impl Transaction {
             .sum::<Decimal>();
 
         if postings_sum != dec!(0) {
-            return Err(HLParserError::Validation(format!(
-                "Transaction {} postings' sum does not equal 0",
-                self
-            )));
+            return Err(ValidationError::NonZeroSumTransactionPostings(self.clone()));
         }
 
         Ok(())

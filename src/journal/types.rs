@@ -117,14 +117,12 @@ impl Journal {
             .filter(|a| !self.accounts.contains(a))
             .collect();
         if !undefined_accounts.is_empty() {
-            return Err(HLParserError::Validation(format!(
-                "The following accounts are not defined:\n{}",
-                undefined_accounts
+            return Err(HLParserError::Validation(
+                crate::ValidationError::UndefinedAccounts(undefined_accounts
                     .iter()
                     .map(|v| v.to_string())
-                    .collect::<Vec<String>>()
-                    .join("\n")
-            )));
+                    .collect::<Vec<String>>())
+                ));
         }
         Ok(())
     }

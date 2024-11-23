@@ -12,7 +12,7 @@ fn test_valid_price() {
         parse_price(&mut input).unwrap(),
         Price {
             commodity: "EUR".to_string(),
-            date: NaiveDate::from_ymd(2017, 1, 1),
+            date: NaiveDate::from_ymd_opt(2017, 1, 1).unwrap(),
             amount: Amount {
                 currency: "SEK".to_string(),
                 value: dec!(9.552532877),

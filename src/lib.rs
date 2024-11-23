@@ -39,7 +39,7 @@ pub enum HLParserError<I> {
     #[error("Parse error: {0}")]
     Parse(String),
     #[error("Validation error: {0}")]
-    Validation(String),
+    Validation(ValidationError),
     #[error("Included journal error: {0}")]
     IncludePath(String),
     #[error("Extract error: {0:?}")]
@@ -48,12 +48,12 @@ pub enum HLParserError<I> {
     Nom(I, ErrorKind),
 }
 
-impl<I: Clone> ParserError<I> for HLParserError<I> {
+impl<I: Clone + winnow::stream::Stream> ParserError<I> for HLParserError<I> {
     fn from_error_kind(input: &I, kind: ErrorKind) -> Self {
         HLParserError::Nom(input.clone(), kind)
     }
 
-    fn append(self, _: &I, _: ErrorKind) -> Self {
+    fn append(self, _: &I, _: &<I as winnow::stream::Stream>::Checkpoint, _: ErrorKind) -> Self {
         self
     }
 }
@@ -62,4 +62,16 @@ impl<I: Clone, E: FromStr> FromExternalError<I, E> for HLParserError<I> {
     fn from_external_error(input: &I, kind: ErrorKind, _e: E) -> Self {
         HLParserError::Nom(input.to_owned(), kind)
     }
+}
+
+#[derive(Debug, Error)]
+pub enum ValidationError {
+    #[error("Invalid date components")]
+    InvalidDateComponents(Option<i32>, u32, u32),
+    #[error("Transaction {0} postings' sum does not equal 0")]
+    NonZeroSumTransactionPostings(Transaction),
+    #[error("Transaction {0} cannot have more than 1 posting with missing amounts")]
+    TransactionWithMissingAmountPostings(Transaction),
+    #[error("These accounts are not defined:\n{}", .0.join("\n"))]
+    UndefinedAccounts(Vec<String>),
 }

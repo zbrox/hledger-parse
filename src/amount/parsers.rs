@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use rust_decimal::Decimal;
 use winnow::{
-    ascii::{dec_int, space0},
+    ascii::{digit1, space0},
     combinator::{alt, opt, terminated},
     error::ContextError,
     stream::AsChar,
@@ -17,9 +17,9 @@ use super::types::{Amount, AmountSign};
 // TODO: no scientific notation parsing
 pub fn parse_money_amount(input: &mut &str) -> PResult<Decimal> {
     let (num, _, scale) = (
-        dec_int::<_, i64, _>.recognize(),
+        digit1.take(),
         opt(alt(('.', ','))),
-        opt(dec_int::<_, i64, _>.recognize()),
+        opt(digit1.take()),
     )
         .parse_next(input)?;
     let value = format!("{}.{}", num, scale.unwrap_or("0"));
