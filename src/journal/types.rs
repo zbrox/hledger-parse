@@ -118,11 +118,13 @@ impl Journal {
             .collect();
         if !undefined_accounts.is_empty() {
             return Err(HLParserError::Validation(
-                crate::ValidationError::UndefinedAccounts(undefined_accounts
-                    .iter()
-                    .map(|v| v.to_string())
-                    .collect::<Vec<String>>())
-                ));
+                crate::ValidationError::UndefinedAccounts(
+                    undefined_accounts
+                        .iter()
+                        .map(|v| v.to_string())
+                        .collect::<Vec<String>>(),
+                ),
+            ));
         }
         Ok(())
     }

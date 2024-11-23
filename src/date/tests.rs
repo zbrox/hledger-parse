@@ -54,7 +54,5 @@ fn test_parse_date_dash(
 #[case::mixed_separator("2021/02.29")]
 fn test_parse_date_invalid(#[case] input: &str) {
     let mut input = input;
-    assert!(
-        parse_date(&mut input).is_err(),
-    );
+    assert!(parse_date(&mut input).is_err(),);
 }

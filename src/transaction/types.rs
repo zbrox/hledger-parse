@@ -136,7 +136,9 @@ impl Transaction {
         let none_amounts = self.postings.iter().filter(|p| p.amount.is_none()).count();
 
         if none_amounts > 1_usize {
-            return Err(ValidationError::TransactionWithMissingAmountPostings(self.clone()));
+            return Err(ValidationError::TransactionWithMissingAmountPostings(
+                self.clone(),
+            ));
         }
 
         if none_amounts == 1_usize {
