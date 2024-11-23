@@ -13,7 +13,7 @@ fn description_end<'s>(input: &mut &'s str) -> PResult<&'s str> {
 
 fn parse_only_note<'s>(input: &mut &'s str) -> PResult<&'s str> {
     repeat_till::<_, char, Vec<char>, _, _, _, _>(0.., any, peek(description_end))
-        .recognize()
+        .take()
         .parse_next(input)
 }
 

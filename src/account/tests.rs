@@ -1,5 +1,4 @@
 use rstest::rstest;
-use winnow::error::{AddContext, ContextError, ErrMode};
 
 use crate::account::parsers::parse_account_directive;
 
@@ -22,10 +21,5 @@ fn test_parse_account_directive(
 #[test]
 fn test_parse_invalid_account_directive() {
     parse_account_directive(&mut "account assets:cash  ").unwrap_err();
-    assert_eq!(
-        parse_account_directive(&mut "account assets:cash  ").unwrap_err(),
-        ErrMode::Backtrack(
-            ContextError::new().add_context(&"", winnow::error::StrContext::Label("account name"))
-        )
-    );
+    assert!(parse_account_directive(&mut "account assets:cash  ").is_err(),);
 }

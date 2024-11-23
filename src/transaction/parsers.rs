@@ -1,7 +1,7 @@
 use winnow::{
     ascii::{line_ending, space0, till_line_ending},
     combinator::{alt, eof, opt, preceded, repeat, separated, terminated},
-    error::{AddContext, ContextError, ErrMode, StrContext},
+    error::{ErrMode, FromExternalError as _, StrContext},
     token::take,
     PResult, Parser,
 };
@@ -72,12 +72,9 @@ pub fn parse_transaction(input: &mut &str) -> PResult<Transaction> {
         postings,
     };
 
-    transaction.validate().map_err(|_e| {
-        ErrMode::Cut(ContextError::new().add_context(
-            input,
-            winnow::error::StrContext::Label("invalid transaction"),
-        ))
-    })?; // TODO: errors
+    transaction.validate().map_err(|e| {
+        ErrMode::from_external_error(input, winnow::error::ErrorKind::Verify, e).cut()
+    })?;
 
     Ok(transaction)
 }

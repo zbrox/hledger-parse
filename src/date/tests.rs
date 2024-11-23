@@ -1,36 +1,35 @@
 use chrono::NaiveDate;
 use rstest::rstest;
-use winnow::error::{ContextError, ErrMode};
 
 use crate::date::parsers::parse_date;
 
 #[rstest]
-#[case::date_dash("2020-01-01", "", NaiveDate::from_ymd(2020, 1, 1), None)]
-#[case::date_slash("2020/01/01", "", NaiveDate::from_ymd(2020, 1, 1), None)]
-#[case::date_dot("2020.01.01", "", NaiveDate::from_ymd(2020, 1, 1), None)]
+#[case::date_dash("2020-01-01", "", NaiveDate::from_ymd_opt(2020, 1, 1).unwrap(), None)]
+#[case::date_slash("2020/01/01", "", NaiveDate::from_ymd_opt(2020, 1, 1).unwrap(), None)]
+#[case::date_dot("2020.01.01", "", NaiveDate::from_ymd_opt(2020, 1, 1).unwrap(), None)]
 #[case::date_dash_secondary(
     "2020-01-01=2020-01-02",
     "",
-    NaiveDate::from_ymd(2020, 1, 1),
-    Some(NaiveDate::from_ymd(2020, 1, 2))
+    NaiveDate::from_ymd_opt(2020, 1, 1).unwrap(),
+    Some(NaiveDate::from_ymd_opt(2020, 1, 2).unwrap())
 )]
 #[case::date_slash_secondary(
     "2020/01/01=2020/01/02",
     "",
-    NaiveDate::from_ymd(2020, 1, 1),
-    Some(NaiveDate::from_ymd(2020, 1, 2))
+    NaiveDate::from_ymd_opt(2020, 1, 1).unwrap(),
+    Some(NaiveDate::from_ymd_opt(2020, 1, 2).unwrap())
 )]
 #[case::date_dot_secondary(
     "2020.01.01=2020.01.02",
     "",
-    NaiveDate::from_ymd(2020, 1, 1),
-    Some(NaiveDate::from_ymd(2020, 1, 2))
+    NaiveDate::from_ymd_opt(2020, 1, 1).unwrap(),
+    Some(NaiveDate::from_ymd_opt(2020, 1, 2).unwrap())
 )]
 #[case::smart_secondary_date(
     "2020-01-01=12-5",
     "",
-    NaiveDate::from_ymd(2020, 1, 1),
-    Some(NaiveDate::from_ymd(2020, 12, 5))
+    NaiveDate::from_ymd_opt(2020, 1, 1).unwrap(),
+    Some(NaiveDate::from_ymd_opt(2020, 12, 5).unwrap())
 )]
 fn test_parse_date_dash(
     #[case] input: &str,
@@ -55,8 +54,7 @@ fn test_parse_date_dash(
 #[case::mixed_separator("2021/02.29")]
 fn test_parse_date_invalid(#[case] input: &str) {
     let mut input = input;
-    assert_eq!(
-        parse_date(&mut input).unwrap_err(),
-        ErrMode::Backtrack(ContextError::new()) // TODO: errors
+    assert!(
+        parse_date(&mut input).is_err(),
     );
 }

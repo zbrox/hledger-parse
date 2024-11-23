@@ -12,11 +12,11 @@ fn parse_commodity_directive_single_line(input: &mut &str) -> PResult<Commodity>
     let _ = terminated("commodity", space1).parse_next(input)?;
     alt((
         separated_pair(
-            parse_money_amount.with_recognized(),
+            parse_money_amount.with_taken(),
             space0,
             parse_currency_string,
         )
-        .with_recognized()
+        .with_taken()
         .map(|((_, name), full_format)| Commodity {
             name: name.to_string(),
             format: Some(full_format.to_string()),
@@ -24,9 +24,9 @@ fn parse_commodity_directive_single_line(input: &mut &str) -> PResult<Commodity>
         separated_pair(
             parse_currency_string,
             space0,
-            opt(parse_money_amount.with_recognized()),
+            opt(parse_money_amount.with_taken()),
         )
-        .with_recognized()
+        .with_taken()
         .map(|((name, format), full_format)| Commodity {
             name: name.to_string(),
             format: format.map(|_| full_format.to_string()),

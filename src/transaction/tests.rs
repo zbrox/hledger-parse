@@ -41,7 +41,7 @@ fn test_simple_transaction() {
     assert_eq!(
         parse_transaction(&mut input).unwrap(),
         Transaction {
-            primary_date: NaiveDate::from_ymd(2008, 1, 1),
+            primary_date: NaiveDate::from_ymd_opt(2008, 1, 1).unwrap(),
             secondary_date: None,
             code: None,
             description: Description {
@@ -86,7 +86,7 @@ fn test_empty_description_cleared_transaction() {
     assert_eq!(
         parse_transaction(&mut input).unwrap(),
         Transaction {
-            primary_date: NaiveDate::from_ymd(2008, 1, 1),
+            primary_date: NaiveDate::from_ymd_opt(2008, 1, 1).unwrap(),
             secondary_date: None,
             code: None,
             description: Description {
@@ -131,7 +131,7 @@ fn test_empty_description_unmarked_transaction() {
     assert_eq!(
         parse_transaction(&mut input).unwrap(),
         Transaction {
-            primary_date: NaiveDate::from_ymd(2008, 1, 1),
+            primary_date: NaiveDate::from_ymd_opt(2008, 1, 1).unwrap(),
             secondary_date: None,
             code: None,
             description: Description {
@@ -179,7 +179,7 @@ fn test_transaction_ending_after_postings() {
     assert_eq!(
         parse_transaction(&mut input).unwrap(),
         Transaction {
-            primary_date: NaiveDate::from_ymd(2008, 1, 1),
+            primary_date: NaiveDate::from_ymd_opt(2008, 1, 1).unwrap(),
             secondary_date: None,
             code: None,
             description: Description {
@@ -224,7 +224,7 @@ fn test_simple_transaction_with_empty_amount_posting() {
     assert_eq!(
         parse_transaction(&mut input).unwrap(),
         Transaction {
-            primary_date: NaiveDate::from_ymd(2008, 1, 1),
+            primary_date: NaiveDate::from_ymd_opt(2008, 1, 1).unwrap(),
             secondary_date: None,
             code: None,
             description: Description {
@@ -266,7 +266,7 @@ fn test_transaction_with_code() {
     assert_eq!(
         parse_transaction(&mut input).unwrap(),
         Transaction {
-            primary_date: NaiveDate::from_ymd(2008, 1, 1),
+            primary_date: NaiveDate::from_ymd_opt(2008, 1, 1).unwrap(),
             secondary_date: None,
             code: Some("101".into()),
             description: Description {
@@ -311,7 +311,7 @@ fn test_transaction_with_status() {
     assert_eq!(
         parse_transaction(&mut input).unwrap(),
         Transaction {
-            primary_date: NaiveDate::from_ymd(2008, 1, 1),
+            primary_date: NaiveDate::from_ymd_opt(2008, 1, 1).unwrap(),
             secondary_date: None,
             code: Some("101".into()),
             description: Description {
@@ -356,7 +356,7 @@ fn test_transaction_no_description() {
     assert_eq!(
         parse_transaction(&mut input).unwrap(),
         Transaction {
-            primary_date: NaiveDate::from_ymd(2008, 1, 1),
+            primary_date: NaiveDate::from_ymd_opt(2008, 1, 1).unwrap(),
             secondary_date: None,
             code: None,
             description: Description {
@@ -401,7 +401,7 @@ fn test_transaction_with_tags() {
     assert_eq!(
         parse_transaction(&mut input).unwrap(),
         Transaction {
-            primary_date: NaiveDate::from_ymd(2008, 1, 1),
+            primary_date: NaiveDate::from_ymd_opt(2008, 1, 1).unwrap(),
             secondary_date: None,
             code: None,
             description: Description {
@@ -453,7 +453,7 @@ fn test_transaction_with_tags() {
 #[test]
 fn test_transaction_validate_none_amount_postings() {
     let transaction = Transaction {
-        primary_date: NaiveDate::from_ymd(2008, 1, 1),
+        primary_date: NaiveDate::from_ymd_opt(2008, 1, 1).unwrap(),
         secondary_date: None,
         status: Status::Unmarked,
         code: None,
@@ -489,7 +489,7 @@ fn test_transaction_validate_none_amount_postings() {
 #[test]
 fn test_transaction_validate_not_zero_sum_postings() {
     let transaction = Transaction {
-        primary_date: NaiveDate::from_ymd(2008, 1, 1),
+        primary_date: NaiveDate::from_ymd_opt(2008, 1, 1).unwrap(),
         secondary_date: None,
         status: Status::Unmarked,
         code: None,
