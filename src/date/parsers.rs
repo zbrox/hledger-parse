@@ -1,9 +1,14 @@
 use chrono::{Datelike, NaiveDate};
 use winnow::{
-    combinator::{alt, opt, preceded, terminated}, error::{ErrMode, FromExternalError as _, StrContext}, PResult, Parser
+    combinator::{alt, opt, preceded, terminated},
+    error::{ErrMode, FromExternalError as _, StrContext},
+    PResult, Parser,
 };
 
-use crate::{utils::{deci32_leading_zeros, decu32_leading_zeros}, ValidationError};
+use crate::{
+    utils::{deci32_leading_zeros, decu32_leading_zeros},
+    ValidationError,
+};
 
 fn parse_date_components<'s>(
     separator: char,
@@ -26,19 +31,27 @@ fn parse_separator_date<'s>(
 ) -> impl FnMut(&mut &'s str) -> PResult<(NaiveDate, Option<NaiveDate>)> {
     move |i: &mut &'s str| {
         let (primary_date_components, secondary_date_components) = (
-            parse_date_components(separator).context(StrContext::Label("error parsing primary date components")),
-            opt(preceded('=', parse_date_components(separator))).context(StrContext::Label("error parsing secondary date components")),
+            parse_date_components(separator)
+                .context(StrContext::Label("error parsing primary date components")),
+            opt(preceded('=', parse_date_components(separator)))
+                .context(StrContext::Label("error parsing secondary date components")),
         )
             .parse_next(i)?;
 
         let (y, m, d) = match primary_date_components {
             (Some(y), m, d) => (y, m, d),
-            _ => return Err(ErrMode::from_external_error(
-                i,
-                winnow::error::ErrorKind::Verify,
-                ValidationError::InvalidDateComponents(primary_date_components.0, primary_date_components.1, primary_date_components.2),
-            )
-            .cut()),
+            _ => {
+                return Err(ErrMode::from_external_error(
+                    i,
+                    winnow::error::ErrorKind::Verify,
+                    ValidationError::InvalidDateComponents(
+                        primary_date_components.0,
+                        primary_date_components.1,
+                        primary_date_components.2,
+                    ),
+                )
+                .cut())
+            }
         };
 
         let primary_date = match NaiveDate::from_ymd_opt(y, m, d) {
@@ -64,12 +77,14 @@ fn parse_separator_date<'s>(
         let secondary_date = match secondary_date_components {
             Some((y, m, d)) => match NaiveDate::from_ymd_opt(y, m, d) {
                 Some(date) => Some(date),
-                None => return Err(ErrMode::from_external_error(
-                    i,
-                    winnow::error::ErrorKind::Verify,
-                    ValidationError::InvalidDateComponents(Some(y), m, d),
-                )
-                .cut()),
+                None => {
+                    return Err(ErrMode::from_external_error(
+                        i,
+                        winnow::error::ErrorKind::Verify,
+                        ValidationError::InvalidDateComponents(Some(y), m, d),
+                    )
+                    .cut())
+                }
             },
             None => None,
         };

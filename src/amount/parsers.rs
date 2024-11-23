@@ -16,12 +16,8 @@ use super::types::{Amount, AmountSign};
 
 // TODO: no scientific notation parsing
 pub fn parse_money_amount(input: &mut &str) -> PResult<Decimal> {
-    let (num, _, scale) = (
-        digit1.take(),
-        opt(alt(('.', ','))),
-        opt(digit1.take()),
-    )
-        .parse_next(input)?;
+    let (num, _, scale) =
+        (digit1.take(), opt(alt(('.', ','))), opt(digit1.take())).parse_next(input)?;
     let value = format!("{}.{}", num, scale.unwrap_or("0"));
     let value =
         Decimal::from_str(&value).map_err(|_e| winnow::error::ErrMode::Cut(ContextError::new()))?; // TODO: errors
