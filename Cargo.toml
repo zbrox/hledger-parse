@@ -6,11 +6,11 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-chrono = "0.4.19"
-rust_decimal = "1.23.1"
-rust_decimal_macros = "1.23.1"
-thiserror = "1.0.56"
-winnow = { version = "0.5.35", features = ["simd"] }
+chrono = "0.4.38"
+rust_decimal = "1.36.0"
+rust_decimal_macros = "1.36.0"
+thiserror = "2.0.3"
+winnow = { version = "0.6.20", features = ["simd"] }
 
 [dev-dependencies]
-rstest = "0.18.2"
+rstest = "0.23.0"
