@@ -30,14 +30,14 @@ pub use transaction::types::Transaction;
 pub use journal::parsers::parse_journal;
 
 use journal::types::Value;
-use winnow::error::{ErrorKind, FromExternalError, ParserError};
+use winnow::error::{ContextError, ErrMode, ErrorKind, FromExternalError, ParserError};
 
 #[derive(Error, Debug)]
 pub enum HLParserError<I> {
     #[error("IO error: {0}")]
     IO(String),
     #[error("Parse error: {0}")]
-    Parse(String),
+    Parse(ErrMode<ContextError>), 
     #[error("Validation error: {0}")]
     Validation(ValidationError),
     #[error("Included journal error: {0}")]
