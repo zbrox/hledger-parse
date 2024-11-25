@@ -13,4 +13,9 @@ thiserror = "2.0.3"
 winnow = { version = "0.6.20", features = ["simd"] }
 
 [dev-dependencies]
+criterion = "0.5.1"
 rstest = "0.23.0"
+
+[[bench]]
+name = "journal"
+harness = false
