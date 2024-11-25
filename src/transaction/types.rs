@@ -19,7 +19,7 @@ use crate::{
 /// use hledger_parse::{Amount, Description, Posting, Status, Tag, Transaction};
 ///
 /// let transaction = Transaction {
-///     primary_date: NaiveDate::from_ymd(2022, 6, 23),
+///     primary_date: NaiveDate::from_ymd_opt(2022, 6, 23).unwrap(),
 ///     secondary_date: None,
 ///     status: Status::Cleared,
 ///     code: Some("12345".to_string()),
@@ -37,6 +37,7 @@ use crate::{
 ///             }),
 ///             unit_price: None,
 ///             total_price: None,
+///             balance_assertion: None,
 ///         },
 ///         Posting {
 ///             status: Status::Unmarked,
@@ -47,6 +48,7 @@ use crate::{
 ///             }),
 ///             unit_price: None,
 ///             total_price: None,
+///             balance_assertion: None,
 ///         },
 ///     ],
 ///     tags: vec![

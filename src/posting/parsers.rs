@@ -1,18 +1,16 @@
 use winnow::{
     ascii::{space0, space1, till_line_ending},
-    combinator::{alt, delimited, empty, opt, peek, preceded, separated_pair, terminated},
-    token::take_until,
+    combinator::{alt, delimited, empty, opt, rest, separated_pair},
+    token::{literal, take_until},
     PResult, Parser,
 };
 
-use crate::{amount::parsers::parse_amount, status::parsers::parse_status};
+use crate::{amount::parsers::parse_amount, status::parsers::parse_status, Amount};
 
 use super::types::{Posting, PostingComplexAmount};
 
-fn parse_posting_with_amount<'s>(input: &mut &'s str) -> PResult<(&'s str, PostingComplexAmount)> {
-    let account_name = terminated(take_until(2.., " "), peek(preceded(space1, parse_amount)))
-        .verify(|s: &str| !s.contains('\n'))
-        .parse_next(input)?;
+fn parse_posting_with_amount<'s>(input: &mut &'s str) -> PResult<PostingComplexAmount> {
+    space0.parse_next(input)?;
     let complex_amount = alt((
         // NOTE: order of parsers is important
         separated_pair(parse_amount, delimited(space0, "@@", space0), parse_amount).map(
@@ -43,35 +41,66 @@ fn parse_posting_with_amount<'s>(input: &mut &'s str) -> PResult<(&'s str, Posti
     ))
     .parse_next(input)?;
 
-    Ok((account_name, complex_amount))
+    Ok(complex_amount)
 }
 
-fn parse_posting_without_amount<'s>(
-    input: &mut &'s str,
-) -> PResult<(&'s str, PostingComplexAmount)> {
-    (
-        till_line_ending,
-        empty.value(PostingComplexAmount {
-            amount: None,
-            unit_price: None,
-            total_price: None,
-        }),
+pub(super) fn parse_balance_assertion(input: &mut &str) -> PResult<Amount> {
+    let balance_assertion = delimited(
+        delimited(space0, literal('='), space0),
+        parse_amount,
+        space0,
     )
-        .parse_next(input)
+    .parse_next(input)?;
+
+    Ok(balance_assertion)
 }
 
 pub fn parse_posting(input: &mut &str) -> PResult<Posting> {
-    let (status, (account_name, complex_amount)) = (
-        delimited(space1, parse_status, space0),
-        alt((parse_posting_with_amount, parse_posting_without_amount)),
-    )
+    let status = delimited(space1, parse_status, space0)
+        .context(winnow::error::StrContext::Label(
+            "error parsing posting status",
+        ))
         .parse_next(input)?;
 
-    Ok(Posting {
-        status,
-        account: account_name.trim().into(),
-        amount: complex_amount.amount,
-        unit_price: complex_amount.unit_price,
-        total_price: complex_amount.total_price,
-    })
+    let mut rest_of_line = alt((till_line_ending, rest)).parse_next(input)?;
+
+    if rest_of_line.contains("  ") {
+        let account_name = take_until(1.., "  ")
+            .context(winnow::error::StrContext::Label(
+                "error parsing account name in posting with amount",
+            ))
+            .parse_next(&mut rest_of_line)?;
+
+        let complex_amount = alt((
+            parse_posting_with_amount,
+            empty.value(PostingComplexAmount::default()),
+        ))
+        .context(winnow::error::StrContext::Label(
+            "error parsing posting complex amount",
+        ))
+        .parse_next(&mut rest_of_line)?;
+        let balance_assertion = opt(parse_balance_assertion)
+            .context(winnow::error::StrContext::Label(
+                "error parsing posting balance assertion",
+            ))
+            .parse_next(&mut rest_of_line)?;
+
+        Ok(Posting {
+            status,
+            account: account_name.trim().into(),
+            amount: complex_amount.amount,
+            unit_price: complex_amount.unit_price,
+            total_price: complex_amount.total_price,
+            balance_assertion: balance_assertion,
+        })
+    } else {
+        Ok(Posting {
+            status,
+            account: rest_of_line.trim().into(),
+            amount: None,
+            unit_price: None,
+            total_price: None,
+            balance_assertion: None,
+        })
+    }
 }

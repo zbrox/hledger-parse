@@ -15,7 +15,7 @@ use crate::{amount::types::Amount, journal::types::Value, HLParserError};
 ///
 /// let price = Price {
 ///     commodity: "EUR".to_string(),
-///     date: NaiveDate::from_ymd(2022, 6, 23),
+///     date: NaiveDate::from_ymd_opt(2022, 6, 23).unwrap(),
 ///     amount: Amount {
 ///         currency: "USD".to_string(),
 ///         value: dec!(1.05),

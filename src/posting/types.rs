@@ -19,6 +19,7 @@ use crate::{amount::types::Amount, status::types::Status, Account};
 ///     }),
 ///     unit_price: None,
 ///     total_price: None,
+///     balance_assertion: None,
 /// };
 /// assert_eq!("  ! expenses:food  100 EUR", format!("{}", posting));
 /// let posting = Posting {
@@ -33,6 +34,7 @@ use crate::{amount::types::Amount, status::types::Status, Account};
 ///         value: dec!(1.05)
 ///     }),
 ///     total_price: None,
+///     balance_assertion: None,
 /// };
 /// assert_eq!("  ! expenses:food  100 EUR @ 1.05 USD", format!("{}", posting));
 /// ```
@@ -48,6 +50,8 @@ pub struct Posting {
     pub unit_price: Option<Amount>,
     /// The total price of the posting
     pub total_price: Option<Amount>,
+    /// Optional balance assertion of the posting
+    pub balance_assertion: Option<Amount>,
 }
 
 impl Display for Posting {
@@ -76,7 +80,7 @@ impl Display for Posting {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct PostingComplexAmount {
     pub amount: Option<Amount>,
     pub unit_price: Option<Amount>,

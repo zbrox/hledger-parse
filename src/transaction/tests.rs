@@ -60,6 +60,7 @@ fn test_simple_transaction() {
                     }),
                     unit_price: None,
                     total_price: None,
+                    balance_assertion: None,
                 },
                 Posting {
                     account: "income:salary".into(),
@@ -70,6 +71,7 @@ fn test_simple_transaction() {
                     }),
                     unit_price: None,
                     total_price: None,
+                    balance_assertion: None,
                 },
             ],
         }
@@ -105,6 +107,7 @@ fn test_empty_description_cleared_transaction() {
                     }),
                     unit_price: None,
                     total_price: None,
+                    balance_assertion: None,
                 },
                 Posting {
                     account: "income:salary".into(),
@@ -115,6 +118,7 @@ fn test_empty_description_cleared_transaction() {
                     }),
                     unit_price: None,
                     total_price: None,
+                    balance_assertion: None,
                 },
             ],
         }
@@ -150,6 +154,7 @@ fn test_empty_description_unmarked_transaction() {
                     }),
                     unit_price: None,
                     total_price: None,
+                    balance_assertion: None,
                 },
                 Posting {
                     account: "income:salary".into(),
@@ -160,6 +165,7 @@ fn test_empty_description_unmarked_transaction() {
                     }),
                     unit_price: None,
                     total_price: None,
+                    balance_assertion: None,
                 },
             ],
         }
@@ -198,6 +204,7 @@ fn test_transaction_ending_after_postings() {
                     }),
                     unit_price: None,
                     total_price: None,
+                    balance_assertion: None,
                 },
                 Posting {
                     account: "income:salary".into(),
@@ -205,6 +212,7 @@ fn test_transaction_ending_after_postings() {
                     amount: None,
                     unit_price: None,
                     total_price: None,
+                    balance_assertion: None,
                 },
             ],
         }
@@ -243,6 +251,7 @@ fn test_simple_transaction_with_empty_amount_posting() {
                     }),
                     unit_price: None,
                     total_price: None,
+                    balance_assertion: None,
                 },
                 Posting {
                     account: "income:salary".into(),
@@ -250,6 +259,7 @@ fn test_simple_transaction_with_empty_amount_posting() {
                     amount: None,
                     unit_price: None,
                     total_price: None,
+                    balance_assertion: None,
                 },
             ],
         }
@@ -285,6 +295,7 @@ fn test_transaction_with_code() {
                     }),
                     unit_price: None,
                     total_price: None,
+                    balance_assertion: None,
                 },
                 Posting {
                     account: "income:salary".into(),
@@ -295,6 +306,7 @@ fn test_transaction_with_code() {
                     }),
                     unit_price: None,
                     total_price: None,
+                    balance_assertion: None,
                 },
             ],
         }
@@ -330,6 +342,7 @@ fn test_transaction_with_status() {
                     }),
                     unit_price: None,
                     total_price: None,
+                    balance_assertion: None,
                 },
                 Posting {
                     account: "income:salary".into(),
@@ -340,6 +353,7 @@ fn test_transaction_with_status() {
                     }),
                     unit_price: None,
                     total_price: None,
+                    balance_assertion: None,
                 },
             ],
         }
@@ -375,6 +389,7 @@ fn test_transaction_no_description() {
                     }),
                     unit_price: None,
                     total_price: None,
+                    balance_assertion: None,
                 },
                 Posting {
                     account: "income:salary".into(),
@@ -385,6 +400,7 @@ fn test_transaction_no_description() {
                     }),
                     unit_price: None,
                     total_price: None,
+                    balance_assertion: None,
                 },
             ],
         }
@@ -433,6 +449,7 @@ fn test_transaction_with_tags() {
                     }),
                     unit_price: None,
                     total_price: None,
+                    balance_assertion: None,
                 },
                 Posting {
                     account: "income:salary".into(),
@@ -443,6 +460,7 @@ fn test_transaction_with_tags() {
                     }),
                     unit_price: None,
                     total_price: None,
+                    balance_assertion: None,
                 },
             ],
         }
@@ -471,6 +489,7 @@ fn test_transaction_validate_none_amount_postings() {
                 status: Status::Unmarked,
                 unit_price: None,
                 total_price: None,
+                balance_assertion: None,
             },
             Posting {
                 account: "income:salary".into(),
@@ -478,6 +497,7 @@ fn test_transaction_validate_none_amount_postings() {
                 status: Status::Unmarked,
                 unit_price: None,
                 total_price: None,
+                balance_assertion: None,
             },
         ],
         tags: vec![],
@@ -507,6 +527,7 @@ fn test_transaction_validate_not_zero_sum_postings() {
                 status: Status::Unmarked,
                 unit_price: None,
                 total_price: None,
+                balance_assertion: None,
             },
             Posting {
                 account: "income:salary".into(),
@@ -517,6 +538,7 @@ fn test_transaction_validate_not_zero_sum_postings() {
                 status: Status::Unmarked,
                 unit_price: None,
                 total_price: None,
+                balance_assertion: None,
             },
         ],
         tags: vec![],
