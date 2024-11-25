@@ -25,7 +25,7 @@ pub struct Journal {
 }
 
 impl TryFrom<PathBuf> for Journal {
-    type Error = HLParserError<String>;
+    type Error = HLParserError;
 
     fn try_from(value: PathBuf) -> Result<Self, Self::Error> {
         let base_path = value.parent().map(|v| v.to_owned());
@@ -103,7 +103,7 @@ impl Journal {
         unique_payees
     }
 
-    pub fn validate_accounts(&self) -> Result<(), HLParserError<&str>> {
+    pub fn validate_accounts(&self) -> Result<(), HLParserError> {
         let undefined_accounts: Vec<Account> = self
             .transactions
             .iter()
