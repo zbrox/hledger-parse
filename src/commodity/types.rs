@@ -23,7 +23,7 @@ pub struct Commodity {
 }
 
 impl TryInto<Commodity> for Value {
-    type Error = HLParserError<&'static str>;
+    type Error = HLParserError;
 
     fn try_into(self) -> Result<Commodity, Self::Error> {
         if let Value::Commodity(c) = self {

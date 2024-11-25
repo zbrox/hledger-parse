@@ -36,14 +36,14 @@ pub(super) fn parse_empty_line(input: &mut &str) -> PResult<Value> {
         .parse_next(input)
 }
 
-pub fn read_journal_from_path<'s>(path: PathBuf) -> Result<Vec<Value>, HLParserError<&'s str>> {
+pub fn read_journal_from_path<'s>(path: PathBuf) -> Result<Vec<Value>, HLParserError> {
     let contents = std::fs::read_to_string(&path).map_err(|e| HLParserError::IO(e.to_string()))?;
     let mut input = &contents[..];
-    let values = parse_journal_contents(&mut input, path).map_err(|e| HLParserError::Parse(e))?;
+    let values = parse_journal_contents(&mut input, path)?;
     Ok(values)
 }
 
-fn parse_journal_contents(input: &mut &str, base_path: PathBuf) -> PResult<Vec<Value>> {
+fn parse_journal_contents<'a>(input: &mut &'a str, base_path: PathBuf) -> Result<Vec<Value>, HLParserError> {
     let res = repeat_till(
         0..,
         alt((
@@ -64,7 +64,8 @@ fn parse_journal_contents(input: &mut &str, base_path: PathBuf) -> PResult<Vec<V
         eof,
     )
     .map(|(v, _)| v)
-    .parse_next(input)?;
+    .parse(input)
+    .map_err(|e| HLParserError::Parse(e.to_string()))?;
 
     Ok(res)
 }
@@ -82,12 +83,12 @@ pub(super) fn flatten_values(values: Vec<Value>) -> Vec<Value> {
 pub fn parse_journal<'s>(
     input: &mut &'s str,
     base_path: Option<PathBuf>,
-) -> Result<Journal, HLParserError<String>> {
+) -> Result<Journal, HLParserError> {
     let values = parse_journal_contents(
         input,
         base_path.unwrap_or(std::env::current_dir().map_err(|e| HLParserError::IO(e.to_string()))?),
-    )
-    .map_err(|e| HLParserError::Parse(e))?;
+    )?;
+    // .map_err(|e| HLParserError::Parse(e))?;
     let values = flatten_values(values);
 
     Ok(Journal::new(

@@ -84,7 +84,7 @@ pub struct Transaction {
 }
 
 impl TryInto<Transaction> for Value {
-    type Error = HLParserError<&'static str>;
+    type Error = HLParserError;
 
     fn try_into(self) -> Result<Transaction, Self::Error> {
         if let Value::Transaction(t) = self {
