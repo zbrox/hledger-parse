@@ -57,7 +57,8 @@ pub fn parse_transaction(input: &mut &str) -> PResult<Transaction> {
     )
     .parse_next(input)?;
 
-    let postings = repeat(0.., terminated(parse_posting, line_ending)).parse_next(input)?;
+    let postings =
+        repeat(0.., terminated(parse_posting, alt((line_ending, eof)))).parse_next(input)?;
 
     let transaction = Transaction {
         primary_date,
