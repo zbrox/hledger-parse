@@ -151,7 +151,15 @@ impl Transaction {
             .postings
             .iter()
             .flat_map(|p| match &p.total_price {
-                Some(v) => Some(v.clone()),
+                Some(v) => match &p
+                    .amount
+                    .as_ref()
+                    .expect("Amount should be present")
+                    .is_negative()
+                {
+                    false => Some(v.clone()),
+                    true => Some(v.negate()),
+                },
                 None => p.amount.clone(),
             })
             .map(|a| a.value) // TODO: different currencies, conversion rates
