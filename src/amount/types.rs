@@ -29,6 +29,23 @@ pub struct Amount {
     pub value: Decimal,
 }
 
+impl Amount {
+    pub fn negate(&self) -> Amount {
+        Amount {
+            currency: self.currency.clone(),
+            value: -self.value,
+        }
+    }
+
+    pub fn is_negative(&self) -> bool {
+        self.value.is_sign_negative()
+    }
+
+    pub fn is_positive(&self) -> bool {
+        self.value.is_sign_positive()
+    }
+}
+
 impl Display for Amount {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{} {}", self.value, self.currency)
