@@ -3,26 +3,40 @@ use std::str::FromStr;
 use rust_decimal::Decimal;
 use winnow::{
     ascii::{digit1, space0},
-    combinator::{alt, opt, terminated},
-    error::ContextError,
+    combinator::{alt, opt, separated, terminated},
+    error::{ErrMode, FromExternalError as _},
     stream::AsChar,
     token::take_till,
     PResult, Parser,
 };
 
-use crate::utils::{in_quotes, is_char_minus};
+use crate::{
+    utils::{in_quotes, is_char_minus},
+    ValidationError,
+};
 
 use super::types::{Amount, AmountSign};
 
 // TODO: no scientific notation parsing
 pub fn parse_money_amount(input: &mut &str) -> PResult<Decimal> {
-    let (num, _, scale) =
-        (digit1.take(), opt(alt(('.', ','))), opt(digit1.take())).parse_next(input)?;
-    let value = format!("{}.{}", num, scale.unwrap_or("0"));
-    let value =
-        Decimal::from_str(&value).map_err(|_e| winnow::error::ErrMode::Cut(ContextError::new()))?; // TODO: errors
+    let num = (
+        separated::<_, _, (), _, _, _, _>(1.., digit1, " ").void(),
+        opt(alt(('.', ','))).void(),
+        opt(digit1).void(),
+    )
+        .take()
+        .parse_next(input)?;
 
-    Ok(value)
+    let num = Decimal::from_str(&num.replace(',', ".").replace(' ', "")).map_err(|e| {
+        ErrMode::from_external_error(
+            input,
+            winnow::error::ErrorKind::Verify,
+            ValidationError::InvalidAmount(e.to_string()),
+        )
+        .cut()
+    })?;
+
+    Ok(num)
 }
 
 fn parse_sign(input: &mut &str) -> PResult<Option<AmountSign>> {

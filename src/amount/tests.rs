@@ -33,6 +33,7 @@ use super::parsers::parse_money_amount;
 #[case::suffix_curr_negative_prefix_space("- 100   EUR", "", "EUR", dec!(-100))]
 #[case::complex_suffix("100 \"silver coins\"", "", "silver coins", dec!(100))]
 #[case::complex_suffix_multispace("100   \"silver coins\"", "", "silver coins", dec!(100))]
+#[case::longer_amount_with_thousands_space_separator("100 000 EUR", "", "EUR", dec!(100000))]
 fn test_parse_amount_currency(
     #[case] input: &str,
     #[case] expected_remaining: &str,

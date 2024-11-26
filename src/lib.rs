@@ -53,4 +53,6 @@ pub enum ValidationError {
     TransactionWithMissingAmountPostings(Transaction),
     #[error("These accounts are not defined:\n{}", .0.join("\n"))]
     UndefinedAccounts(Vec<String>),
+    #[error("Invalid amount: {0}")]
+    InvalidAmount(String),
 }
