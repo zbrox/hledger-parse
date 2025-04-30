@@ -31,6 +31,7 @@ use super::{parsers::parse_description, types::Description};
 #[case::empty_space(" ", "", None, None)]
 #[case::empty("", "", None, None)]
 #[case::with_comment(" ; blah", " ; blah", None, None)]
+#[case::payee_with_comment("Acme | ; blah", " ; blah", Some("Acme".to_string()), None)]
 fn test_parse_description(
     #[case] input: &str,
     #[case] expected_remaining: &str,

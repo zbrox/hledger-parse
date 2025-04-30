@@ -24,8 +24,11 @@ fn test_parse_line_comment(
 
 #[rstest]
 #[case::transaction_comment(";comment", "", "comment")]
+#[case::transaction_comment_leading_space(" ;comment", "", "comment")]
 #[case::transaction_comment_space("; comment", "", "comment")]
+#[case::transaction_comment_space_leading_space(" ; comment", "", "comment")]
 #[case::transaction_comment_multiword(";lorem ipsum", "", "lorem ipsum")]
+#[case::transaction_comment_multiword_preceding_space(" ;lorem ipsum", "", "lorem ipsum")]
 #[case::transaction_comment_multiword_space("; lorem ipsum", "", "lorem ipsum")]
 fn test_parse_transaction_comment(
     #[case] input: &str,
