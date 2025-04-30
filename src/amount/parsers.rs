@@ -6,7 +6,7 @@ use winnow::{
     combinator::{alt, opt, separated, terminated},
     error::{ContextError, FromExternalError as _},
     stream::AsChar,
-    token::take_till,
+    token::{one_of, take_till},
     Parser, Result as PResult,
 };
 
@@ -21,7 +21,7 @@ use super::types::{Amount, AmountSign};
 pub fn parse_money_amount(input: &mut &str) -> PResult<Decimal> {
     let num = (
         separated::<_, _, (), _, _, _, _>(1.., digit1, " ").void(),
-        opt(alt(('.', ','))).void(),
+        opt(one_of(['.', ','])).void(),
         opt(digit1).void(),
     )
         .take()
@@ -35,7 +35,7 @@ pub fn parse_money_amount(input: &mut &str) -> PResult<Decimal> {
 }
 
 fn parse_sign(input: &mut &str) -> PResult<Option<AmountSign>> {
-    let char = opt(alt(('-', '+'))).parse_next(input)?;
+    let char = opt(one_of(['-', '+'])).parse_next(input)?;
     let sign = match char {
         Some('-') => Some(AmountSign::Minus),
         Some('+') => Some(AmountSign::Plus),
