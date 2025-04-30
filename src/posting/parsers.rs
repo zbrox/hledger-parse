@@ -9,7 +9,7 @@ use crate::{amount::parsers::parse_amount, status::parsers::parse_status, Amount
 
 use super::types::{Posting, PostingComplexAmount};
 
-fn parse_posting_with_amount<'s>(input: &mut &'s str) -> PResult<PostingComplexAmount> {
+fn parse_posting_with_amount(input: &mut &str) -> PResult<PostingComplexAmount> {
     space0.parse_next(input)?;
     let amount = parse_amount.parse_next(input)?;
     let _ = space0.parse_next(input)?;
@@ -83,7 +83,7 @@ pub fn parse_posting(input: &mut &str) -> PResult<Posting> {
             amount: complex_amount.amount,
             unit_price: complex_amount.unit_price,
             total_price: complex_amount.total_price,
-            balance_assertion: balance_assertion,
+            balance_assertion,
         })
     } else {
         Ok(Posting {
