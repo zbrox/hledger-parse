@@ -1,5 +1,5 @@
 use rstest::rstest;
-use winnow::error::{ContextError, ErrMode};
+use winnow::error::ContextError;
 
 use super::{parsers::parse_tag, types::Tag};
 
@@ -8,7 +8,7 @@ use super::{parsers::parse_tag, types::Tag};
 fn test_parse_tag_with_space(#[case] input: &str) {
     let mut input = input;
     let err = parse_tag(&mut input).unwrap_err();
-    let expected_err = ErrMode::Backtrack(ContextError::new()); // TODO: errors
+    let expected_err = ContextError::new(); // TODO: errors
     assert_eq!(err, expected_err)
 }
 

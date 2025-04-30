@@ -4,10 +4,10 @@ use rust_decimal::Decimal;
 use winnow::{
     ascii::{digit1, space0},
     combinator::{alt, opt, separated, terminated},
-    error::{ErrMode, FromExternalError as _},
+    error::{ContextError, FromExternalError as _},
     stream::AsChar,
     token::take_till,
-    PResult, Parser,
+    Parser, Result as PResult,
 };
 
 use crate::{
@@ -28,12 +28,7 @@ pub fn parse_money_amount(input: &mut &str) -> PResult<Decimal> {
         .parse_next(input)?;
 
     let num = Decimal::from_str(&num.replace(',', ".").replace(' ', "")).map_err(|e| {
-        ErrMode::from_external_error(
-            input,
-            winnow::error::ErrorKind::Verify,
-            ValidationError::InvalidAmount(e.to_string()),
-        )
-        .cut()
+        ContextError::from_external_error(input, ValidationError::InvalidAmount(e.to_string()))
     })?;
 
     Ok(num)

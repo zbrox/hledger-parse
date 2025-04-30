@@ -1,9 +1,9 @@
 use winnow::{
     ascii::{line_ending, space0, till_line_ending},
     combinator::{alt, eof, opt, preceded, repeat, separated, terminated},
-    error::{ErrMode, FromExternalError as _, StrContext},
+    error::{ContextError, FromExternalError as _, StrContext},
     token::take,
-    PResult, Parser,
+    Parser, Result as PResult,
 };
 
 use crate::{
@@ -73,9 +73,9 @@ pub fn parse_transaction(input: &mut &str) -> PResult<Transaction> {
         postings,
     };
 
-    transaction.validate().map_err(|e| {
-        ErrMode::from_external_error(input, winnow::error::ErrorKind::Verify, e).cut()
-    })?;
+    transaction
+        .validate()
+        .map_err(|e| ContextError::from_external_error(input, e))?;
 
     Ok(transaction)
 }

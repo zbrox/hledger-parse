@@ -1,8 +1,8 @@
 use chrono::{Datelike, NaiveDate};
 use winnow::{
     combinator::{alt, opt, preceded, terminated},
-    error::{ErrMode, FromExternalError as _, StrContext},
-    PResult, Parser,
+    error::{ContextError, FromExternalError as _, StrContext},
+    Parser, Result as PResult,
 };
 
 use crate::{
@@ -41,28 +41,24 @@ fn parse_separator_date<'s>(
         let (y, m, d) = match primary_date_components {
             (Some(y), m, d) => (y, m, d),
             _ => {
-                return Err(ErrMode::from_external_error(
+                return Err(ContextError::from_external_error(
                     i,
-                    winnow::error::ErrorKind::Verify,
                     ValidationError::InvalidDateComponents(
                         primary_date_components.0,
                         primary_date_components.1,
                         primary_date_components.2,
                     ),
-                )
-                .cut())
+                ))
             }
         };
 
         let primary_date = match NaiveDate::from_ymd_opt(y, m, d) {
             Some(date) => date,
             None => {
-                return Err(ErrMode::from_external_error(
+                return Err(ContextError::from_external_error(
                     i,
-                    winnow::error::ErrorKind::Verify,
                     ValidationError::InvalidDateComponents(Some(y), m, d),
-                )
-                .cut());
+                ));
             }
         };
 
@@ -78,12 +74,10 @@ fn parse_separator_date<'s>(
             Some((y, m, d)) => match NaiveDate::from_ymd_opt(y, m, d) {
                 Some(date) => Some(date),
                 None => {
-                    return Err(ErrMode::from_external_error(
+                    return Err(ContextError::from_external_error(
                         i,
-                        winnow::error::ErrorKind::Verify,
                         ValidationError::InvalidDateComponents(Some(y), m, d),
-                    )
-                    .cut())
+                    ))
                 }
             },
             None => None,

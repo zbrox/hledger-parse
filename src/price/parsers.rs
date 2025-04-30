@@ -1,7 +1,7 @@
 use winnow::{
     ascii::{line_ending, space1},
     combinator::{alt, eof, terminated},
-    PResult, Parser,
+    Parser, Result as PResult,
 };
 
 use crate::{

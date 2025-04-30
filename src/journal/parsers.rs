@@ -3,8 +3,8 @@ use std::{path::PathBuf, str::FromStr};
 use winnow::{
     ascii::{line_ending, space0, space1, till_line_ending},
     combinator::{alt, eof, preceded, repeat_till, terminated},
-    error::{ContextError, ErrMode},
-    PResult, Parser,
+    error::ContextError,
+    Parser, Result as PResult,
 };
 
 use crate::{
@@ -20,7 +20,7 @@ use super::types::{Journal, Value};
 
 fn parse_include_statement(input: &mut &str) -> PResult<PathBuf> {
     let path = preceded(("include", space1), alt((till_line_ending, eof))).parse_next(input)?;
-    let path = PathBuf::from_str(path).map_err(|_| ErrMode::Backtrack(ContextError::new()))?; // TODO: better error
+    let path = PathBuf::from_str(path).map_err(|_| ContextError::new())?; // TODO: better error
     Ok(path)
 }
 
@@ -43,7 +43,10 @@ pub fn read_journal_from_path<'s>(path: PathBuf) -> Result<Vec<Value>, HLParserE
     Ok(values)
 }
 
-fn parse_journal_contents<'a>(input: &mut &'a str, base_path: PathBuf) -> Result<Vec<Value>, HLParserError> {
+fn parse_journal_contents<'a>(
+    input: &mut &'a str,
+    base_path: PathBuf,
+) -> Result<Vec<Value>, HLParserError> {
     let res = repeat_till(
         0..,
         alt((

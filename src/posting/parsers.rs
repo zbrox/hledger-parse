@@ -1,8 +1,8 @@
 use winnow::{
     ascii::{space0, space1, till_line_ending},
-    combinator::{alt, delimited, empty, opt, rest, separated_pair},
-    token::{literal, take_until},
-    PResult, Parser,
+    combinator::{alt, delimited, empty, opt, separated_pair},
+    token::{literal, rest, take_until},
+    Parser, Result as PResult,
 };
 
 use crate::{amount::parsers::parse_amount, status::parsers::parse_status, Amount};

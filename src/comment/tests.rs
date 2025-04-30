@@ -1,5 +1,5 @@
 use rstest::rstest;
-use winnow::error::{ContextError, ErrMode};
+use winnow::error::ContextError;
 
 use crate::comment::parsers::{parse_line_comment, parse_transaction_comment};
 
@@ -44,6 +44,6 @@ fn test_parse_transaction_comment(
 fn test_parse_line_comment_as_transaction_comment() {
     assert_eq!(
         parse_transaction_comment(&mut "# comment").unwrap_err(),
-        ErrMode::Backtrack(ContextError::new()) // TODO: errors
+        ContextError::new() // TODO: errors
     );
 }

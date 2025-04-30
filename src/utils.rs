@@ -2,7 +2,7 @@ use winnow::{
     ascii::{dec_int, dec_uint, space0},
     combinator::{alt, delimited, preceded, terminated},
     token::{take_until, take_while},
-    PResult, Parser,
+    Parser, Result as PResult,
 };
 
 pub fn is_char_minus(char: char) -> bool {
@@ -74,7 +74,7 @@ mod tests {
     #[case::several_repeated_zero("00000", Ok(()))]
     fn test_repeated_zero_parser(
         #[case] input: &str,
-        #[case] expected: Result<(), winnow::error::ErrMode<winnow::error::ContextError>>,
+        #[case] expected: Result<(), winnow::error::ContextError>,
     ) {
         let mut input = input;
         assert_eq!(repeated_zero(&mut input), expected);
@@ -88,7 +88,7 @@ mod tests {
     #[case::decu32_leading_several_zeros("000001", Ok(1))]
     fn test_parse_decu32_leading_zeros(
         #[case] input: &str,
-        #[case] expected: Result<u32, winnow::error::ErrMode<winnow::error::ContextError>>,
+        #[case] expected: Result<u32, winnow::error::ContextError>,
     ) {
         let mut input = input;
         assert_eq!(decu32_leading_zeros(&mut input), expected);
@@ -102,7 +102,7 @@ mod tests {
     #[case::deci32_leading_several_zeros("000001", Ok(1))]
     fn test_parse_deci32_leading_zeros(
         #[case] input: &str,
-        #[case] expected: Result<i32, winnow::error::ErrMode<winnow::error::ContextError>>,
+        #[case] expected: Result<i32, winnow::error::ContextError>,
     ) {
         let mut input = input;
         assert_eq!(deci32_leading_zeros(&mut input), expected);

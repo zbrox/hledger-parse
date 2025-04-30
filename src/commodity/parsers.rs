@@ -1,7 +1,7 @@
 use winnow::{
     ascii::{line_ending, space0, space1, till_line_ending},
     combinator::{alt, delimited, eof, opt, separated_pair, terminated},
-    PResult, Parser,
+    Parser, Result as PResult,
 };
 
 use crate::amount::parsers::{parse_currency_string, parse_money_amount};

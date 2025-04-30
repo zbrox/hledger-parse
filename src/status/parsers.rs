@@ -1,6 +1,6 @@
 use winnow::{
     combinator::{alt, opt, terminated},
-    PResult, Parser,
+    Parser, Result as PResult,
 };
 
 use super::types::Status;

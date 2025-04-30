@@ -2,7 +2,7 @@ use winnow::{
     ascii::{line_ending, space0},
     combinator::{alt, delimited, eof, opt, peek, repeat_till, terminated},
     token::{any, take_until},
-    PResult, Parser,
+    Parser, Result as PResult,
 };
 
 use super::types::Description;

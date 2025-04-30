@@ -1,4 +1,4 @@
-use winnow::error::{ContextError, ErrMode};
+use winnow::error::ContextError;
 
 use super::parsers::parse_code;
 
@@ -13,6 +13,6 @@ fn test_parse_code() {
 fn test_parse_invalid_code() {
     assert_eq!(
         parse_code(&mut "()").unwrap_err(),
-        ErrMode::Backtrack(ContextError::new()) // TODO: errors
+        ContextError::new() // TODO: errors
     )
 }

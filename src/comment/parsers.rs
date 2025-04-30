@@ -1,7 +1,7 @@
 use winnow::{
     ascii::{space0, till_line_ending},
     combinator::{alt, preceded},
-    PResult, Parser,
+    Parser, Result as PResult,
 };
 
 pub fn parse_line_comment<'s>(input: &mut &'s str) -> PResult<&'s str> {

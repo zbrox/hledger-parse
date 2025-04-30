@@ -1,7 +1,7 @@
 use winnow::{
     combinator::{alt, terminated},
     token::take_while,
-    PResult, Parser,
+    Parser, Result as PResult,
 };
 
 use crate::utils::in_quotes;

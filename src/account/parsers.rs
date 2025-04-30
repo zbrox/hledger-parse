@@ -1,7 +1,7 @@
 use winnow::{
     ascii::{space1, till_line_ending},
     combinator::preceded,
-    PResult, Parser,
+    Parser, Result as PResult,
 };
 
 pub fn parse_account_directive<'s>(input: &mut &'s str) -> PResult<&'s str> {
