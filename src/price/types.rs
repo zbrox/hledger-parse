@@ -46,7 +46,7 @@ impl TryInto<Price> for Value {
         if let Value::Price(p) = self {
             Ok(p)
         } else {
-            Err(HLParserError::Extract(self))
+            Err(HLParserError::Extract(Box::new(self)))
         }
     }
 }

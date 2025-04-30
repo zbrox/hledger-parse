@@ -29,7 +29,7 @@ impl TryInto<Commodity> for Value {
         if let Value::Commodity(c) = self {
             Ok(c)
         } else {
-            Err(HLParserError::Extract(self))
+            Err(HLParserError::Extract(Box::new(self)))
         }
     }
 }

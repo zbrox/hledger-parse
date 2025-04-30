@@ -34,13 +34,13 @@ pub enum HLParserError {
     #[error("IO error: {0}")]
     IO(String),
     #[error("Parse error: {0}")]
-    Parse(String), 
+    Parse(String),
     #[error("Validation error: {0}")]
     Validation(ValidationError),
     #[error("Included journal error: {0}")]
     IncludePath(String),
     #[error("Extract error: {0:?}")]
-    Extract(Value),
+    Extract(Box<Value>),
 }
 
 #[derive(Debug, Error)]
@@ -48,9 +48,9 @@ pub enum ValidationError {
     #[error("Invalid date components: {}-{}-{}", .0.unwrap_or(0), .1, .2)]
     InvalidDateComponents(Option<i32>, u32, u32),
     #[error("Transaction {0} postings' sum does not equal 0")]
-    NonZeroSumTransactionPostings(Transaction),
+    NonZeroSumTransactionPostings(Box<Transaction>),
     #[error("Transaction {0} cannot have more than 1 posting with missing amounts")]
-    TransactionWithMissingAmountPostings(Transaction),
+    TransactionWithMissingAmountPostings(Box<Transaction>),
     #[error("These accounts are not defined:\n{}", .0.join("\n"))]
     UndefinedAccounts(Vec<String>),
     #[error("Invalid amount: {0}")]

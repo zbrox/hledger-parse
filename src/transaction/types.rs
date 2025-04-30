@@ -92,7 +92,7 @@ impl TryInto<Transaction> for Value {
         if let Value::Transaction(t) = self {
             Ok(t)
         } else {
-            Err(HLParserError::Extract(self))
+            Err(HLParserError::Extract(Box::new(self)))
         }
     }
 }
@@ -139,7 +139,7 @@ impl Transaction {
 
         if none_amounts > 1_usize {
             return Err(ValidationError::TransactionWithMissingAmountPostings(
-                self.clone(),
+                Box::new(self.clone()),
             ));
         }
 
@@ -166,7 +166,9 @@ impl Transaction {
             .sum::<Decimal>();
 
         if postings_sum != dec!(0) {
-            return Err(ValidationError::NonZeroSumTransactionPostings(self.clone()));
+            return Err(ValidationError::NonZeroSumTransactionPostings(Box::new(
+                self.clone(),
+            )));
         }
 
         Ok(())

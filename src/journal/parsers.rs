@@ -67,7 +67,7 @@ fn parse_journal_contents(
         eof,
     )
     .map(|(v, _)| v)
-    .parse(&mut &input)
+    .parse(input)
     .map_err(|e| HLParserError::Parse(e.to_string()))?;
 
     Ok(res)
@@ -91,7 +91,6 @@ pub fn parse_journal(
         input,
         base_path.unwrap_or(std::env::current_dir().map_err(|e| HLParserError::IO(e.to_string()))?),
     )?;
-    // .map_err(|e| HLParserError::Parse(e))?;
     let values = flatten_values(values);
 
     Ok(Journal::new(

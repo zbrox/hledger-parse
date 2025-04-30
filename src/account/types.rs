@@ -25,7 +25,7 @@ impl TryInto<Account> for Value {
         if let Value::Account(t) = self {
             Ok(t)
         } else {
-            Err(HLParserError::Extract(self))
+            Err(HLParserError::Extract(Box::new(self)))
         }
     }
 }
