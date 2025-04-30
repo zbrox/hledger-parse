@@ -30,12 +30,11 @@ fn parse_separator_date<'s>(
     separator: char,
 ) -> impl FnMut(&mut &'s str) -> PResult<(NaiveDate, Option<NaiveDate>)> {
     move |i: &mut &'s str| {
-        let (primary_date_components, secondary_date_components) = (
-            parse_date_components(separator)
-                .context(StrContext::Label("error parsing primary date components")),
-            opt(preceded('=', parse_date_components(separator)))
-                .context(StrContext::Label("error parsing secondary date components")),
-        )
+        let primary_date_components = parse_date_components(separator)
+            .context(StrContext::Label("error parsing primary date components"))
+            .parse_next(i)?;
+        let secondary_date_components = opt(preceded('=', parse_date_components(separator)))
+            .context(StrContext::Label("error parsing secondary date components"))
             .parse_next(i)?;
 
         let (y, m, d) = match primary_date_components {

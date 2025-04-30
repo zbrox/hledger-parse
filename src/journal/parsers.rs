@@ -50,12 +50,11 @@ fn parse_journal_contents(
     let res = repeat_till(
         0..,
         alt((
-            parse_transaction.map(Value::Transaction),
-            parse_comment_value,
             parse_empty_line,
-            parse_price.map(Value::Price),
+            parse_comment_value,
             parse_account_directive.map(|v| Value::Account(v.into())),
             parse_commodity_directive.map(Value::Commodity),
+            parse_price.map(Value::Price),
             parse_include_statement.try_map(|v| {
                 let values = match read_journal_from_path(base_path.join(v)) {
                     Ok(values) => values,
@@ -63,11 +62,12 @@ fn parse_journal_contents(
                 };
                 Ok(Value::Included(values))
             }),
+            parse_transaction.map(Value::Transaction),
         )),
         eof,
     )
     .map(|(v, _)| v)
-    .parse(input)
+    .parse(&mut &input)
     .map_err(|e| HLParserError::Parse(e.to_string()))?;
 
     Ok(res)

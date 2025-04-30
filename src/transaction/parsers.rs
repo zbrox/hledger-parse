@@ -1,6 +1,6 @@
 use winnow::{
     ascii::{line_ending, space0, till_line_ending},
-    combinator::{alt, eof, opt, preceded, repeat, separated, terminated},
+    combinator::{alt, eof, opt, repeat, separated, terminated},
     error::{ContextError, FromExternalError as _, StrContext},
     token::take,
     Parser, Result as PResult,
@@ -43,19 +43,15 @@ pub fn parse_transaction(input: &mut &str) -> PResult<Transaction> {
         .parse_next(input)?;
     let code = opt(parse_code.context(StrContext::Label("transaction code"))).parse_next(input)?;
 
-    let (description, comment_and_tags) = terminated(
-        (
-            parse_description.context(StrContext::Label("transaction description")),
-            opt(preceded(
-                space0,
-                parse_transaction_comment
-                    .and_then(parse_comments_tags)
-                    .context(StrContext::Label("transaction comment and tags")),
-            )),
-        ),
-        line_ending,
-    )
+    let description = parse_description
+        .context(StrContext::Label("transaction description"))
+        .parse_next(input)?;
+    let _ = space0.parse_next(input)?;
+    let comment_and_tags = opt(parse_transaction_comment
+        .and_then(parse_comments_tags)
+        .context(StrContext::Label("transaction comment and tags")))
     .parse_next(input)?;
+    let _ = line_ending.parse_next(input)?;
 
     let postings =
         repeat(0.., terminated(parse_posting, alt((line_ending, eof)))).parse_next(input)?;
