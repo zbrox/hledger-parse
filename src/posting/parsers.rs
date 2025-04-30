@@ -1,7 +1,7 @@
 use winnow::{
     ascii::{space0, space1, till_line_ending},
-    combinator::{alt, delimited, empty, opt, separated_pair},
-    token::{literal, rest, take_until},
+    combinator::{alt, delimited, empty, opt, preceded},
+    token::{literal, rest, take_until, take_while},
     Parser, Result as PResult,
 };
 
@@ -11,37 +11,29 @@ use super::types::{Posting, PostingComplexAmount};
 
 fn parse_posting_with_amount<'s>(input: &mut &'s str) -> PResult<PostingComplexAmount> {
     space0.parse_next(input)?;
-    let complex_amount = alt((
-        // NOTE: order of parsers is important
-        separated_pair(parse_amount, delimited(space0, "@@", space0), parse_amount).map(
-            |(amount, total_price)| -> PostingComplexAmount {
-                PostingComplexAmount {
-                    amount: Some(amount),
-                    unit_price: None,
-                    total_price: Some(total_price),
-                }
-            },
-        ),
-        separated_pair(parse_amount, delimited(space0, "@", space0), parse_amount).map(
-            |(amount, unit_price)| -> PostingComplexAmount {
-                PostingComplexAmount {
-                    amount: Some(amount),
-                    unit_price: Some(unit_price),
-                    total_price: None,
-                }
-            },
-        ),
-        opt(parse_amount).map(|amount| -> PostingComplexAmount {
-            PostingComplexAmount {
-                amount,
-                unit_price: None,
-                total_price: None,
-            }
-        }),
-    ))
-    .parse_next(input)?;
+    let amount = parse_amount.parse_next(input)?;
+    let _ = space0.parse_next(input)?;
 
-    Ok(complex_amount)
+    let pricing_marker = take_while(0..3, '@').parse_next(input)?;
+
+    Ok(match pricing_marker.len() {
+        0 => PostingComplexAmount {
+            amount: Some(amount),
+            unit_price: None,
+            total_price: None,
+        },
+        1 => PostingComplexAmount {
+            amount: Some(amount),
+            unit_price: Some(preceded(space0, parse_amount).parse_next(input)?),
+            total_price: None,
+        },
+        2 => PostingComplexAmount {
+            amount: Some(amount),
+            unit_price: None,
+            total_price: Some(preceded(space0, parse_amount).parse_next(input)?),
+        },
+        _ => unreachable!(),
+    })
 }
 
 pub(super) fn parse_balance_assertion(input: &mut &str) -> PResult<Amount> {
