@@ -39,7 +39,7 @@ pub(super) fn parse_empty_line(input: &mut &str) -> PResult<Value> {
 pub fn read_journal_from_path(path: PathBuf) -> Result<Vec<Value>, HLParserError> {
     let contents = std::fs::read_to_string(&path).map_err(|e| HLParserError::IO(e.to_string()))?;
     let mut input = &contents[..];
-    let values = parse_journal_contents(&mut input, path)?;
+    let values = parse_journal_contents(&mut input, path.parent().unwrap_or(&path).to_owned())?;
     Ok(values)
 }
 
