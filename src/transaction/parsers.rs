@@ -51,6 +51,7 @@ pub fn parse_transaction(input: &mut &str) -> PResult<Transaction> {
         .and_then(parse_comments_tags)
         .context(StrContext::Label("transaction comment and tags")))
     .parse_next(input)?;
+
     let _ = line_ending.parse_next(input)?;
 
     let postings =

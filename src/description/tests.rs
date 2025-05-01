@@ -10,6 +10,18 @@ use super::{parsers::parse_description, types::Description};
     Some("Acme".to_string()),
     Some("some description".to_string())
 )]
+#[case::payee_and_note_with_comment(
+    "Acme | some description ; blah",
+    " ; blah",
+    Some("Acme".to_string()),
+    Some("some description".to_string())
+)]
+#[case::no_payee_with_note_with_comment(
+    "| some description  ; blah;",
+    "  ; blah;",
+    None,
+    Some("some description".to_string())
+)]
 #[case::payee_and_note_irregular_spacing(
     "Acme| some description",
     "",

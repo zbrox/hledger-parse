@@ -546,3 +546,12 @@ fn test_transaction_validate_not_zero_sum_postings() {
 
     assert!(transaction.validate().is_err());
 }
+
+#[test]
+fn test_transaction_parse_comments_no_tags() {
+    let mut input = " a comment containing tag1;";
+    assert_eq!(
+        parse_comments_tags(&mut input).unwrap(),
+        ("a comment containing tag1;", vec![],)
+    );
+}
