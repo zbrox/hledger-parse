@@ -23,7 +23,7 @@ pub(super) fn parse_comments_tags<'s>(input: &mut &'s str) -> PResult<(&'s str, 
     let mut line = till_line_ending.parse_next(input)?;
     let comment = match find_space_before_char(line, ':') {
         Some(pos) => take(pos + 1).parse_next(&mut line)?,
-        None => "",
+        None => return Ok((line.trim(), Vec::new())),
     };
 
     let tags = terminated(
