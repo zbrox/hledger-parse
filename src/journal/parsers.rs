@@ -3,7 +3,7 @@ use std::{path::PathBuf, str::FromStr};
 use winnow::{
     ascii::{line_ending, space0, space1, till_line_ending},
     combinator::{alt, eof, preceded, repeat_till, terminated},
-    error::ContextError,
+    error::{ContextError, StrContext},
     Parser, Result as PResult,
 };
 
@@ -50,19 +50,29 @@ fn parse_journal_contents(
     let res = repeat_till(
         0..,
         alt((
-            parse_empty_line,
-            parse_comment_value,
-            parse_account_directive.map(|v| Value::Account(v.into())),
-            parse_commodity_directive.map(Value::Commodity),
-            parse_price.map(Value::Price),
-            parse_include_statement.try_map(|v| {
-                let values = match read_journal_from_path(base_path.join(v)) {
-                    Ok(values) => values,
-                    Err(e) => return Err(e),
-                };
-                Ok(Value::Included(values))
-            }),
-            parse_transaction.map(Value::Transaction),
+            parse_empty_line.context(StrContext::Label("parsing empty lines")),
+            parse_comment_value.context(StrContext::Label("parsing line comment")),
+            parse_account_directive
+                .map(|v| Value::Account(v.into()))
+                .context(StrContext::Label("parsing account directive")),
+            parse_commodity_directive
+                .map(Value::Commodity)
+                .context(StrContext::Label("parsing commodity directive")),
+            parse_price
+                .map(Value::Price)
+                .context(StrContext::Label("parsing pricing entry")),
+            parse_include_statement
+                .try_map(|v| {
+                    let values = match read_journal_from_path(base_path.join(v)) {
+                        Ok(values) => values,
+                        Err(e) => return Err(e),
+                    };
+                    Ok(Value::Included(values))
+                })
+                .context(StrContext::Label("parsing included journal")),
+            parse_transaction
+                .map(Value::Transaction)
+                .context(StrContext::Label("parsing transaction")),
         )),
         eof,
     )
